@@ -1,0 +1,59 @@
+---
+import "../styles/global.css";
+import { href } from "../lib/url";
+import type { Variant } from "../variants";
+
+interface Props {
+  title: string;
+  description: string;
+  /** The variant whose name, theme and navigation the page uses; none on the overview. */
+  variant?: Variant;
+}
+
+const { title, description, variant } = Astro.props;
+---
+
+<!doctype html>
+<html lang="de" data-theme={variant?.theme ?? "lofi"}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" href="data:," />
+    <title>{title}</title>
+  </head>
+  <body class="flex min-h-screen flex-col bg-base-100 text-base-content">
+    {variant && (
+      <header class="navbar bg-base-200 px-4">
+        <div class="flex-1">
+          <a class="text-xl font-bold" href={href(`/${variant.slug}/`)}>
+            {variant.name}
+          </a>
+        </div>
+        <nav aria-label="Hauptnavigation">
+          <ul class="menu menu-horizontal gap-1 px-0">
+            <li>
+              <a href={href(`/${variant.slug}/#spiele`)}>Spiele</a>
+            </li>
+            <li>
+              <a href={href(`/${variant.slug}/ueber-uns/`)}>Über uns</a>
+            </li>
+          </ul>
+        </nav>
+      </header>
+    )}
+    <main class="flex-1">
+      <slot />
+    </main>
+    {variant && (
+      <footer class="footer footer-center bg-base-200 p-6 text-sm">
+        <p>
+          «{variant.name}» ist einer von mehreren Namensvorschlägen.{" "}
+          <a class="link" href={href("/")}>
+            Alle Vorschläge ansehen
+          </a>
+        </p>
+      </footer>
+    )}
+  </body>
+</html>

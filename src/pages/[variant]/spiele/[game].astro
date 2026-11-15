@@ -1,0 +1,51 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import { getCollection, render } from "astro:content";
+import Layout from "../../../layouts/Layout.astro";
+import { href } from "../../../lib/url";
+import { variants } from "../../../variants";
+
+export const getStaticPaths = (async () => {
+  const games = await getCollection("games");
+  return variants.flatMap((variant) =>
+    games.map((game) => ({
+      params: { variant: variant.slug, game: game.id },
+      props: { variant, game },
+    })),
+  );
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { variant, game } = Astro.props;
+const { Content } = await render(game);
+---
+
+<Layout
+  title={`${game.data.title} – ${variant.name}`}
+  description={game.data.tagline}
+  variant={variant}
+>
+  <div class="mx-auto max-w-3xl px-4 py-12">
+    <a class="link" href={href(`/${variant.slug}/#spiele`)}>
+      Alle Spiele
+    </a>
+    <h1 class="mt-6 text-5xl font-bold">{game.data.title}</h1>
+    <p class="mt-4 text-xl">{game.data.tagline}</p>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a class="btn btn-primary btn-lg" href={game.data.playUrl}>
+        {game.data.title} spielen
+      </a>
+      <a class="btn btn-ghost btn-lg" href={game.data.sourceUrl}>
+        Quellcode auf GitHub
+      </a>
+    </div>
+    <p class="mt-4 text-sm">
+      Läuft in einem aktuellen Browser auf dem Computer, mit Tastatur oder
+      Controller.
+    </p>
+    <article class="prose prose-lg mt-12">
+      <Content />
+    </article>
+  </div>
+</Layout>
