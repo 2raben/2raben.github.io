@@ -33,6 +33,7 @@ does not prove correctness.
 
 | Record | Status |
 | --- | --- |
-| [0001 — Build a static site with Astro and daisyUI on GitHub Pages](0001-build-a-static-site-with-astro-and-daisyui.md) | accepted; amended by 0003 |
+| [0001 — Build a static site with Astro and daisyUI on GitHub Pages](0001-build-a-static-site-with-astro-and-daisyui.md) | accepted; amended by 0003, 0004 |
 | [0002 — Compare name candidates as variant routes that share the game content](0002-compare-name-candidates-as-variant-routes.md) | accepted; amended by 0003 |
 | [0003 — Give each variant its own pages, layout and stylesheet](0003-give-each-variant-its-own-pages-and-styles.md) | accepted; amends 0001, 0002 |
+| [0004 — Allow optional client-side scripts in a variant](0004-allow-optional-client-side-scripts-in-a-variant.md) | accepted; amends 0001 |

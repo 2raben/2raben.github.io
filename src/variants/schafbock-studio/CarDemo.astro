@@ -1,0 +1,244 @@
+---
+/**
+ * A warm-up for Car Drive's keys: focus the panel and steer between three
+ * lanes, or boost; with a mouse, the car also follows the pointer's lane. Not
+ * the game itself: no traffic to dodge, no score. Needs JavaScript, so it stays
+ * hidden without it.
+ */
+import type { GameComic } from "./comics";
+
+interface Props {
+  sfx: GameComic["sfx"];
+}
+
+const { sfx } = Astro.props;
+const ink = "#111111";
+const keys = [
+  { action: "left", label: "A / ←", text: "Links" },
+  { action: "boost", label: "Leertaste", text: "Boost" },
+  { action: "right", label: "D / →", text: "Rechts" },
+  { action: "restart", label: "R", text: "Neustart" },
+];
+---
+
+<section
+  class="panel demo flex flex-col"
+  style="--panel-rot: -0.6deg"
+  tabindex="0"
+  role="group"
+  aria-labelledby="car-demo-title"
+  aria-describedby="car-demo-help"
+  data-demo="car"
+  data-sfx={JSON.stringify(sfx)}
+  hidden
+>
+  <div class="flex flex-wrap items-center gap-3 border-b-4 border-ink p-4">
+    <h2 id="car-demo-title" class="comic-heading text-3xl">
+      Trockenübung: die Tasten
+    </h2>
+    <span class="panel-caption">Nur zum Aufwärmen</span>
+  </div>
+  <div class="grid items-center gap-4 p-4 sm:grid-cols-[1fr_auto]">
+    <p id="car-demo-help">
+      Klick hier hinein und lenk mit A und D oder den Pfeiltasten von Spur zu
+      Spur. Mit der Leertaste zündest du den Boost. Mit der Maus folgt das Auto
+      deinem Zeiger. Hier gibt es keinen Verkehr – den findest du im echten
+      Spiel hinter «Spielen!».
+    </p>
+    <svg
+      viewBox="0 0 300 320"
+      class="mx-auto w-full max-w-72"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      data-road
+    >
+      <defs>
+        <clipPath id="car-demo-clip">
+          <rect x="0" y="0" width="300" height="320"></rect>
+        </clipPath>
+      </defs>
+      <g clip-path="url(#car-demo-clip)">
+        <rect x="0" y="0" width="300" height="320" fill="#4a4e69"></rect>
+        <g class="road-stripes">
+          <path
+            d="M 100 -40 V 360 M 200 -40 V 360"
+            stroke="#ffffff"
+            stroke-width="5"
+            stroke-dasharray="22 18"
+          ></path>
+        </g>
+        <path
+          d="M 3 0 V 320 M 297 0 V 320"
+          stroke="#ffd60a"
+          stroke-width="6"
+        ></path>
+        <g class="car-sprite" data-car style="translate: 100px 0">
+          <path
+            class="moto-flame"
+            d="M 36 268 L 50 306 L 64 268 Z"
+            fill="#ff9f1c"
+            stroke={ink}
+            stroke-width="3"
+            stroke-linejoin="round"
+          ></path>
+          <rect
+            x="26"
+            y="196"
+            width="48"
+            height="76"
+            rx="10"
+            fill="#00b4d8"
+            stroke={ink}
+            stroke-width="4"
+          ></rect>
+          <rect
+            x="33"
+            y="210"
+            width="34"
+            height="16"
+            rx="3"
+            fill="#cdeffd"
+            stroke={ink}
+            stroke-width="3"
+          ></rect>
+          <circle
+            cx="50"
+            cy="244"
+            r="11"
+            fill="#ffffff"
+            stroke={ink}
+            stroke-width="3"
+          ></circle>
+          <circle cx="50" cy="240" r="6" fill="#3a2b2b"></circle>
+          <path d="M 26 254 H 74" stroke="#d62828" stroke-width="5"></path>
+        </g>
+      </g>
+      <rect
+        x="2"
+        y="2"
+        width="296"
+        height="316"
+        fill="none"
+        stroke={ink}
+        stroke-width="4"
+      ></rect>
+    </svg>
+  </div>
+  <div class="flex flex-wrap gap-2 border-t-4 border-ink p-4">
+    {keys.map((key) => (
+      <button
+        type="button"
+        class="demo-key"
+        tabindex="-1"
+        data-action={key.action}
+      >
+        {key.label} <span class="font-sans text-sm">{key.text}</span>
+      </button>
+    ))}
+  </div>
+  <p class="sr-only" aria-live="polite" data-demo-status></p>
+</section>
+
+<script>
+  import { nod, sfxAt } from "./effects";
+
+  type Action = "left" | "right" | "boost" | "restart";
+
+  const keyActions: Record<string, Action> = {
+    a: "left",
+    arrowleft: "left",
+    d: "right",
+    arrowright: "right",
+    " ": "boost",
+    r: "restart",
+  };
+  const laneNames = ["linke", "mittlere", "rechte"];
+
+  for (const demo of document.querySelectorAll<HTMLElement>(
+    '[data-demo="car"]',
+  )) {
+    demo.hidden = false;
+    const car = demo.querySelector<SVGGElement>("[data-car]");
+    const road = demo.querySelector<SVGSVGElement>("[data-road]");
+    const status = demo.querySelector<HTMLElement>("[data-demo-status]");
+    const words = JSON.parse(demo.dataset.sfx ?? "{}") as Record<
+      string,
+      string
+    >;
+    let lane = 1;
+    let boosting = 0;
+
+    const setLane = (next: number, word?: string) => {
+      const clamped = Math.max(0, Math.min(2, next));
+      if (clamped === lane) return;
+      lane = clamped;
+      if (car) car.style.translate = `${lane * 100}px 0`;
+      if (word) sfxAt(demo, word);
+      if (status) status.textContent = `Auf der ${laneNames[lane]} Spur`;
+    };
+
+    const act = (action: Action) => {
+      switch (action) {
+        case "left":
+          setLane(lane - 1, words.left);
+          break;
+        case "right":
+          setLane(lane + 1, words.right);
+          break;
+        case "boost":
+          demo.dataset.boost = "true";
+          demo.dataset.jet = "true";
+          window.clearTimeout(boosting);
+          boosting = window.setTimeout(() => {
+            demo.dataset.boost = "false";
+            demo.dataset.jet = "false";
+          }, 1200);
+          sfxAt(demo, words.boost ?? "BOOST!");
+          if (status) status.textContent = "Boost!";
+          break;
+        case "restart":
+          setLane(1);
+          sfxAt(demo, words.restart ?? "NEUSTART!");
+          if (status) status.textContent = "Neustart";
+          break;
+      }
+      nod();
+    };
+
+    demo.addEventListener("keydown", (event) => {
+      if (event.ctrlKey || event.metaKey || event.altKey || event.repeat) {
+        return;
+      }
+      const action = keyActions[event.key.toLowerCase()];
+      if (!action) return;
+      event.preventDefault();
+      act(action);
+      demo
+        .querySelector(`[data-action="${action}"]`)
+        ?.classList.add("is-pressed");
+    });
+    demo.addEventListener("keyup", (event) => {
+      const action = keyActions[event.key.toLowerCase()];
+      if (action) {
+        demo
+          .querySelector(`[data-action="${action}"]`)
+          ?.classList.remove("is-pressed");
+      }
+    });
+    demo.addEventListener("click", (event) => {
+      const button =
+        event.target instanceof Element
+          ? event.target.closest<HTMLElement>("[data-action]")
+          : null;
+      demo.focus();
+      if (button?.dataset.action) act(button.dataset.action as Action);
+    });
+    road?.addEventListener("pointermove", (event) => {
+      if (event.pointerType !== "mouse") return;
+      const rect = road.getBoundingClientRect();
+      setLane(Math.floor(((event.clientX - rect.left) / rect.width) * 3));
+    });
+    demo.addEventListener("focusin", () => (demo.dataset.active = "true"));
+    demo.addEventListener("focusout", () => (demo.dataset.active = "false"));
+  }
+</script>

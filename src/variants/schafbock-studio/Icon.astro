@@ -1,0 +1,226 @@
+---
+/**
+ * Small comic icons in ink and pop colors, drawn on a 100 × 100 grid. Our own
+ * drawings; no product logos.
+ */
+interface Props {
+  name:
+    | "calendar"
+    | "sketch"
+    | "plan"
+    | "gamepad"
+    | "mountains"
+    | "gear"
+    | "browser"
+    | "code"
+    | "cone"
+    | "pyramid"
+    | "kangaroo"
+    | "cactus"
+    | "roofs"
+    | "avalanche"
+    | "heart"
+    | "shield"
+    | "coin"
+    | "truck"
+    | "garage";
+  class?: string;
+}
+
+const { name, class: className = "" } = Astro.props;
+const ink = "#111111";
+---
+
+<svg
+  class={className}
+  viewBox="0 0 100 100"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-hidden="true"
+  fill="none"
+  stroke={ink}
+  stroke-width="5"
+  stroke-linejoin="round"
+  stroke-linecap="round"
+>
+  {name === "calendar" && (
+    <>
+      <rect x="14" y="20" width="72" height="66" rx="6" fill="#ffffff" />
+      <path d="M14 38 H86" />
+      <rect x="14" y="20" width="72" height="18" rx="6" fill="#d62828" />
+      <path d="M32 12 V28 M68 12 V28" />
+      <text
+        x="50"
+        y="76"
+        text-anchor="middle"
+        font-family="Bangers, Impact, sans-serif"
+        font-size="34"
+        fill={ink}
+        stroke="none"
+      >
+        12
+      </text>
+    </>
+  )}
+  {name === "sketch" && (
+    <>
+      <rect
+        x="14"
+        y="14"
+        width="62"
+        height="74"
+        fill="#ffffff"
+        transform="rotate(-6 45 51)"
+      />
+      <path
+        d="M24 40 Q34 30 44 40 T64 40 M24 56 H58 M24 70 H48"
+        stroke="#1d4ed8"
+      />
+      <path d="M62 84 L88 40 L94 44 L68 88 Z" fill="#ffd60a" />
+      <path d="M62 84 L60 94 L68 88" fill="#f3d2c1" />
+    </>
+  )}
+  {name === "plan" && (
+    <>
+      <rect x="18" y="12" width="64" height="78" rx="4" fill="#ffffff" />
+      <path d="M30 32 l6 6 l10 -12 M30 54 l6 6 l10 -12" stroke="#2a9d8f" />
+      <path d="M54 34 H72 M54 56 H72" />
+      <path d="M30 76 l14 0 M54 76 H72" stroke="#d62828" />
+    </>
+  )}
+  {name === "gamepad" && (
+    <>
+      <path
+        d="M22 34 H78 C90 34 94 52 92 66 C90 80 78 82 70 72 L64 64 H36 L30 72 C22 82 10 80 8 66 C6 52 10 34 22 34 Z"
+        fill="#00b4d8"
+      />
+      <path d="M28 46 V62 M20 54 H36" />
+      <circle cx="68" cy="48" r="4" fill="#d62828" />
+      <circle cx="76" cy="58" r="4" fill="#ffd60a" />
+    </>
+  )}
+  {name === "mountains" && (
+    <>
+      <path d="M4 86 L34 30 L52 60 L66 40 L96 86 Z" fill="#8d99ae" />
+      <path d="M34 30 L26 46 L34 42 L42 48 Z" fill="#ffffff" />
+      <path d="M66 40 L60 52 L67 49 L73 53 Z" fill="#ffffff" />
+      <circle cx="82" cy="20" r="9" fill="#ffd60a" />
+    </>
+  )}
+  {name === "gear" && (
+    <>
+      <path
+        d="M50 10 L57 22 L71 18 L72 32 L86 36 L79 49 L88 60 L75 66 L76 80 L62 78 L54 90 L45 79 L31 84 L29 70 L15 66 L22 53 L12 42 L26 36 L26 22 L40 24 Z"
+        fill="#ff9f1c"
+      />
+      <circle cx="50" cy="50" r="14" fill="#ffffff" />
+    </>
+  )}
+  {name === "browser" && (
+    <>
+      <rect x="8" y="16" width="84" height="68" rx="6" fill="#ffffff" />
+      <path d="M8 32 H92" />
+      <circle cx="18" cy="24" r="2.5" fill={ink} />
+      <circle cx="27" cy="24" r="2.5" fill={ink} />
+      <path d="M40 46 L64 58 L40 70 Z" fill="#d62828" />
+    </>
+  )}
+  {name === "code" && (
+    <>
+      <rect x="8" y="16" width="84" height="68" rx="6" fill="#111111" />
+      <path d="M30 38 L18 50 L30 62 M70 38 L82 50 L70 62" stroke="#ffd60a" />
+      <path d="M56 32 L44 68" stroke="#00b4d8" />
+    </>
+  )}
+  {name === "cone" && (
+    <>
+      <path d="M50 10 L74 84 H26 Z" fill="#ff9f1c" />
+      <path d="M38 46 H62 M33 64 H67" stroke="#ffffff" stroke-width="7" />
+      <path d="M50 10 L74 84 H26 Z" />
+      <path d="M14 86 H86" />
+    </>
+  )}
+  {name === "pyramid" && (
+    <>
+      <circle cx="78" cy="22" r="10" fill="#ffd60a" />
+      <path d="M8 84 L50 22 L92 84 Z" fill="#f4c95d" />
+      <path d="M50 22 L60 84 M29 53 H71 M18 70 H82" stroke-width="3" />
+      <path d="M2 86 Q26 78 50 86 T98 86" stroke="#ff9f1c" />
+    </>
+  )}
+  {name === "kangaroo" && (
+    <>
+      <path
+        d="M62 16 L66 8 L70 18 C78 20 80 28 74 32 L66 34 C62 44 60 54 62 64 C70 70 78 78 88 82 L84 88 C72 84 60 78 52 72 L44 86 L30 86 L38 76 C24 74 16 62 20 48 C24 34 40 26 54 26 Z"
+        fill="#c97b3d"
+      />
+      <circle cx="68" cy="24" r="2.5" fill={ink} stroke="none" />
+      <path d="M58 42 L48 48" />
+    </>
+  )}
+  {name === "cactus" && (
+    <>
+      <path
+        d="M42 88 V22 C42 12 58 12 58 22 V88 M42 56 H28 C22 56 20 52 20 46 V34 C20 28 30 28 30 34 V46 H42 M58 48 H70 V30 C70 24 80 24 80 30 V46 C80 54 76 58 70 58 H58"
+        fill="#2a9d8f"
+      />
+      <path d="M8 88 H92" />
+      <circle cx="16" cy="78" r="8" fill="#f4c95d" stroke-dasharray="4 4" />
+    </>
+  )}
+  {name === "roofs" && (
+    <>
+      <path d="M6 88 V56 L26 40 L46 56 V88 Z" fill="#8d99ae" />
+      <path d="M46 88 V48 L70 28 L94 48 V88 Z" fill="#00b4d8" />
+      <rect x="74" y="22" width="8" height="16" fill="#d62828" />
+      <path d="M18 66 h8 v8 h-8 Z M60 58 h8 v8 h-8 Z M76 58 h8 v8 h-8 Z" />
+      <path d="M2 88 H98" />
+    </>
+  )}
+  {name === "avalanche" && (
+    <>
+      <path d="M6 88 L48 18 L94 88 Z" fill="#8d99ae" />
+      <path d="M48 18 L36 38 L48 32 L60 40 Z" fill="#ffffff" />
+      <circle cx="72" cy="64" r="10" fill="#ffffff" />
+      <circle cx="84" cy="74" r="8" fill="#ffffff" />
+      <circle cx="62" cy="76" r="7" fill="#ffffff" />
+      <path d="M52 48 L60 56 M58 42 L68 52" stroke-width="4" />
+    </>
+  )}
+  {name === "heart" && (
+    <path
+      d="M50 86 C20 64 8 48 12 32 C16 16 38 12 50 30 C62 12 84 16 88 32 C92 48 80 64 50 86 Z"
+      fill="#d62828"
+    />
+  )}
+  {name === "shield" && (
+    <>
+      <path
+        d="M50 8 L86 22 C86 54 72 76 50 92 C28 76 14 54 14 22 Z"
+        fill="#00b4d8"
+      />
+      <path d="M50 22 V78 M30 38 H70" stroke="#ffffff" stroke-width="6" />
+    </>
+  )}
+  {name === "coin" && (
+    <>
+      <circle cx="50" cy="50" r="38" fill="#ffd60a" />
+      <circle cx="50" cy="50" r="26" stroke-width="3" />
+      <path d="M50 34 V66" stroke-width="6" />
+    </>
+  )}
+  {name === "truck" && (
+    <>
+      <rect x="6" y="28" width="58" height="44" fill="#ff9f1c" />
+      <path d="M64 42 H82 L94 56 V72 H64 Z" fill="#00b4d8" />
+      <circle cx="24" cy="78" r="9" fill={ink} />
+      <circle cx="78" cy="78" r="9" fill={ink} />
+    </>
+  )}
+  {name === "garage" && (
+    <>
+      <path d="M8 40 L50 12 L92 40 V88 H8 Z" fill="#ffffff" />
+      <rect x="22" y="48" width="56" height="40" fill="#8d99ae" />
+      <path d="M22 58 H78 M22 68 H78 M22 78 H78" stroke-width="3" />
+    </>
+  )}
+</svg>

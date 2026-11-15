@@ -2,7 +2,9 @@
 
 A static website built with Astro 7, Tailwind CSS 4 and daisyUI 5
 ([ADR 0001](decisions/0001-build-a-static-site-with-astro-and-daisyui.md)) and
-published on GitHub Pages. It has no server and no client-side JavaScript. Until
+published on GitHub Pages. It has no server, and no content depends on client-side
+JavaScript; a variant may add small scripts for optional effects
+([ADR 0004](decisions/0004-allow-optional-client-side-scripts-in-a-variant.md)). Until
 the studio's name is chosen, the site holds one complete version per name
 candidate ([ADR 0002](decisions/0002-compare-name-candidates-as-variant-routes.md)),
 each with its own pages, layout and theme.
@@ -24,10 +26,31 @@ two folders named after its slug:
 | `src/variants/<slug>/styles.css` | Tailwind, typography plugin, and daisyUI without built-in themes |
 | `src/variants/<slug>/theme.css` | The variant's custom daisyUI theme, named after the slug |
 
-The four variants start from the same layout and pages, and their themes start as
+The variants start from the same layout and pages, and their themes start as
 copies of daisyUI's retro (Schafbock Studio), cupcake (Egg Settlers), nord
-(November Games) and forest (Waldstatt Games). Change a variant only inside its own
-folders; never import another variant's files.
+(November Games) and forest (Waldstatt Games). A variant may add components and
+modules of its own to its folder. Change a variant only inside its own folders;
+never import another variant's files.
+
+### Schafbock Studio
+
+A pop-art comic starring a superhero ram, shaped in the
+[pitch](../pitches/schafbock-studio/pitch--pop-art-superhero.md). Its own theme
+replaces the retro copy, and the comic face Bangers comes self-hosted from
+`@fontsource/bangers`. Its folder `src/variants/schafbock-studio/` adds:
+
+| Path | Contents |
+| --- | --- |
+| `Ram.astro`, `RamHead.astro` | The ram as SVG in four poses: landing (home), moto (Moto Devil), car (Car Drive), sketch (Über uns) |
+| `Burst.astro`, `Icon.astro` | Sound-effect bursts and small comic icons |
+| `comics.ts` | The variant's comic retelling of each game, keyed by game id; `getComicGames()` fails the build when a game has none |
+| `MotoTour.astro`, `CarRoad.astro` | Charts of each game's facts: Moto Devil's countries, Car Drive's road and levels |
+| `MotoDemo.astro`, `CarDemo.astro` | Key demos for each game's controls; hidden until their script runs |
+| `effects.ts` | Optional effects on pointer movement, clicks and typing ([ADR 0004](decisions/0004-allow-optional-client-side-scripts-in-a-variant.md)) |
+
+The game pages show the variant's comic copy first and the shared game Markdown
+below it. Running text sits on flat backgrounds; halftone dots only appear behind
+shapes and large display headings.
 
 ### Adding a variant
 

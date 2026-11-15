@@ -1,35 +1,298 @@
 ---
+import Burst from "../../variants/schafbock-studio/Burst.astro";
+import Icon from "../../variants/schafbock-studio/Icon.astro";
 import Layout from "../../variants/schafbock-studio/Layout.astro";
 import meta from "../../variants/schafbock-studio/meta";
+import Ram from "../../variants/schafbock-studio/Ram.astro";
+import RamHead from "../../variants/schafbock-studio/RamHead.astro";
+
+const ink = "#111111";
+const steps = [
+  {
+    icon: "sketch",
+    title: "Skizze",
+    text: "Jede Idee beginnt als Skizze.",
+  },
+  {
+    icon: "plan",
+    title: "Plan",
+    text: "Was fehlt, wie könnte die Lösung aussehen, und was lassen wir bewusst weg?",
+  },
+  {
+    icon: "gamepad",
+    title: "Prototyp",
+    text: "Dann bauen wir einen Prototyp und probieren ihn aus.",
+  },
+] as const;
+const tools = [
+  { icon: "gear", title: "Rust", text: "Unsere Programmiersprache" },
+  { icon: "gamepad", title: "Bevy", text: "Die Spiel-Engine" },
+  { icon: "browser", title: "WebAssembly", text: "Läuft direkt im Browser" },
+  { icon: "code", title: "GitHub", text: "Der Quellcode ist öffentlich" },
+] as const;
 ---
 
 <Layout
   title={`Über uns – ${meta.name}`}
-  description={`Wer hinter ${meta.name} steckt und wie unsere Spiele entstehen.`}
+  description={`Wer hinter ${meta.name} steckt, woher der Name kommt und wie unsere Spiele entstehen.`}
 >
-  <article class="prose prose-lg mx-auto px-4 py-12">
-    <h1>Über uns</h1>
-    <p>
-      {meta.name} ist ein kleines Hobby-Spielestudio. Wir programmieren Spiele,
-      die direkt im Browser laufen, ohne Installation.
-    </p>
-    <h2>Wie alles begann</h2>
-    <p>
-      Am Nationalen Zukunftstag, dem 12. November 2026, haben wir aus Skizzen
-      auf Papier unsere ersten spielbaren Prototypen gebaut: Moto Devil und Car
-      Drive. Seither entwickeln wir beide weiter.
-    </p>
-    <h2>Wie wir arbeiten</h2>
-    <p>
-      Jede Idee beginnt als Skizze. Daraus schreiben wir einen kurzen Plan: Was
-      fehlt, wie könnte die Lösung aussehen, und was lassen wir bewusst weg?
-      Dann bauen wir einen Prototyp und probieren ihn aus.
-    </p>
-    <h2>Womit wir bauen</h2>
-    <p>
-      Unsere Spiele sind in Rust mit der Spiel-Engine Bevy geschrieben und
-      laufen als WebAssembly im Browser. Der Quellcode ist auf GitHub
-      öffentlich.
-    </p>
-  </article>
+  <section class="rays relative overflow-hidden border-b-4 border-ink">
+    <div class="halftone pointer-events-none absolute inset-0"></div>
+    <div class="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-10 md:grid-cols-2 md:py-14">
+      <div class="flex flex-col gap-6">
+        <p class="panel-caption self-start">Die Entstehungsgeschichte</p>
+        <h1 class="comic-title text-6xl text-pop-red sm:text-8xl">Über uns</h1>
+        <p class="bubble text-lg">
+          {meta.name} ist ein kleines Hobby-Spielestudio. Wir programmieren
+          Spiele, die direkt im Browser laufen, ohne Installation.
+        </p>
+      </div>
+      <div class="parallax" style="--depth: 16">
+        <Ram
+          pose="sketch"
+          class="mx-auto w-72 sm:w-96"
+          label="Der Schafbock zeichnet mit einem Bleistift ein Motorrad und ein Auto auf einen Skizzenblock."
+        />
+      </div>
+    </div>
+  </section>
+
+  <div class="mx-auto flex max-w-6xl flex-col gap-16 px-4 py-14">
+    <section
+      aria-labelledby="name-title"
+      class="grid items-center gap-8 md:grid-cols-[6fr_5fr]"
+    >
+      <div
+        class="panel flex flex-col gap-4 p-6"
+        style="--panel-rot: -1deg"
+        data-tilt
+      >
+        <h2 id="name-title" class="comic-heading text-5xl">
+          Warum Schafbock?
+        </h2>
+        <p class="text-lg">
+          Unsere ersten Spiele sind am Nationalen Zukunftstag bei der ISE AG in
+          Einsiedeln entstanden. Der Schafbock ist eine Einsiedler Spezialität –
+          darum der Name.
+        </p>
+        <p class="text-lg">
+          Ein Schafbock ist aber auch ein Widder: ein Dickschädel, der mit dem
+          Kopf durch die Wand will. Darum ist unser Schafbock ein Superheld mit
+          Maske, Umhang und Hörnern.
+        </p>
+        <div class="ink-box halftone-red relative mt-2 p-4 text-white">
+          <Burst
+            text="ACHTUNG!"
+            class="absolute -top-10 -right-4 w-32 rotate-6"
+            color="#111111"
+          />
+          <p class="comic-heading text-2xl">Verwechslungsgefahr!</p>
+          <p class="mt-1 rounded bg-ink/70 p-2">
+            Mit der Bäckerei und dem gebackenen Schafbock haben wir nichts zu
+            tun. Unser Schafbock backt keine Weggli – er macht Spiele.
+          </p>
+        </div>
+      </div>
+      <figure
+        class="panel overflow-hidden"
+        style="--panel-rot: 1.2deg"
+        data-tilt
+      >
+        <svg
+          viewBox="0 0 400 300"
+          class="w-full"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-labelledby="einsiedeln-desc"
+        >
+          <desc id="einsiedeln-desc">
+            Berge unter einer Sonne und ein blaues Ortsschild mit der Aufschrift
+            Einsiedeln. Der Kopf des Schafbocks schaut hinter dem Schild hervor.
+          </desc>
+          <rect width="400" height="300" fill="#cdeffd"></rect>
+          <circle
+            cx="330"
+            cy="62"
+            r="34"
+            fill="#ffd60a"
+            stroke={ink}
+            stroke-width="5"
+          ></circle>
+          <path
+            d="M 0 220 L 70 110 L 120 170 L 190 70 L 270 180 L 320 130 L 400 220 Z"
+            fill="#8d99ae"
+            stroke={ink}
+            stroke-width="5"
+            stroke-linejoin="round"
+          ></path>
+          <path
+            d="M 190 70 L 170 100 L 190 92 L 210 104 Z M 70 110 L 58 130 L 72 124 L 84 132 Z"
+            fill="#ffffff"
+            stroke={ink}
+            stroke-width="4"
+            stroke-linejoin="round"
+          ></path>
+          <path
+            d="M 0 220 H 400 V 300 H 0 Z"
+            fill="#2a9d8f"
+            stroke={ink}
+            stroke-width="5"
+          ></path>
+          <g class="ram" data-ram>
+            <RamHead x={300} y={150} scale={0.75} />
+          </g>
+          <path
+            d="M 150 290 V 200 M 250 290 V 200"
+            stroke={ink}
+            stroke-width="8"
+          ></path>
+          <rect
+            x="96"
+            y="168"
+            width="208"
+            height="62"
+            rx="6"
+            fill="#1d4ed8"
+            stroke={ink}
+            stroke-width="5"
+          ></rect>
+          <rect
+            x="104"
+            y="176"
+            width="192"
+            height="46"
+            rx="4"
+            fill="none"
+            stroke="#ffffff"
+            stroke-width="3"
+          ></rect>
+          <text
+            x="200"
+            y="212"
+            text-anchor="middle"
+            font-family="Bangers, Impact, sans-serif"
+            font-size="36"
+            letter-spacing="2"
+            fill="#ffffff"
+          >
+            Einsiedeln
+          </text>
+        </svg>
+      </figure>
+    </section>
+
+    <section aria-labelledby="begin-title" class="flex flex-col gap-8">
+      <h2
+        id="begin-title"
+        class="comic-title text-5xl text-pop-yellow sm:text-6xl"
+      >
+        Wie alles begann
+      </h2>
+      <div class="grid gap-8 md:grid-cols-[2fr_3fr]">
+        <div
+          class="panel flex flex-col items-center gap-3 p-6 text-center"
+          style="--panel-rot: -1.4deg"
+          data-tilt
+        >
+          <Icon name="calendar" class="h-32 w-32" />
+          <p class="panel-caption">12. November 2026</p>
+          <p class="comic-heading text-3xl">Nationaler Zukunftstag</p>
+        </div>
+        <div
+          class="panel flex flex-col justify-center gap-4 p-6"
+          style="--panel-rot: 0.8deg"
+          data-tilt
+        >
+          <p class="text-lg">
+            Am Nationalen Zukunftstag, dem 12. November 2026, haben wir aus
+            Skizzen auf Papier unsere ersten spielbaren Prototypen gebaut:
+          </p>
+          <ul class="flex flex-wrap gap-4">
+            <li
+              class="sticker ink-box halftone-red px-4 py-2"
+              style="--rot: -3deg"
+            >
+              <span class="comic-heading text-3xl text-white [-webkit-text-stroke:1px_#111]">
+                Moto Devil
+              </span>
+            </li>
+            <li
+              class="sticker ink-box halftone-cyan px-4 py-2"
+              style="--rot: 2deg"
+            >
+              <span class="comic-heading text-3xl">Car Drive</span>
+            </li>
+          </ul>
+          <p class="text-lg">Seither entwickeln wir beide weiter.</p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="work-title" class="flex flex-col gap-8">
+      <h2
+        id="work-title"
+        class="comic-title text-5xl text-pop-yellow sm:text-6xl"
+      >
+        Wie wir arbeiten
+      </h2>
+      <ol class="grid gap-8 md:grid-cols-3">
+        {steps.map((step, i) => (
+          <li
+            class="panel relative flex flex-col items-center gap-3 p-6 text-center"
+            style={`--panel-rot: ${[-1, 1.2, -0.6][i]}deg`}
+            data-tilt
+          >
+            <span class="comic-title absolute -top-6 -left-4 flex h-14 w-14 items-center justify-center rounded-full border-4 border-ink bg-pop-red text-3xl text-white">
+              {i + 1}
+            </span>
+            <Icon name={step.icon} class="h-24 w-24" />
+            <span class="panel-caption">{step.title}</span>
+            <p class="text-lg">{step.text}</p>
+            {i < steps.length - 1 && (
+              <svg
+                viewBox="0 0 60 40"
+                class="absolute top-1/2 -right-11 z-10 hidden w-14 md:block"
+                aria-hidden="true"
+              >
+                <path
+                  d="M 4 14 H 36 V 4 L 56 20 L 36 36 V 26 H 4 Z"
+                  fill="#ffd60a"
+                  stroke="#111111"
+                  stroke-width="4"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            )}
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <section aria-labelledby="tools-title" class="flex flex-col gap-8">
+      <h2
+        id="tools-title"
+        class="comic-title text-5xl text-pop-yellow sm:text-6xl"
+      >
+        Womit wir bauen
+      </h2>
+      <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {tools.map((tool, i) => (
+          <li
+            class="panel flex flex-col items-center gap-2 p-5 text-center"
+            style={`--panel-rot: ${i % 2 ? 1 : -1}deg`}
+            data-tilt
+          >
+            <Icon name={tool.icon} class="h-20 w-20" />
+            <span class="comic-heading text-3xl">{tool.title}</span>
+            <span>{tool.text}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="ink-box bg-white p-4 text-lg">
+        Unsere Spiele sind in Rust mit der Spiel-Engine Bevy geschrieben und
+        laufen als WebAssembly im Browser. Der Quellcode ist auf GitHub
+        öffentlich.
+      </p>
+    </section>
+  </div>
 </Layout>

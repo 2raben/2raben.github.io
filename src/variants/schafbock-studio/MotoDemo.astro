@@ -1,0 +1,253 @@
+---
+/**
+ * A warm-up for Moto Devil's keys: focus the panel and press the keys from the
+ * game's controls table; the ram on its bike reacts. Not the game itself.
+ * Needs JavaScript, so it stays hidden without it.
+ */
+import type { GameComic } from "./comics";
+import RamHead from "./RamHead.astro";
+
+interface Props {
+  sfx: GameComic["sfx"];
+}
+
+const { sfx } = Astro.props;
+const ink = "#111111";
+const keys = [
+  { action: "gas", label: "W / ↑", text: "Gas" },
+  { action: "brake", label: "S / ↓", text: "Bremsen" },
+  { action: "back", label: "A / ←", text: "Kippen" },
+  { action: "forward", label: "D / →", text: "Kippen" },
+  { action: "jump", label: "Leertaste", text: "Springen" },
+  { action: "turn", label: "E", text: "Umdrehen" },
+  { action: "restart", label: "R", text: "Neu" },
+];
+---
+
+<section
+  class="panel demo flex flex-col"
+  style="--panel-rot: 0.6deg"
+  tabindex="0"
+  role="group"
+  aria-labelledby="moto-demo-title"
+  aria-describedby="moto-demo-help"
+  data-demo="moto"
+  data-sfx={JSON.stringify(sfx)}
+  hidden
+>
+  <div class="flex flex-wrap items-center gap-3 border-b-4 border-ink p-4">
+    <h2 id="moto-demo-title" class="comic-heading text-3xl">
+      Trockenübung: die Tasten
+    </h2>
+    <span class="panel-caption">Nur zum Aufwärmen</span>
+  </div>
+  <p id="moto-demo-help" class="px-4 pt-3">
+    Klick hier hinein und probier die Tasten aus dem Spiel: Gas, Bremsen, Kippen
+    bis zum Salto, Springen – und die Leertaste halten für den Düsenschub. Das
+    echte Spiel startest du mit «Spielen!».
+  </p>
+  <svg
+    viewBox="0 0 640 230"
+    class="mt-2 w-full"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <rect x="0" y="0" width="640" height="230" fill="#fff1b8"></rect>
+    <circle
+      cx="560"
+      cy="50"
+      r="26"
+      fill="#ffd60a"
+      stroke={ink}
+      stroke-width="4"
+    ></circle>
+    <path
+      d="M 0 196 H 640 M 470 196 L 590 150 L 590 196"
+      fill="#2a9d8f"
+      stroke={ink}
+      stroke-width="5"
+      stroke-linejoin="round"
+    ></path>
+    <path d="M 0 200 H 640 V 230 H 0 Z" fill="#c97b3d"></path>
+    <path d="M 0 198 H 640" stroke={ink} stroke-width="5"></path>
+    <g class="moto-rider" data-rider>
+      <g transform="translate(60 0)">
+        <path
+          class="moto-flame"
+          d="M 0 150 L -46 140 L -30 152 L -56 160 L -30 166 L -44 178 L 0 166 Z"
+          fill="#ff9f1c"
+          stroke={ink}
+          stroke-width="3"
+          stroke-linejoin="round"
+        ></path>
+        {[20, 110].map((cx) => (
+          <g>
+            <circle cx={cx} cy="174" r="21" fill={ink} />
+            <circle cx={cx} cy="174" r="12" fill="#fffaf0" />
+            <circle cx={cx} cy="174" r="4" fill={ink} />
+          </g>
+        ))}
+        <path
+          d="M 20 174 L 52 150 L 92 150 L 110 174 M 110 174 L 96 128 L 106 122"
+          fill="none"
+          stroke={ink}
+          stroke-width="6"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+        ></path>
+        <path
+          d="M 36 142 L 88 138 L 98 152 L 44 156 Z"
+          fill="#d62828"
+          stroke={ink}
+          stroke-width="3"
+          stroke-linejoin="round"
+        ></path>
+        <RamHead x={66} y={104} scale={0.5} rotate={8} tails="left" />
+      </g>
+    </g>
+  </svg>
+  <div class="flex flex-wrap gap-2 border-t-4 border-ink p-4">
+    {keys.map((key) => (
+      <button
+        type="button"
+        class="demo-key"
+        tabindex="-1"
+        data-action={key.action}
+      >
+        {key.label} <span class="font-sans text-sm">{key.text}</span>
+      </button>
+    ))}
+  </div>
+  <p class="sr-only" aria-live="polite" data-demo-status></p>
+</section>
+
+<script>
+  import { nod, sfxAt } from "./effects";
+
+  type Action =
+    "gas" | "brake" | "back" | "forward" | "jump" | "jet" | "turn" | "restart";
+
+  const keyActions: Record<string, Action> = {
+    w: "gas",
+    arrowup: "gas",
+    s: "brake",
+    arrowdown: "brake",
+    a: "back",
+    arrowleft: "back",
+    d: "forward",
+    arrowright: "forward",
+    " ": "jump",
+    e: "turn",
+    r: "restart",
+  };
+
+  for (const demo of document.querySelectorAll<HTMLElement>(
+    '[data-demo="moto"]',
+  )) {
+    demo.hidden = false;
+    const rider = demo.querySelector<SVGGElement>("[data-rider]");
+    const status = demo.querySelector<HTMLElement>("[data-demo-status]");
+    const words = JSON.parse(demo.dataset.sfx ?? "{}") as Record<
+      string,
+      string
+    >;
+    const state = { x: 0, angle: 0, spin: 0, lift: 0, dir: 1 };
+    let landing = 0;
+
+    const render = () => {
+      if (!rider) return;
+      rider.style.transformBox = "fill-box";
+      rider.style.transformOrigin = "50% 70%";
+      rider.style.transform = `translate(${state.x}px, ${-state.lift}px) rotate(${state.angle}deg) scaleX(${state.dir})`;
+    };
+    const say = (word: string | undefined, text: string) => {
+      if (word) sfxAt(demo, word);
+      if (status) status.textContent = text;
+      nod();
+    };
+    const land = (delay: number) => {
+      window.clearTimeout(landing);
+      landing = window.setTimeout(() => {
+        state.lift = 0;
+        demo.dataset.jet = "false";
+        render();
+      }, delay);
+    };
+
+    const act = (action: Action) => {
+      switch (action) {
+        case "gas":
+          state.x = Math.min(state.x + 60 * state.dir, 400);
+          state.x = Math.max(state.x, 0);
+          say(words.gas, "Gas");
+          break;
+        case "brake":
+          state.x = Math.max(Math.min(state.x - 20 * state.dir, 400), 0);
+          say(words.brake, "Bremsen");
+          break;
+        case "back":
+        case "forward": {
+          const step = action === "back" ? -45 : 45;
+          state.angle += step;
+          state.spin += step;
+          if (Math.abs(state.spin) >= 360) {
+            state.spin = 0;
+            say(words.flip, "Salto!");
+          } else {
+            say(undefined, "Kippen");
+          }
+          break;
+        }
+        case "jump":
+          state.lift = 70;
+          say(words.jump, "Springen");
+          land(450);
+          break;
+        case "jet":
+          state.lift = Math.min(state.lift + 14, 120);
+          demo.dataset.jet = "true";
+          say(words.jet, "Düsenschub");
+          land(350);
+          break;
+        case "turn":
+          state.dir *= -1;
+          say(words.turn, "Umdrehen");
+          break;
+        case "restart":
+          Object.assign(state, { x: 0, angle: 0, spin: 0, lift: 0, dir: 1 });
+          say(words.restart, "Level neu gestartet");
+          break;
+      }
+      render();
+    };
+
+    demo.addEventListener("keydown", (event) => {
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      const action = keyActions[event.key.toLowerCase()];
+      if (!action) return;
+      event.preventDefault();
+      act(action === "jump" && event.repeat ? "jet" : action);
+      demo
+        .querySelector(`[data-action="${action}"]`)
+        ?.classList.add("is-pressed");
+    });
+    demo.addEventListener("keyup", (event) => {
+      const action = keyActions[event.key.toLowerCase()];
+      if (action) {
+        demo
+          .querySelector(`[data-action="${action}"]`)
+          ?.classList.remove("is-pressed");
+      }
+    });
+    demo.addEventListener("click", (event) => {
+      const button =
+        event.target instanceof Element
+          ? event.target.closest<HTMLElement>("[data-action]")
+          : null;
+      demo.focus();
+      if (button?.dataset.action) act(button.dataset.action as Action);
+    });
+    demo.addEventListener("focusin", () => (demo.dataset.active = "true"));
+    demo.addEventListener("focusout", () => (demo.dataset.active = "false"));
+  }
+</script>

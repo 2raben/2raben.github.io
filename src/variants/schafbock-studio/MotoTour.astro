@@ -1,0 +1,109 @@
+---
+/**
+ * Moto Devil's journey as a comic map: three training levels, then five
+ * countries with three levels each. Facts from src/content/games/moto-devil.md.
+ */
+import Icon from "./Icon.astro";
+
+const stops = [
+  { name: "Training", hazard: "3 Levels zum Üben", icon: "cone", levels: 3 },
+  { name: "Ägypten", hazard: "Treibsand", icon: "pyramid", levels: 3 },
+  { name: "Australien", hazard: "Kängurus", icon: "kangaroo", levels: 3 },
+  {
+    name: "USA",
+    hazard: "Steppenläufer und Kakteen",
+    icon: "cactus",
+    levels: 3,
+  },
+  { name: "Paris", hazard: "Über den Dächern", icon: "roofs", levels: 3 },
+  { name: "Schweiz", hazard: "Lawinen", icon: "avalanche", levels: 3 },
+] as const;
+const onTheWay = ["Schlamm", "Raben im Sturzflug", "Trampoline", "Düsenschub"];
+const colors = [
+  "#ffffff",
+  "#f4c95d",
+  "#ff9f1c",
+  "#2a9d8f",
+  "#00b4d8",
+  "#d62828",
+];
+---
+
+<section aria-labelledby="tour-title" class="flex flex-col gap-8">
+  <h2 id="tour-title" class="comic-title text-5xl text-pop-yellow sm:text-6xl">
+    Die Weltreise
+  </h2>
+  <div class="relative">
+    <div
+      class="absolute top-16 right-[8%] left-[8%] hidden border-t-[6px] border-dashed border-ink lg:block"
+      aria-hidden="true"
+    ></div>
+    <ol class="relative grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
+      {stops.map((stop, i) => (
+        <li class="group flex flex-col items-center gap-2 text-center">
+          <div
+            class="ink-box flex h-32 w-32 items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-6"
+            style={`background: ${colors[i]}`}
+          >
+            <Icon name={stop.icon} class="h-20 w-20" />
+          </div>
+          <span class="panel-caption mt-2">
+            {i === 0 ? stop.name : `${i}. ${stop.name}`}
+          </span>
+          <span class="font-semibold">{stop.hazard}</span>
+          <span class="flex gap-1" aria-label={`${stop.levels} Levels`}>
+            {Array.from({ length: stop.levels }, () => (
+              <span class="h-4 w-4 rounded-full border-[3px] border-ink bg-pop-red" />
+            ))}
+          </span>
+        </li>
+      ))}
+    </ol>
+  </div>
+  <div class="grid gap-6 md:grid-cols-[3fr_2fr]">
+    <div class="panel p-5" style="--panel-rot: -0.8deg" data-tilt>
+      <p class="panel-caption">Unterwegs warten</p>
+      <ul class="mt-4 flex flex-wrap gap-3">
+        {onTheWay.map((item, i) => (
+          <li
+            class="sticker ink-box bg-white px-3 py-1 text-lg font-semibold"
+            style={`--rot: ${i % 2 ? 2 : -2}deg`}
+          >
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div
+      class="panel flex items-center gap-4 p-5"
+      style="--panel-rot: 1deg"
+      data-tilt
+    >
+      <svg viewBox="0 0 80 100" class="h-24 w-20 shrink-0" aria-hidden="true">
+        <path
+          d="M 10 92 L 10 36 C 10 14 70 14 70 36 L 70 92 Z"
+          fill="#cfd8dc"
+          stroke="#111111"
+          stroke-width="5"
+          stroke-linejoin="round"
+        ></path>
+        <path
+          d="M 40 34 L 40 66 M 28 46 L 52 46"
+          stroke="#111111"
+          stroke-width="6"
+          stroke-linecap="round"
+        ></path>
+        <path
+          d="M 2 94 L 78 94"
+          stroke="#2a9d8f"
+          stroke-width="8"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <p class="text-lg">
+        Wo du am weitesten gekommen bist, steht dein <strong>Grabstein</strong>{" "}
+        – neben denen aller anderen, die am gleichen Computer spielen.
+      </p>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,61 @@
+---
+/**
+ * A comic sound-effect burst: a jagged star with a word in it, as inline SVG.
+ * The jaggedness comes from the text, so the same word always looks the same.
+ */
+interface Props {
+  text: string;
+  fill?: string;
+  color?: string;
+  points?: number;
+  class?: string;
+}
+
+const {
+  text,
+  fill = "#ffd60a",
+  color = "#d62828",
+  points = 14,
+  class: className = "",
+} = Astro.props;
+
+const seed = [...text].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+const star = Array.from({ length: points * 2 }, (_, i) => {
+  const angle = (Math.PI * i) / points;
+  const jitter = ((seed * (i + 3)) % 17) / 17;
+  const radius = i % 2 === 0 ? 1 - jitter * 0.12 : 0.66 + jitter * 0.1;
+  return `${(Math.cos(angle) * 100 * radius).toFixed(1)},${(Math.sin(angle) * 62 * radius).toFixed(1)}`;
+}).join(" ");
+const fontSize = Math.min(54, 300 / Math.max(text.length, 3));
+---
+
+<svg
+  class={className}
+  viewBox="-110 -72 220 144"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-hidden="true"
+>
+  <polygon points={star} fill="#111111" transform="translate(6 6)"></polygon>
+  <polygon
+    points={star}
+    fill={fill}
+    stroke="#111111"
+    stroke-width="5"
+    stroke-linejoin="round"
+  ></polygon>
+  <text
+    x="0"
+    y={fontSize * 0.36}
+    text-anchor="middle"
+    font-family="Bangers, Impact, sans-serif"
+    font-size={fontSize}
+    letter-spacing="1"
+    fill={color}
+    stroke="#111111"
+    stroke-width="2"
+    paint-order="stroke"
+    transform="rotate(-6)"
+  >
+    {text}
+  </text>
+</svg>
