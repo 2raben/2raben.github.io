@@ -1,5 +1,6 @@
 ---
 import { getGames } from "../../lib/games";
+import { href } from "../../lib/url";
 import GameCard from "../../variants/november-games/GameCard.astro";
 import Layout from "../../variants/november-games/Layout.astro";
 import meta from "../../variants/november-games/meta";
@@ -7,26 +8,91 @@ import meta from "../../variants/november-games/meta";
 const games = await getGames();
 ---
 
-<Layout title={meta.name} description={meta.tagline}>
-  <section class="hero bg-base-200 py-16">
-    <div class="hero-content text-center">
-      <div class="max-w-2xl">
-        <h1 class="text-5xl font-bold">{meta.name}</h1>
-        <p class="py-6 text-xl">{meta.tagline}</p>
-        <p>
-          Wir sind ein kleines Hobby-Spielestudio. Unsere Spiele laufen direkt
-          im Browser, ohne Installation.
-        </p>
+<Layout
+  title={meta.name}
+  description="Am Nationalen Zukunftstag entwickeln Schülerinnen und Schüler eigene Spiele. Entdecke November Games und spiele direkt im Browser."
+>
+  <section class="hero-section shell" aria-labelledby="intro-title">
+    <div class="hero-copy">
+      <p class="eyebrow">
+        <span class="signal-dot" aria-hidden="true"></span> Nationaler
+        Zukunftstag / November
+      </p>
+      <h1 id="intro-title">
+        Im November
+        <br />
+        bauen wir
+        <br />
+        <span class="text-primary">Zukunft.</span>
+      </h1>
+      <p class="hero-addition">Und Spiele.</p>
+      <p class="intro-text">
+        Von der 5. Primarklasse bis zur 1. Oberstufe: Am Nationalen Zukunftstag
+        machen wir aus unseren Ideen eigene Spiele. Bereit, sie auszuprobieren?
+      </p>
+      <div class="action-row">
+        <a class="btn btn-primary" href={href(`/${meta.slug}/#spiele`)}>
+          Spiele entdecken <span aria-hidden="true">↘</span>
+        </a>
+        <a class="text-link" href={href(`/${meta.slug}/ueber-uns/`)}>
+          Unsere Geschichte <span aria-hidden="true">↗</span>
+        </a>
       </div>
     </div>
+    <aside class="landscape-caption" aria-label="Hintergrundillustration">
+      <p class="eyebrow">Mythen × Einsiedeln</p>
+      <p class="landscape-note">Unsere Region, neu gezeichnet.</p>
+    </aside>
   </section>
-  <section id="spiele" class="mx-auto max-w-5xl px-4 py-12">
-    <h2 class="text-3xl font-bold">Unsere Spiele</h2>
-    <p class="mt-2">Entstanden am Nationalen Zukunftstag 2026.</p>
-    <div class="mt-8 grid gap-6 md:grid-cols-2">
-      {games.map((game) => (
-        <GameCard game={game} />
+  <section
+    id="spiele"
+    class="games-section shell"
+    aria-labelledby="games-title"
+  >
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Ideen werden spielbar</p>
+        <h2 id="games-title">
+          Dein nächstes Spiel<span class="text-primary">.</span>
+        </h2>
+      </div>
+      <p>
+        Entstanden am Zukunftstag 2026.
+        <br />
+        Direkt im Browser. Ohne Installation.
+      </p>
+    </div>
+    <p class="keyboard-hint" data-enhanced hidden>
+      <kbd>Tab</kbd> wählt einen Link · <kbd>← →</kbd> wechseln das Spiel ·{" "}
+      <kbd>Enter</kbd> öffnet es
+    </p>
+    <div class="games-grid">
+      {games.map((game, index) => (
+        <GameCard game={game} index={index} />
       ))}
+    </div>
+    <p class="games-note">
+      <span aria-hidden="true">↳</span> Zum Spielen brauchst du einen Computer
+      mit Tastatur oder Controller.
+    </p>
+  </section>
+  <section class="mission-section shell" aria-labelledby="mission-title">
+    <p class="eyebrow">Unser Motto</p>
+    <div class="mission-content">
+      <h2 id="mission-title">
+        Spiele entwickeln.
+        <br />
+        <span>Die Welt retten.</span>
+      </h2>
+      <div>
+        <p>
+          Grosse Worte? Klar. Aber jede Zukunft beginnt mit einer Idee. Wir
+          fangen mit unseren eigenen Spielen an.
+        </p>
+        <a class="text-link" href={href(`/${meta.slug}/ueber-uns/`)}>
+          Lerne uns kennen <span aria-hidden="true">↗</span>
+        </a>
+      </div>
     </div>
   </section>
 </Layout>

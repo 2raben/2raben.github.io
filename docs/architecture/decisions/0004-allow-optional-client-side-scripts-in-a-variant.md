@@ -2,6 +2,8 @@
 tags: [adr]
 status: accepted
 date: 2026-11-15
+amended-by:
+  - 0005-enhance-november-games-with-local-interactions.md
 amends:
   - 0001-build-a-static-site-with-astro-and-daisyui.md
 sources:
@@ -13,6 +15,10 @@ sources:
 ---
 
 # 0004 — Allow optional client-side scripts in a variant
+
+> Amended by [ADR 0005](0005-enhance-november-games-with-local-interactions.md):
+> November Games stores an optional session-scoped effects preference and adds
+> the Alt+K navigation shortcut. The original rationale below is preserved.
 
 ## Context
 

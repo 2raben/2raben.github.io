@@ -1,0 +1,152 @@
+---
+interface Props {
+  game: string;
+}
+const { game } = Astro.props;
+---
+
+<div class="game-artwork" aria-hidden="true">
+  <svg viewBox="0 0 600 240" fill="none">
+    <defs>
+      <linearGradient id={`${game}-glow`} x2="1" y2="1">
+        <stop stop-color="#ffb487" />
+        <stop offset="1" stop-color="#f255de" />
+      </linearGradient>
+      <linearGradient id={`${game}-ground`} x2="0" y2="1">
+        <stop stop-color="#341448" />
+        <stop offset="1" stop-color="#110c29" />
+      </linearGradient>
+    </defs>
+    <path d="M0 0h600v240H0z" fill={`url(#${game}-ground)`} />
+    <circle cx="440" cy="100" r="77" fill={`url(#${game}-glow)`} opacity=".8" />
+    <path
+      d="M350 110h180m-180 15h180m-180 18h180m-180 21h180"
+      stroke="#2c133f"
+      stroke-width="6"
+    />
+    <g stroke="#8b55c8" opacity=".5">
+      <path d="M0 178h600M0 205h600M0 237h600M300 160 60 240m240-80L180 240m120-80v80m0-80 120 80m-120-80 240 80" />
+    </g>
+    {game === "moto-devil" ? (
+      <g>
+        <path
+          d="M0 204h80l105-40 95 53h110l100-52 110 29"
+          stroke="#70efff"
+          stroke-width="3"
+        />
+        <path
+          d="m80 204 14 36m91-76-28 76m28-76 41 76m264-75-26 75m26-75 45 75"
+          stroke="#70efff"
+          opacity=".3"
+        />
+        <g transform="translate(210 105) rotate(-18)">
+          <circle
+            cx="0"
+            cy="35"
+            r="28"
+            fill="#160d2e"
+            stroke="#ff8add"
+            stroke-width="4"
+          />
+          <circle
+            cx="105"
+            cy="35"
+            r="28"
+            fill="#160d2e"
+            stroke="#ff8add"
+            stroke-width="4"
+          />
+          <path
+            d="M0 35 28-4 62 35H0m62 0 22-52 21 52M28-4h42m8-13h20M17-10h30"
+            stroke="#83f4ff"
+            stroke-width="5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="m51-7-13-25 16-16 20 26h14M40-30l-14 21"
+            stroke="#f7dfef"
+            stroke-width="8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M17-9h30l15-10h14l5 20H23z"
+            fill="#ff8add"
+            stroke="#f7dfef"
+            stroke-width="2"
+          />
+          <path
+            d="M32 4h28l9 19-12 10H34L23 21z"
+            fill="#211331"
+            stroke="#83f4ff"
+            stroke-width="3"
+          />
+          <path
+            d="M33 12h23m-22 7h25m-22 7h21M19 28-3 5h-18"
+            stroke="#f7dfef"
+            stroke-width="3"
+            stroke-linecap="round"
+          />
+          <path
+            d="M9-11h32m48 16h25"
+            stroke="#ff8add"
+            stroke-width="7"
+            stroke-linecap="round"
+          />
+          <circle cx="0" cy="35" r="20" stroke="#83f4ff" stroke-width="3" />
+          <circle cx="105" cy="35" r="20" stroke="#83f4ff" stroke-width="3" />
+          <path d="M45-58a13 13 0 0 1 26-3v13H57z" fill="#f7dfef" />
+          <path d="M58-61h13v7H61z" fill="#672469" />
+        </g>
+        <path
+          d="M95 77h58m-86 15h66m-40 17h39"
+          stroke="#fa6ada"
+          stroke-width="2"
+        />
+      </g>
+    ) : (
+      <g>
+        <path
+          d="M200 240 280 65m120 175L320 65"
+          stroke="#71f2ff"
+          stroke-width="3"
+        />
+        <path
+          d="m262 240 30-175m46 175L308 65"
+          stroke="#efb4fb"
+          stroke-width="2"
+          stroke-dasharray="18 16"
+        />
+        <g transform="translate(300 157)">
+          <path
+            d="m-32-49-12 24v55l9 17h70l9-17v-55L32-49z"
+            fill="#28123e"
+            stroke="#ff83da"
+            stroke-width="3"
+          />
+          <path
+            d="m-25-25 7-15h36l7 15 5 33h-60z"
+            fill="#72e7f3"
+            fill-opacity=".4"
+            stroke="#73f6ff"
+            stroke-width="2"
+          />
+          <path d="M-27 20h54m-45-12v-33m36 33v-33" stroke="#71eaff" />
+          <path d="M-33 34h16m18 0h16" stroke="#ff86de" stroke-width="5" />
+        </g>
+        <path
+          d="m232 171-30 65m166-65 30 65"
+          stroke="#ff7cdd"
+          stroke-width="3"
+          opacity=".6"
+        />
+      </g>
+    )}
+    <g fill="#dce7ff">
+      <path d="M85 34v12m-6-6h12M530 55v12m-6-6h12" stroke="#dce7ff" />
+      <circle cx="170" cy="50" r="1.5" />
+      <circle cx="355" cy="30" r="1.5" />
+    </g>
+  </svg>
+</div>

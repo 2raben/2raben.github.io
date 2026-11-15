@@ -5,6 +5,7 @@ date: 2026-11-15
 amended-by:
   - 0003-give-each-variant-its-own-pages-and-styles.md
   - 0004-allow-optional-client-side-scripts-in-a-variant.md
+  - 0005-enhance-november-games-with-local-interactions.md
 sources:
   - package.json
   - astro.config.mjs
@@ -23,6 +24,9 @@ sources:
 > Amended by [ADR 0004](0004-allow-optional-client-side-scripts-in-a-variant.md):
 > a variant may load small client-side scripts for optional effects; no content
 > depends on them.
+> Amended by [ADR 0005](0005-enhance-november-games-with-local-interactions.md):
+> November Games adds optional local JavaScript for its requested synthwave
+> canvas and keyboard navigation. Static hosting and script-free core links remain.
 
 ## Context
 

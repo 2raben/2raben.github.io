@@ -43,3 +43,4 @@ What this pitch explicitly does not include.
 | Pitch | Status |
 | --- | --- |
 | [Schafbock Studio: pop-art superhero](schafbock-studio/pitch--pop-art-superhero.md) | Implemented |
+| [November Games: Zukunftstag im Cyberpunk-Stil](november-games/pitch--zukunftstag-cyberpunk.md) | implemented |
