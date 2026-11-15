@@ -1,0 +1,119 @@
+---
+import { mythen, monastery } from "./landmarks";
+interface Props {
+  id: string;
+}
+const { id } = Astro.props;
+---
+
+<svg
+  class="horizon-art"
+  width="100%"
+  height="100%"
+  fill="none"
+  aria-hidden="true"
+>
+  <defs>
+    <linearGradient id={`${id}-sky`} x2="0" y2="1">
+      <stop stop-color="#100a2a" />
+      <stop offset=".7" stop-color="#43133f" />
+      <stop offset="1" stop-color="#100b29" />
+    </linearGradient>
+    <linearGradient id={`${id}-sun`} x2="0" y2="1">
+      <stop stop-color="#ffe6a2" />
+      <stop offset=".5" stop-color="#ff9cbb" />
+      <stop offset="1" stop-color="#ef3fce" />
+    </linearGradient>
+    <mask id={`${id}-stripes`}>
+      <path fill="white" d="M0 0h500v500H0z" />
+      <path
+        d="M0 275h500m-500 25h500m-500 30h500m-500 33h500m-500 38h500m-500 40h500"
+        stroke="black"
+        stroke-width="10"
+      />
+    </mask>
+  </defs>
+  <rect width="100%" height="100%" fill={`url(#${id}-sky)`} />
+  <svg
+    width="100%"
+    height="70%"
+    viewBox="0 0 1600 700"
+    preserveAspectRatio="none"
+  >
+    {Array.from({ length: 60 }, (_, i) => (
+      <circle
+        cx={(i * 173 + 47) % 1600}
+        cy={(i * 139 + 23) % 600}
+        r={i % 5 === 0 ? 1.7 : 0.8}
+        fill="#e6d7ff"
+        opacity=".6"
+      />
+    ))}
+  </svg>
+  <svg
+    class="sun-layer"
+    x="50%"
+    y="7%"
+    width="45%"
+    height="50%"
+    viewBox="0 0 500 500"
+  >
+    <circle
+      cx="250"
+      cy="250"
+      r="210"
+      fill={`url(#${id}-sun)`}
+      mask={`url(#${id}-stripes)`}
+    />
+  </svg>
+  <svg
+    class="mountain-layer"
+    x="40%"
+    y="10%"
+    width="65%"
+    height="60%"
+    viewBox="0 0 1000 400"
+    preserveAspectRatio="xMidYMax meet"
+  >
+    {mythen.map((shape) => (
+      <path
+        d={shape.d}
+        fill={shape.fill}
+        stroke={shape.stroke}
+        stroke-width={shape.width}
+      />
+    ))}
+  </svg>
+  <svg
+    y="70%"
+    width="100%"
+    height="30%"
+    viewBox="0 0 1600 300"
+    preserveAspectRatio="none"
+  >
+    <path d="M0 0h1600v300H0z" fill="#100b29" />
+    <g stroke="#a94da5" opacity=".65">
+      <path d="M0 2h1600M0 12h1600M0 28h1600M0 52h1600M0 90h1600M0 145h1600M0 220h1600M0 298h1600" />
+      <path d="M800 0-800 300M800 0-400 300M800 0 0 300M800 0 400 300M800 0v300M800 0l400 300M800 0l800 300M800 0l1200 300M800 0l1600 300" />
+    </g>
+    <path d="M0 1h1600" stroke="#76ecff" opacity=".6" />
+  </svg>
+  <svg
+    class="monastery-layer"
+    x="60%"
+    y="50%"
+    width="37%"
+    height="36%"
+    viewBox="0 0 800 340"
+    preserveAspectRatio="xMidYMax meet"
+  >
+    {monastery.map((shape) => (
+      <path
+        d={shape.d}
+        fill={shape.fill}
+        stroke={shape.stroke}
+        stroke-width={shape.width}
+      />
+    ))}
+  </svg>
+</svg>

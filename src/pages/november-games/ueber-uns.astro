@@ -1,35 +1,86 @@
 ---
+import { href } from "../../lib/url";
 import Layout from "../../variants/november-games/Layout.astro";
 import meta from "../../variants/november-games/meta";
+import Horizon from "../../variants/november-games/Horizon.astro";
 ---
 
 <Layout
   title={`Über uns – ${meta.name}`}
-  description={`Wer hinter ${meta.name} steckt und wie unsere Spiele entstehen.`}
+  description="Warum November Games? Schülerinnen und Schüler entwickeln am Nationalen Zukunftstag ihre eigenen Spiele. Hier beginnt unsere Geschichte."
 >
-  <article class="prose prose-lg mx-auto px-4 py-12">
-    <h1>Über uns</h1>
-    <p>
-      {meta.name} ist ein kleines Hobby-Spielestudio. Wir programmieren Spiele,
-      die direkt im Browser laufen, ohne Installation.
-    </p>
-    <h2>Wie alles begann</h2>
-    <p>
-      Am Nationalen Zukunftstag, dem 12. November 2026, haben wir aus Skizzen
-      auf Papier unsere ersten spielbaren Prototypen gebaut: Moto Devil und Car
-      Drive. Seither entwickeln wir beide weiter.
-    </p>
-    <h2>Wie wir arbeiten</h2>
-    <p>
-      Jede Idee beginnt als Skizze. Daraus schreiben wir einen kurzen Plan: Was
-      fehlt, wie könnte die Lösung aussehen, und was lassen wir bewusst weg?
-      Dann bauen wir einen Prototyp und probieren ihn aus.
-    </p>
-    <h2>Womit wir bauen</h2>
-    <p>
-      Unsere Spiele sind in Rust mit der Spiel-Engine Bevy geschrieben und
-      laufen als WebAssembly im Browser. Der Quellcode ist auf GitHub
-      öffentlich.
-    </p>
-  </article>
+  <div class="about-page shell">
+    <a class="text-link back-link" href={href(`/${meta.slug}/`)}>
+      <span aria-hidden="true">←</span> Zur Startseite
+    </a>
+    <header class="about-heading">
+      <p class="eyebrow">Über uns / November Games</p>
+      <h1>
+        Kleine Anfänge.
+        <br />
+        <span class="text-primary">Grosse Zukunft.</span>
+      </h1>
+      <p class="intro-text">
+        Wir sind ein kleines Hobby-Spielestudio. Bei uns werden aus Skizzen auf
+        Papier eigene Spiele – und aus Schülerinnen und Schülern
+        Spieleentwicklerinnen und Spieleentwickler.
+      </p>
+    </header>
+    <div class="about-grid">
+      <aside class="origin-note" aria-label="Der November in unserem Namen">
+        <div class="origin-landscape">
+          <Horizon id="about-horizon" />
+        </div>
+        <p class="eyebrow">November / Unser Anfang</p>
+        <p>
+          Der Nationale Zukunftstag findet im November statt. Darum heissen wir
+          November Games.
+        </p>
+      </aside>
+      <article class="story-content">
+        <section aria-labelledby="story-start">
+          <p class="eyebrow">01 / Der Zukunftstag</p>
+          <h2 id="story-start">Zukunft selber ausprobieren.</h2>
+          <p>
+            Am Nationalen Zukunftstag entdecken Schülerinnen und Schüler von der
+            5. Primarklasse bis zur 1. Oberstufe die Arbeitswelt. Bei uns
+            entwickeln sie Spiele: eigene Ideen, eigene Entscheidungen und am
+            Ende etwas, das andere spielen können.
+          </p>
+          <p>
+            Am 12. November 2026 haben wir aus Skizzen auf Papier unsere ersten
+            spielbaren Prototypen gebaut: Moto Devil und Car Drive. Seither
+            entwickeln wir beide weiter.
+          </p>
+        </section>
+        <section aria-labelledby="story-making">
+          <p class="eyebrow">02 / Die Werkstatt</p>
+          <h2 id="story-making">Eine Idee. Und dann los.</h2>
+          <p>
+            Jede Idee beginnt als Skizze. Daraus schreiben wir einen kurzen
+            Plan: Was fehlt, wie könnte die Lösung aussehen, und was lassen wir
+            bewusst weg? Dann bauen wir einen Prototyp und probieren ihn aus.
+          </p>
+          <p>
+            Unsere Spiele sind in Rust mit der Spiel-Engine Bevy geschrieben.
+            Sie laufen als WebAssembly direkt im Browser, ohne Installation. Den
+            Quellcode findest du auf der jeweiligen Spieleseite.
+          </p>
+        </section>
+        <section aria-labelledby="story-motto">
+          <p class="eyebrow">03 / Unser Motto</p>
+          <h2 id="story-motto">Spiele entwickeln. Die Welt retten.</h2>
+          <p>
+            Das mit dem Weltretten sagen wir mit einem Augenzwinkern. Aber die
+            Lust, etwas selber zu machen, meinen wir ernst. Der Zukunftstag ist
+            unser Anfang. Was wir daraus machen, finden wir beim Entwickeln
+            heraus.
+          </p>
+          <a class="btn btn-primary" href={href(`/${meta.slug}/#spiele`)}>
+            Unsere Spiele entdecken <span aria-hidden="true">↗</span>
+          </a>
+        </section>
+      </article>
+    </div>
+  </div>
 </Layout>

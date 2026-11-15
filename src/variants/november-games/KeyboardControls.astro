@@ -1,0 +1,90 @@
+---
+import { href } from "../../lib/url";
+import meta from "./meta";
+---
+
+<div class="utility-bar shell" data-enhanced hidden>
+  <span class="utility-caption">
+    <span aria-hidden="true">✦</span> Zukunft zum Ausprobieren
+  </span>
+  <div class="utility-actions">
+    <div class="scene-controls" data-scene-controls data-enhanced hidden>
+      <button
+        type="button"
+        class="utility-button"
+        data-scene-control
+        aria-describedby="scene-help"
+      >
+        Szene steuern <span aria-hidden="true">✧</span>
+      </button>
+      <p id="scene-help">
+        Maus bewegen · Hier: <kbd>← ↑ ↓ →</kbd> lenken · <kbd>Leertaste</kbd>{" "}
+        Impuls · <kbd>Tab</kbd> weiter
+      </p>
+    </div>
+    <button
+      type="button"
+      class="utility-button"
+      data-effects-toggle
+      aria-label="Bewegte Effekte"
+      aria-pressed="true"
+    >
+      Effekte <span data-effects-state>an</span>
+    </button>
+    <button
+      type="button"
+      class="utility-button"
+      data-navigation-open
+      aria-haspopup="dialog"
+      aria-controls="keyboard-navigation"
+      aria-keyshortcuts="Alt+K"
+    >
+      Navigation <kbd>Alt K</kbd>
+    </button>
+  </div>
+</div>
+<dialog
+  id="keyboard-navigation"
+  class="keyboard-dialog"
+  aria-labelledby="navigation-title"
+>
+  <div class="dialog-heading">
+    <div>
+      <p class="eyebrow">Dein nächster Sprung</p>
+      <h2 id="navigation-title">Wohin geht's?</h2>
+    </div>
+    <button
+      type="button"
+      class="dialog-close"
+      data-navigation-close
+      aria-label="Navigation schliessen"
+    >
+      ✕
+    </button>
+  </div>
+  <nav aria-label="Tastaturnavigation">
+    <a href={href(`/${meta.slug}/`)}>
+      <span>Startseite</span>
+      <span aria-hidden="true">↗</span>
+    </a>
+    <a href={href(`/${meta.slug}/#spiele`)}>
+      <span>Spiele entdecken</span>
+      <span aria-hidden="true">↗</span>
+    </a>
+    <a href={href(`/${meta.slug}/ueber-uns/`)}>
+      <span>Über uns</span>
+      <span aria-hidden="true">↗</span>
+    </a>
+    <a href={href("/")}>
+      <span>Alle Namensvorschläge</span>
+      <span aria-hidden="true">↗</span>
+    </a>
+  </nav>
+  <p class="keyboard-hint">
+    <kbd>↑ ↓</kbd> wählen · <kbd>Enter</kbd> öffnen · <kbd>Esc</kbd> schliessen
+  </p>
+  <p class="dialog-note">
+    Mit <kbd>Tab</kbd> erreichst du alle Links und Bedienelemente.{" "}
+    <kbd>Alt K</kbd> öffnet dieses Menü von jeder November-Games-Seite.
+  </p>
+</dialog>

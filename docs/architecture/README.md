@@ -4,7 +4,9 @@ A static website built with Astro 7, Tailwind CSS 4 and daisyUI 5
 ([ADR 0001](decisions/0001-build-a-static-site-with-astro-and-daisyui.md)) and
 published on GitHub Pages. It has no server, and no content depends on client-side
 JavaScript; a variant may add small scripts for optional effects
-([ADR 0004](decisions/0004-allow-optional-client-side-scripts-in-a-variant.md)). Until
+([ADR 0004](decisions/0004-allow-optional-client-side-scripts-in-a-variant.md)). November Games adds
+keyboard navigation and an interactive canvas background
+([ADR 0005](decisions/0005-enhance-november-games-with-local-interactions.md)). Until
 the studio's name is chosen, the site holds one complete version per name
 candidate ([ADR 0002](decisions/0002-compare-name-candidates-as-variant-routes.md)),
 each with its own pages, layout and theme.
@@ -26,7 +28,7 @@ two folders named after its slug:
 | `src/variants/<slug>/styles.css` | Tailwind, typography plugin, and daisyUI without built-in themes |
 | `src/variants/<slug>/theme.css` | The variant's custom daisyUI theme, named after the slug |
 
-The variants start from the same layout and pages, and their themes start as
+The four variants started from the same layout and pages, and their themes started as
 copies of daisyUI's retro (Schafbock Studio), cupcake (Egg Settlers), nord
 (November Games) and forest (Waldstatt Games). A variant may add components and
 modules of its own to its folder. Change a variant only inside its own folders;
@@ -51,6 +53,54 @@ replaces the retro copy, and the comic face Bangers comes self-hosted from
 The game pages show the variant's comic copy first and the shared game Markdown
 below it. Running text sits on flat backgrounds; halftone dots only appear behind
 shapes and large display headings.
+
+### November Games
+
+November Games has a dark synthwave theme with pink, sunset and cyan accents.
+Its home and about pages explain the Nationaler Zukunftstag and the participating
+school levels; the world-saving motto is studio copy, not a claim about game
+content. Game pages retain the shared Markdown and existing play/source links.
+The overview automatically uses the updated theme and tagline.
+
+The variant owns `Horizon.astro` (SVG landscape), `landmarks.ts` (shared original
+Mythen and Einsiedeln monastery paths), `GameArtwork.astro` (decorative SVG game
+illustrations), `SynthwaveScene.astro` (fixed full-viewport canvas with SVG fallback
+on every November Games page), `KeyboardControls.astro`, `interactions.ts` and
+`scene.ts`. No game assets, external
+fonts, rendering libraries or remote services are loaded. The numeric November
+motif has been removed. See the
+[implemented pitch](../pitches/november-games/pitch--zukunftstag-cyberpunk.md).
+
+All links work without JavaScript. With JavaScript, a visible Navigation button
+or Alt+K opens a native modal dialog. Up/Down and Home/End select its links;
+Enter follows a link and Escape closes the dialog and restores focus. Left/Right
+and Home/End move between header links or between the same action on each game
+card. Tab keeps its native order throughout. Shortcuts ignore editing fields,
+composition and unrelated modifier combinations. A skip link and visible focus
+are available on every page.
+
+The full-screen background reacts to pointer movement across the document and
+clicks/taps outside interactive controls. It never captures pointer events or
+keyboard focus itself. The visible «Szene steuern» button accepts arrow keys;
+its native click, Enter and Space activation send a light impulse. Tab continues
+to the next control. A hint appears when that button is focused or hovered.
+Game artwork still tilts towards the pointer, and focused games are highlighted.
+
+The Mythen ridge and the monastery are an original synthwave composition, not a
+literal geographic viewpoint. Both the canvas and fallback SVG use the same
+landmark paths; responsive placement keeps the landmarks in the phone viewport.
+The home page leaves space to see the landscape; longer content uses translucent
+dark surfaces. Visual reference sources are recorded in the
+[pitch](../pitches/november-games/pitch--zukunftstag-cyberpunk.md#solution).
+
+The effects button pauses movement, remembering the choice in optional session
+storage. Reduced-motion preferences always disable movement; navigation still
+works. The renderer caps pixel density at 2, raster size at approximately three
+million pixels and drawing at 30 fps, limits concurrent impulses, and suspends
+its animation loop in hidden tabs. The fixed canvas remains visible when the
+page scrolls. A static SVG remains if JavaScript or the 2D context is unavailable;
+the unavailable scene control stays hidden. Phone layouts retain readable game
+controls without promising mobile game support.
 
 ### Adding a variant
 
