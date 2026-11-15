@@ -1,32 +1,133 @@
 ---
-import { getGames } from "../../lib/games";
+import { href } from "../../lib/url";
+import Burst from "../../variants/schafbock-studio/Burst.astro";
+import { getComicGames } from "../../variants/schafbock-studio/comics";
 import GameCard from "../../variants/schafbock-studio/GameCard.astro";
+import Icon from "../../variants/schafbock-studio/Icon.astro";
 import Layout from "../../variants/schafbock-studio/Layout.astro";
 import meta from "../../variants/schafbock-studio/meta";
+import Ram from "../../variants/schafbock-studio/Ram.astro";
 
-const games = await getGames();
+const games = await getComicGames();
+const story = [
+  {
+    icon: "calendar",
+    caption: "12. November 2026",
+    text: "Nationaler Zukunftstag in Einsiedeln. Die Mission: ein eigenes Spiel.",
+  },
+  {
+    icon: "sketch",
+    caption: "Skizzen auf Papier",
+    text: "Jede Idee beginnt mit Stift und Papier: Spuren, Rampen, Fallen.",
+  },
+  {
+    icon: "gamepad",
+    caption: "Spielbar!",
+    text: "Am Ende des Tages: zwei Prototypen. Seither bauen wir weiter.",
+  },
+] as const;
 ---
 
 <Layout title={meta.name} description={meta.tagline}>
-  <section class="hero bg-base-200 py-16">
-    <div class="hero-content text-center">
-      <div class="max-w-2xl">
-        <h1 class="text-5xl font-bold">{meta.name}</h1>
-        <p class="py-6 text-xl">{meta.tagline}</p>
-        <p>
-          Wir sind ein kleines Hobby-Spielestudio. Unsere Spiele laufen direkt
-          im Browser, ohne Installation.
+  <section class="rays relative overflow-hidden border-b-4 border-ink">
+    <div class="halftone pointer-events-none absolute inset-0"></div>
+    <div
+      class="parallax pointer-events-none absolute top-6 left-[4%] hidden w-36 md:block"
+      style="--depth: -26"
+    >
+      <Burst text="MÄÄH!" fill="#ffffff" color="#111111" />
+    </div>
+    <div
+      class="parallax pointer-events-none absolute top-4 right-[3%] w-28 sm:w-40"
+      style="--depth: 34"
+    >
+      <Burst text="BÄÄM!" fill="#ff4fa3" color="#ffd60a" />
+    </div>
+    <div class="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-10 md:grid-cols-[5fr_6fr] md:py-16">
+      <div class="parallax order-2 md:order-1" style="--depth: 16">
+        <Ram
+          pose="landing"
+          class="ram-bob mx-auto w-64 sm:w-80 md:w-full md:max-w-md"
+          label="Der Schafbock: ein Widder mit roter Maske und rotem Umhang, gerade gelandet, die Hufe in die Hüften gestemmt."
+        />
+      </div>
+      <div class="order-1 flex flex-col gap-6 md:order-2">
+        <p class="panel-caption sticker self-start" style="--rot: -2deg">
+          Einsiedeln präsentiert
         </p>
+        <h1 class="comic-title text-6xl text-pop-red sm:text-7xl lg:text-8xl">
+          {meta.name}
+        </h1>
+        <p class="bubble bubble-left comic-heading text-3xl sm:text-4xl">
+          {meta.tagline}
+        </p>
+        <p class="ink-box max-w-xl bg-white p-4 text-lg">
+          Wir sind ein kleines Hobby-Spielestudio mit einem Superhelden als
+          Maskottchen. Unsere Spiele laufen direkt im Browser – ohne
+          Installation, ohne Umweg.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a
+            class="btn-comic btn-comic-red btn-comic-big"
+            href={href(`/${meta.slug}/#spiele`)}
+          >
+            Zu den Spielen!
+          </a>
+          <a
+            class="btn-comic btn-comic-white"
+            href={href(`/${meta.slug}/ueber-uns/`)}
+          >
+            Wer ist der Schafbock?
+          </a>
+        </div>
       </div>
     </div>
   </section>
-  <section id="spiele" class="mx-auto max-w-5xl px-4 py-12">
-    <h2 class="text-3xl font-bold">Unsere Spiele</h2>
-    <p class="mt-2">Entstanden am Nationalen Zukunftstag 2026.</p>
-    <div class="mt-8 grid gap-6 md:grid-cols-2">
-      {games.map((game) => (
-        <GameCard game={game} />
+
+  <section id="spiele" class="mx-auto max-w-6xl scroll-mt-24 px-4 py-14">
+    <div class="flex flex-wrap items-end gap-4">
+      <h2 class="comic-title text-5xl text-pop-yellow sm:text-6xl">
+        Unsere Spiele
+      </h2>
+      <p class="panel-caption mb-2">
+        Entstanden am Nationalen Zukunftstag 2026
+      </p>
+    </div>
+    <div class="mt-10 grid gap-12 md:grid-cols-2 md:gap-10">
+      {games.map(({ game, comic }, i) => (
+        <GameCard game={game} comic={comic} rotate={i % 2 ? 1.2 : -1.2} />
       ))}
+    </div>
+  </section>
+
+  <section class="halftone-cyan border-y-4 border-ink">
+    <div class="mx-auto max-w-6xl px-4 py-14">
+      <h2 class="comic-title text-5xl text-white sm:text-6xl">
+        Wie alles begann
+      </h2>
+      <ol class="mt-8 grid gap-8 md:grid-cols-3">
+        {story.map((step, i) => (
+          <li
+            class="panel flex flex-col gap-3 p-5"
+            style={`--panel-rot: ${[-1.5, 1, -0.8][i]}deg`}
+            data-tilt
+          >
+            <span class="panel-caption self-start">
+              {i + 1}. {step.caption}
+            </span>
+            <Icon name={step.icon} class="mx-auto h-28 w-28" />
+            <p class="text-lg">{step.text}</p>
+          </li>
+        ))}
+      </ol>
+      <p class="mt-10">
+        <a
+          class="btn-comic btn-comic-white"
+          href={href(`/${meta.slug}/ueber-uns/`)}
+        >
+          Die ganze Geschichte
+        </a>
+      </p>
     </div>
   </section>
 </Layout>

@@ -1,7 +1,452 @@
-/* This variant's stylesheet, loaded only by its own pages through Layout.astro. */
+/* This variant's stylesheet, loaded only by its own pages through Layout.astro:
+   the comic look (ink outlines, halftone, panels, bubbles, bursts) and the
+   animations that effects.ts triggers. */
 @import "tailwindcss";
+@import "@fontsource/bangers/latin.css";
 @import "./theme.css";
 @plugin "@tailwindcss/typography";
 @plugin "daisyui" {
   themes: false;
+}
+
+@theme {
+  --font-comic: "Bangers", "Impact", "Arial Black", sans-serif;
+  --color-ink: #111111;
+  --color-paper: #fffaf0;
+  --color-pop-red: #d62828;
+  --color-pop-yellow: #ffd60a;
+  --color-pop-cyan: #00b4d8;
+  --color-pop-pink: #ff4fa3;
+}
+
+/* Pointer position from effects.ts, -1 to 1 across the viewport. */
+:root {
+  --mx: 0;
+  --my: 0;
+}
+
+/* ---------- Type ---------- */
+
+.comic-title {
+  font-family: var(--font-comic);
+  letter-spacing: 0.03em;
+  line-height: 0.95;
+  -webkit-text-stroke: 0.06em var(--color-ink);
+  paint-order: stroke fill;
+  text-shadow: 0.08em 0.08em 0 var(--color-ink);
+}
+
+.comic-heading {
+  font-family: var(--font-comic);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+/* ---------- Surfaces ---------- */
+
+.halftone {
+  background-image: radial-gradient(
+    circle,
+    rgb(17 17 17 / 0.16) 1.6px,
+    transparent 2.2px
+  );
+  background-size: 12px 12px;
+}
+
+.halftone-red {
+  background-color: var(--color-pop-red);
+  background-image: radial-gradient(
+    circle,
+    rgb(255 255 255 / 0.22) 2px,
+    transparent 2.6px
+  );
+  background-size: 14px 14px;
+}
+
+.halftone-cyan {
+  background-color: var(--color-pop-cyan);
+  background-image: radial-gradient(
+    circle,
+    rgb(255 255 255 / 0.3) 2px,
+    transparent 2.6px
+  );
+  background-size: 14px 14px;
+}
+
+/* A sunburst of rays behind the hero, as on a comic cover. */
+.rays {
+  background: repeating-conic-gradient(
+    from 0deg at 50% 60%,
+    var(--color-pop-yellow) 0deg 9deg,
+    #ffe766 9deg 18deg
+  );
+}
+
+.ink-box {
+  border: 3px solid var(--color-ink);
+  box-shadow: 6px 6px 0 var(--color-ink);
+}
+
+/* ---------- Panels ---------- */
+
+.panel {
+  position: relative;
+  background: var(--color-paper);
+  border: 4px solid var(--color-ink);
+  box-shadow: 8px 8px 0 var(--color-ink);
+  transform: perspective(900px) rotate(var(--panel-rot, 0deg))
+    rotateX(var(--tilt-y, 0deg)) rotateY(var(--tilt-x, 0deg));
+  transition:
+    transform 0.25s ease-out,
+    box-shadow 0.25s ease-out;
+}
+
+.panel-caption {
+  display: inline-block;
+  background: var(--color-pop-yellow);
+  border: 3px solid var(--color-ink);
+  padding: 0.15rem 0.6rem;
+  font-family: var(--font-comic);
+  font-size: 1.15rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ---------- Speech bubbles ---------- */
+
+.bubble {
+  position: relative;
+  background: #ffffff;
+  border: 4px solid var(--color-ink);
+  border-radius: 2rem;
+  padding: 1rem 1.4rem;
+  box-shadow: 5px 5px 0 var(--color-ink);
+}
+
+/* The tail: a black triangle with a white one on top. --tail-x places it. */
+.bubble::before,
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: var(--tail-x, 2.5rem);
+  border-style: solid;
+}
+.bubble::before {
+  bottom: -26px;
+  border-width: 26px 22px 0 0;
+  border-color: var(--color-ink) transparent transparent transparent;
+}
+.bubble::after {
+  bottom: -16px;
+  margin-left: 5px;
+  border-width: 18px 14px 0 0;
+  border-color: #ffffff transparent transparent transparent;
+}
+/* A bubble whose tail points left, toward a character beside it. */
+@media (min-width: 768px) {
+  .bubble-left::before {
+    left: -28px;
+    bottom: auto;
+    top: 2rem;
+    border-width: 0 28px 20px 0;
+    border-color: transparent var(--color-ink) transparent transparent;
+  }
+  .bubble-left::after {
+    left: -18px;
+    bottom: auto;
+    top: calc(2rem + 6px);
+    margin-left: 0;
+    border-width: 0 20px 12px 0;
+    border-color: transparent #ffffff transparent transparent;
+  }
+}
+
+/* ---------- Buttons ---------- */
+
+.btn-comic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0.4rem 1.3rem;
+  font-family: var(--font-comic);
+  font-size: 1.4rem;
+  letter-spacing: 0.06em;
+  border: 3px solid var(--color-ink);
+  box-shadow: 5px 5px 0 var(--color-ink);
+  background: var(--color-pop-yellow);
+  color: var(--color-ink);
+  transition:
+    transform 0.12s ease-out,
+    box-shadow 0.12s ease-out;
+}
+.btn-comic:hover {
+  transform: translate(-2px, -2px) rotate(-1deg);
+  box-shadow: 7px 7px 0 var(--color-ink);
+}
+.btn-comic:active {
+  transform: translate(4px, 4px);
+  box-shadow: 1px 1px 0 var(--color-ink);
+}
+.btn-comic:focus-visible,
+.comic-link:focus-visible,
+.demo:focus-visible {
+  outline: 4px solid var(--color-pop-cyan);
+  outline-offset: 4px;
+}
+.btn-comic-red {
+  background: var(--color-pop-red);
+  color: #ffffff;
+}
+.btn-comic-white {
+  background: #ffffff;
+}
+.btn-comic-big {
+  font-size: 2rem;
+  min-height: 4rem;
+  padding: 0.5rem 2rem;
+}
+
+.comic-link {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+}
+.comic-link:hover {
+  background: var(--color-pop-yellow);
+}
+
+/* ---------- Characters and decorations ---------- */
+
+/* Parallax: a wrapper moves with the pointer by --depth pixels. */
+.parallax {
+  transform: translate3d(
+    calc(var(--mx) * var(--depth, 10) * 1px),
+    calc(var(--my) * var(--depth, 10) * 1px),
+    0
+  );
+  transition: transform 0.12s linear;
+}
+
+.ram svg {
+  overflow: visible;
+}
+.ram .cape,
+.ram .mask-tails {
+  transform-box: fill-box;
+  animation: flutter 1.6s ease-in-out infinite;
+}
+.ram .cape {
+  transform-origin: 50% 0%;
+}
+.ram .mask-tails {
+  transform-origin: 0% 50%;
+  animation-duration: 0.7s;
+}
+.ram .wheel {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spin 0.8s linear infinite;
+}
+.ram .ram-head {
+  transform-box: fill-box;
+  transform-origin: 50% 90%;
+}
+.ram.is-nodding .ram-head {
+  animation: headbutt 0.45s ease-out;
+}
+.ram-bob {
+  animation: bob 3s ease-in-out infinite;
+}
+
+.sticker {
+  transform: rotate(var(--rot, -4deg));
+}
+
+/* ---------- Effects layer (effects.ts) ---------- */
+
+.sfx-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 60;
+}
+.sfx {
+  position: absolute;
+  translate: -50% -50%;
+  font-family: var(--font-comic);
+  font-size: var(--size, 2.6rem);
+  letter-spacing: 0.04em;
+  color: var(--fill, var(--color-pop-yellow));
+  -webkit-text-stroke: 0.09em var(--color-ink);
+  paint-order: stroke fill;
+  text-shadow: 0.07em 0.07em 0 var(--color-ink);
+  white-space: nowrap;
+  animation: sfx-pop 0.9s cubic-bezier(0.2, 1.6, 0.4, 1) forwards;
+}
+.sfx-burst {
+  position: absolute;
+  inset: -40% -25%;
+  z-index: -1;
+}
+.trail-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--fill, var(--color-pop-red));
+  border: 2px solid var(--color-ink);
+  animation: trail 0.6s ease-out forwards;
+}
+.flyby {
+  position: absolute;
+  top: 30%;
+  left: -260px;
+  width: 240px;
+  animation: flyby 2.4s ease-in-out forwards;
+}
+
+/* ---------- Key demos ---------- */
+
+.demo {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+.demo[data-active="true"] {
+  box-shadow: 8px 8px 0 var(--color-pop-red);
+}
+.demo-key {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.2rem 0.6rem;
+  font-family: var(--font-comic);
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  background: #ffffff;
+  border: 3px solid var(--color-ink);
+  border-radius: 0.4rem;
+  box-shadow: 0 4px 0 var(--color-ink);
+}
+.demo-key:active,
+.demo-key.is-pressed {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--color-ink);
+  background: var(--color-pop-yellow);
+}
+
+.moto-rider {
+  transition:
+    transform 0.25s ease-out,
+    translate 0.35s ease-out;
+}
+.moto-flame {
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.demo[data-jet="true"] .moto-flame {
+  opacity: 1;
+}
+.road-stripes {
+  animation: road 0.6s linear infinite;
+}
+.demo[data-boost="true"] .road-stripes {
+  animation-duration: 0.15s;
+}
+.car-sprite {
+  transition: translate 0.2s ease-out;
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes flutter {
+  0%,
+  100% {
+    transform: skewX(0deg) scaleX(1);
+  }
+  50% {
+    transform: skewX(-4deg) scaleX(1.04);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -10px;
+  }
+}
+@keyframes headbutt {
+  0% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(14deg) translateY(4px);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes sfx-pop {
+  0% {
+    transform: scale(0.2) rotate(var(--rot, -8deg));
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1.15) rotate(var(--rot, -8deg));
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1) rotate(var(--rot, -8deg));
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.1) translateY(-30px) rotate(var(--rot, -8deg));
+    opacity: 0;
+  }
+}
+@keyframes trail {
+  to {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+}
+@keyframes flyby {
+  0% {
+    transform: translate(0, 0) rotate(-10deg);
+  }
+  50% {
+    transform: translate(calc(50vw + 120px), -60px) rotate(-4deg);
+  }
+  100% {
+    transform: translate(calc(100vw + 520px), -140px) rotate(-12deg);
+  }
+}
+@keyframes road {
+  to {
+    transform: translateY(40px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .parallax,
+  .panel {
+    transform: rotate(var(--panel-rot, 0deg));
+  }
 }

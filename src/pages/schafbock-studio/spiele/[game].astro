@@ -1,47 +1,140 @@
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 import { render } from "astro:content";
-import { getGames } from "../../../lib/games";
 import { href } from "../../../lib/url";
+import Burst from "../../../variants/schafbock-studio/Burst.astro";
+import CarDemo from "../../../variants/schafbock-studio/CarDemo.astro";
+import CarRoad from "../../../variants/schafbock-studio/CarRoad.astro";
+import { getComicGames } from "../../../variants/schafbock-studio/comics";
 import Layout from "../../../variants/schafbock-studio/Layout.astro";
 import meta from "../../../variants/schafbock-studio/meta";
+import MotoDemo from "../../../variants/schafbock-studio/MotoDemo.astro";
+import MotoTour from "../../../variants/schafbock-studio/MotoTour.astro";
+import Ram from "../../../variants/schafbock-studio/Ram.astro";
 
 export const getStaticPaths = (async () =>
-  (await getGames()).map((game) => ({
+  (await getComicGames()).map(({ game, comic }) => ({
     params: { game: game.id },
-    props: { game },
+    props: { game, comic },
   }))) satisfies GetStaticPaths;
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { game } = Astro.props;
+const { game, comic } = Astro.props;
 const { Content } = await render(game);
+const background = comic.pose === "moto" ? "halftone-red" : "halftone-cyan";
+const rotations = [-1.5, 1, -0.6];
 ---
 
 <Layout
   title={`${game.data.title} – ${meta.name}`}
   description={game.data.tagline}
 >
-  <div class="mx-auto max-w-3xl px-4 py-12">
-    <a class="link" href={href(`/${meta.slug}/#spiele`)}>
-      Alle Spiele
-    </a>
-    <h1 class="mt-6 text-5xl font-bold">{game.data.title}</h1>
-    <p class="mt-4 text-xl">{game.data.tagline}</p>
-    <div class="mt-8 flex flex-wrap gap-3">
-      <a class="btn btn-primary btn-lg" href={game.data.playUrl}>
-        {game.data.title} spielen
-      </a>
-      <a class="btn btn-ghost btn-lg" href={game.data.sourceUrl}>
-        Quellcode auf GitHub
-      </a>
+  <section
+    class:list={[background, "relative overflow-hidden border-b-4 border-ink"]}
+  >
+    <div
+      class="parallax pointer-events-none absolute top-6 right-[4%] w-28 sm:w-40"
+      style="--depth: -28"
+    >
+      <Burst
+        text={comic.strip[0]?.sfx ?? "BÄÄM!"}
+        fill="#ffffff"
+        color="#111111"
+      />
     </div>
-    <p class="mt-4 text-sm">
-      Läuft in einem aktuellen Browser auf dem Computer, mit Tastatur oder
-      Controller.
-    </p>
-    <article class="prose prose-lg mt-12">
-      <Content />
-    </article>
+    <div class="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-10 md:grid-cols-2 md:py-14">
+      <div class="flex flex-col gap-5">
+        <a
+          class="btn-comic btn-comic-white self-start !min-h-10 !text-lg"
+          href={href(`/${meta.slug}/#spiele`)}
+        >
+          ← Alle Spiele
+        </a>
+        <h1 class="comic-title text-6xl text-pop-yellow sm:text-8xl">
+          {game.data.title}
+        </h1>
+        <p class="bubble comic-heading text-2xl sm:text-3xl">
+          {game.data.tagline}
+        </p>
+      </div>
+      <div class="parallax" style="--depth: 18">
+        <Ram
+          pose={comic.pose}
+          class="ram-bob mx-auto w-full max-w-lg"
+          label={
+            comic.pose === "moto"
+              ? "Der Schafbock fährt mit wehendem Umhang auf dem Hinterrad eines Motorrads."
+              : "Der Schafbock sitzt mit wehendem Umhang am Steuer eines offenen Autos."
+          }
+        />
+      </div>
+    </div>
+  </section>
+
+  <div class="mx-auto flex max-w-6xl flex-col gap-16 px-4 py-14">
+    <section aria-label="Comic" class="grid gap-8 md:grid-cols-3">
+      {comic.strip.map((panel, i) => (
+        <article
+          class="panel flex flex-col gap-3 p-5"
+          style={`--panel-rot: ${rotations[i] ?? 0}deg`}
+          data-tilt
+        >
+          <span class="panel-caption self-start">{panel.caption}</span>
+          <Burst text={panel.sfx} class="mx-auto w-40" />
+          <p class="text-lg">{panel.text}</p>
+        </article>
+      ))}
+    </section>
+
+    <section class="ink-box rays flex flex-col items-center gap-6 px-4 py-10 text-center">
+      <ul class="flex flex-wrap justify-center gap-3" aria-label="Fakten">
+        {comic.stats.map((stat, i) => (
+          <li
+            class="sticker ink-box bg-white px-3 py-1"
+            style={`--rot: ${i % 2 ? 3 : -3}deg`}
+          >
+            <span class="comic-heading text-2xl">{stat.value}</span>{" "}
+            <span class="font-semibold">{stat.label}</span>
+          </li>
+        ))}
+      </ul>
+      <div class="flex flex-wrap justify-center gap-5">
+        <a
+          class="btn-comic btn-comic-red btn-comic-big sm:!text-4xl"
+          href={game.data.playUrl}
+        >
+          {game.data.title} spielen!
+        </a>
+        <a
+          class="btn-comic btn-comic-white self-center"
+          href={game.data.sourceUrl}
+        >
+          Quellcode auf GitHub
+        </a>
+      </div>
+      <p class="rounded border-2 border-ink bg-white px-3 py-1 text-sm">
+        Läuft in einem aktuellen Browser auf dem Computer, mit Tastatur oder
+        Controller.
+      </p>
+    </section>
+
+    {game.id === "moto-devil" && <MotoTour />}
+    {game.id === "car-drive" && <CarRoad />}
+
+    {game.id === "moto-devil" && <MotoDemo sfx={comic.sfx} />}
+    {game.id === "car-drive" && <CarDemo sfx={comic.sfx} />}
+
+    <section aria-labelledby="details-title" class="flex flex-col gap-6">
+      <h2
+        id="details-title"
+        class="comic-title text-5xl text-pop-yellow sm:text-6xl"
+      >
+        Das Kleingedruckte
+      </h2>
+      <article class="panel prose prose-lg max-w-none p-6 sm:p-10 prose-headings:font-comic prose-headings:tracking-wide prose-h2:text-4xl prose-table:block prose-table:overflow-x-auto">
+        <Content />
+      </article>
+    </section>
   </div>
 </Layout>

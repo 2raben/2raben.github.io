@@ -20,34 +20,61 @@ const { title, description } = Astro.props;
     <link rel="icon" href="data:," />
     <title>{title}</title>
   </head>
-  <body class="flex min-h-screen flex-col bg-base-100 text-base-content">
-    <header class="navbar bg-base-200 px-4">
-      <div class="flex-1">
-        <a class="text-xl font-bold" href={href(`/${meta.slug}/`)}>
+  <body class="halftone flex min-h-screen flex-col bg-base-100 text-base-content">
+    <header class="relative z-50 border-b-4 border-ink bg-pop-yellow px-4 py-2 md:sticky md:top-0">
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-3">
+        <a
+          class="comic-title sticker inline-block border-4 border-ink bg-pop-red px-3 py-1 text-2xl text-white shadow-[4px_4px_0_#111] sm:text-3xl"
+          style="--rot: -3deg"
+          href={href(`/${meta.slug}/`)}
+        >
           {meta.name}
         </a>
+        <nav aria-label="Hauptnavigation" class="ml-auto">
+          <ul class="flex gap-2 sm:gap-3">
+            <li>
+              <a
+                class="btn-comic btn-comic-white !min-h-10 !px-3 !text-lg"
+                href={href(`/${meta.slug}/#spiele`)}
+              >
+                Spiele
+              </a>
+            </li>
+            <li>
+              <a
+                class="btn-comic btn-comic-white !min-h-10 !px-3 !text-lg"
+                href={href(`/${meta.slug}/ueber-uns/`)}
+              >
+                Über uns
+              </a>
+            </li>
+          </ul>
+        </nav>
       </div>
-      <nav aria-label="Hauptnavigation">
-        <ul class="menu menu-horizontal gap-1 px-0">
-          <li>
-            <a href={href(`/${meta.slug}/#spiele`)}>Spiele</a>
-          </li>
-          <li>
-            <a href={href(`/${meta.slug}/ueber-uns/`)}>Über uns</a>
-          </li>
-        </ul>
-      </nav>
     </header>
-    <main class="flex-1">
+    <main class="flex-1 overflow-x-clip">
       <slot />
     </main>
-    <footer class="footer footer-center bg-base-200 p-6 text-sm">
-      <p>
-        «{meta.name}» ist einer von mehreren Namensvorschlägen.{" "}
-        <a class="link" href={href("/")}>
-          Alle Vorschläge ansehen
-        </a>
-      </p>
+    <footer class="halftone-red border-t-4 border-ink px-4 py-8 text-white">
+      <div class="mx-auto flex max-w-6xl flex-col items-center gap-3 text-center">
+        <p class="comic-heading text-2xl [-webkit-text-stroke:1px_#111] [paint-order:stroke_fill]">
+          Fortsetzung folgt …
+        </p>
+        <p class="rounded border-2 border-ink bg-ink/70 px-3 py-1">
+          «{meta.name}» ist einer von mehreren Namensvorschlägen.{" "}
+          <a class="comic-link" href={href("/")}>
+            Alle Vorschläge ansehen
+          </a>
+        </p>
+        <p class="rounded bg-ink/70 px-3 py-1 text-sm" data-js-hint hidden>
+          Tipp: Beweg die Maus, klick irgendwo hin oder tipp auf der Tastatur.
+          Und probier mal «schafbock».
+        </p>
+      </div>
     </footer>
+    <div class="sfx-layer" aria-hidden="true" data-sfx-layer></div>
+    <script>
+      import "./effects";
+    </script>
   </body>
 </html>

@@ -1,24 +1,60 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { href } from "../../lib/url";
+import Burst from "./Burst.astro";
+import type { GameComic } from "./comics";
 import meta from "./meta";
+import Ram from "./Ram.astro";
 
 interface Props {
   game: CollectionEntry<"games">;
+  comic: GameComic;
+  /** Panels lean a little, alternately left and right. */
+  rotate?: number;
 }
 
-const { game } = Astro.props;
+const { game, comic, rotate = 0 } = Astro.props;
+const background = comic.pose === "moto" ? "halftone-red" : "halftone-cyan";
 ---
 
-<article class="card border border-base-300 bg-base-100">
-  <div class="card-body">
-    <h3 class="card-title text-2xl">{game.data.title}</h3>
-    <p>{game.data.tagline}</p>
-    <div class="card-actions mt-4">
-      <a class="btn btn-primary" href={game.data.playUrl}>
-        Spielen
+<article
+  class="panel flex flex-col"
+  style={`--panel-rot: ${rotate}deg`}
+  data-tilt
+>
+  <div class:list={[background, "relative border-b-4 border-ink px-4 pt-6"]}>
+    <span class="panel-caption absolute top-3 left-3 z-10">
+      Spiel Nr. {game.data.order}
+    </span>
+    <Burst
+      text={comic.strip[0]?.sfx ?? "BÄÄM!"}
+      color="#111111"
+      class="absolute top-2 right-2 w-28 rotate-6 sm:w-32"
+    />
+    <Ram pose={comic.pose} class="mx-auto w-full max-w-sm pt-6" />
+  </div>
+  <div class="flex flex-1 flex-col gap-4 p-5">
+    <h3 class="comic-heading text-4xl sm:text-5xl">{game.data.title}</h3>
+    <p class="bubble text-lg font-semibold">{comic.teaser}</p>
+    <ul class="mt-4 flex flex-wrap gap-3" aria-label="Fakten">
+      {comic.stats.map((stat, i) => (
+        <li
+          class="sticker ink-box bg-pop-yellow px-3 py-1"
+          style={`--rot: ${i % 2 ? 3 : -3}deg`}
+        >
+          <span class="comic-heading text-2xl">{stat.value}</span>{" "}
+          <span class="font-semibold">{stat.label}</span>
+        </li>
+      ))}
+    </ul>
+    <div class="mt-auto flex flex-wrap items-center gap-4 pt-4">
+      <a class="btn-comic btn-comic-red" href={game.data.playUrl}>
+        Spielen!
       </a>
-      <a class="btn btn-ghost" href={href(`/${meta.slug}/spiele/${game.id}/`)}>
+      <a
+        class="btn-comic btn-comic-white"
+        href={href(`/${meta.slug}/spiele/${game.id}/`)}
+      >
         Mehr zu {game.data.title}
       </a>
     </div>

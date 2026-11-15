@@ -42,3 +42,4 @@ What this pitch explicitly does not include.
 
 | Pitch | Status |
 | --- | --- |
+| [Schafbock Studio: pop-art superhero](schafbock-studio/pitch--pop-art-superhero.md) | Implemented |

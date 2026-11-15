@@ -1,34 +1,35 @@
-/* This variant's colors and shapes. It starts as a copy of daisyUI's "retro"
-   theme; change the values freely (https://daisyui.com/docs/themes/). */
+/* This variant's colors and shapes: a comic printed on light paper, with loud
+   primaries and black ink (https://daisyui.com/docs/themes/). The overview at /
+   imports this file, so it holds only the daisyUI theme. */
 @plugin "daisyui/theme" {
   name: "schafbock-studio";
   color-scheme: light;
-  --color-base-100: oklch(91.637% 0.034 90.515);
-  --color-base-200: oklch(88.272% 0.049 91.774);
-  --color-base-300: oklch(84.133% 0.065 90.856);
-  --color-base-content: oklch(41% 0.112 45.904);
-  --color-primary: oklch(80% 0.114 19.571);
-  --color-primary-content: oklch(39% 0.141 25.723);
-  --color-secondary: oklch(92% 0.084 155.995);
-  --color-secondary-content: oklch(44% 0.119 151.328);
-  --color-accent: oklch(68% 0.162 75.834);
-  --color-accent-content: oklch(41% 0.112 45.904);
-  --color-neutral: oklch(44% 0.011 73.639);
-  --color-neutral-content: oklch(86% 0.005 56.366);
-  --color-info: oklch(58% 0.158 241.966);
-  --color-info-content: oklch(96% 0.059 95.617);
-  --color-success: oklch(51% 0.096 186.391);
-  --color-success-content: oklch(96% 0.059 95.617);
-  --color-warning: oklch(64% 0.222 41.116);
-  --color-warning-content: oklch(96% 0.059 95.617);
-  --color-error: oklch(70% 0.191 22.216);
-  --color-error-content: oklch(40% 0.123 38.172);
+  --color-base-100: #fffaf0;
+  --color-base-200: #fff1b8;
+  --color-base-300: #111111;
+  --color-base-content: #111111;
+  --color-primary: #d62828;
+  --color-primary-content: #ffffff;
+  --color-secondary: #00b4d8;
+  --color-secondary-content: #111111;
+  --color-accent: #ffd60a;
+  --color-accent-content: #111111;
+  --color-neutral: #111111;
+  --color-neutral-content: #fffaf0;
+  --color-info: #00b4d8;
+  --color-info-content: #111111;
+  --color-success: #2a9d8f;
+  --color-success-content: #111111;
+  --color-warning: #ff9f1c;
+  --color-warning-content: #111111;
+  --color-error: #d62828;
+  --color-error-content: #ffffff;
   --radius-selector: 0.25rem;
   --radius-field: 0.25rem;
-  --radius-box: 0.5rem;
+  --radius-box: 0.25rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
-  --border: 1px;
+  --border: 2px;
   --depth: 0;
   --noise: 0;
 }
