@@ -2,6 +2,7 @@
 tags: [adr]
 status: accepted
 date: 2026-11-15
+amended-by: [0003-give-each-variant-its-own-pages-and-styles.md]
 sources:
   - src/variants.ts
   - src/pages/index.astro
@@ -10,6 +11,11 @@ sources:
 ---
 
 # 0002 — Compare name candidates as variant routes that share the game content
+
+> Amended by [ADR 0003](0003-give-each-variant-its-own-pages-and-styles.md):
+> each variant now has its own pages in `src/pages/<slug>/` and its own layout,
+> components and theme in `src/variants/<slug>/`; `src/variants.ts` and
+> `src/pages/[variant]/` were replaced by `src/variants/index.ts` and those folders.
 
 ## Context
 
@@ -28,7 +34,7 @@ Alternatives considered:
 
 ## Decision
 
-[src/variants.ts](../../../src/variants.ts) lists the variants: slug, name, daisyUI
+`src/variants.ts` lists the variants: slug, name, daisyUI
 theme, and tagline. Each variant is served under `/<slug>/` with a home page,
 `/<slug>/ueber-uns/`, and `/<slug>/spiele/<game>/` for every entry in
 `src/content/games/`. The root page lists all variants, each rendered in its own

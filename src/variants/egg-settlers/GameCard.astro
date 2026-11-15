@@ -1,14 +1,13 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import { href } from "../lib/url";
-import type { Variant } from "../variants";
+import { href } from "../../lib/url";
+import meta from "./meta";
 
 interface Props {
   game: CollectionEntry<"games">;
-  variant: Variant;
 }
 
-const { game, variant } = Astro.props;
+const { game } = Astro.props;
 ---
 
 <article class="card border border-base-300 bg-base-100">
@@ -19,10 +18,7 @@ const { game, variant } = Astro.props;
       <a class="btn btn-primary" href={game.data.playUrl}>
         Spielen
       </a>
-      <a
-        class="btn btn-ghost"
-        href={href(`/${variant.slug}/spiele/${game.id}/`)}
-      >
+      <a class="btn btn-ghost" href={href(`/${meta.slug}/spiele/${game.id}/`)}>
         Mehr zu {game.data.title}
       </a>
     </div>

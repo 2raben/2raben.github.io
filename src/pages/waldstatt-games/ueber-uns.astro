@@ -1,29 +1,17 @@
 ---
-import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
-import Layout from "../../layouts/Layout.astro";
-import { variants } from "../../variants";
-
-export const getStaticPaths = (() =>
-  variants.map((variant) => ({
-    params: { variant: variant.slug },
-    props: { variant },
-  }))) satisfies GetStaticPaths;
-
-type Props = InferGetStaticPropsType<typeof getStaticPaths>;
-
-const { variant } = Astro.props;
+import Layout from "../../variants/waldstatt-games/Layout.astro";
+import meta from "../../variants/waldstatt-games/meta";
 ---
 
 <Layout
-  title={`Über uns – ${variant.name}`}
-  description={`Wer hinter ${variant.name} steckt und wie unsere Spiele entstehen.`}
-  variant={variant}
+  title={`Über uns – ${meta.name}`}
+  description={`Wer hinter ${meta.name} steckt und wie unsere Spiele entstehen.`}
 >
   <article class="prose prose-lg mx-auto px-4 py-12">
     <h1>Über uns</h1>
     <p>
-      {variant.name} ist ein kleines Hobby-Spielestudio. Wir programmieren
-      Spiele, die direkt im Browser laufen, ohne Installation.
+      {meta.name} ist ein kleines Hobby-Spielestudio. Wir programmieren Spiele,
+      die direkt im Browser laufen, ohne Installation.
     </p>
     <h2>Wie alles begann</h2>
     <p>

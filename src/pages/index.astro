@@ -1,33 +1,43 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import "../styles/overview.css";
 import { href } from "../lib/url";
 import { variants } from "../variants";
 ---
 
-<Layout
-  title="Namensvorschläge für unser Spielestudio"
-  description="Mehrere Namensvorschläge für unser Hobby-Spielestudio, jeder als eigene Version der Website."
->
-  <div class="mx-auto max-w-5xl px-4 py-12">
-    <h1 class="text-4xl font-bold">Wie soll unser Spielestudio heissen?</h1>
-    <p class="mt-4 max-w-prose text-lg">
-      Jeder Vorschlag ist eine eigene Version der Website, mit Startseite, «Über
-      uns» und einer Seite pro Spiel. Schau dir alle an und sag uns, welcher
-      Name dir am besten gefällt.
-    </p>
-    <ul class="mt-10 grid gap-6 sm:grid-cols-2">
-      {variants.map((variant) => (
-        <li
-          data-theme={variant.theme}
-          class="rounded-box border border-base-300 bg-base-100 p-6 text-base-content"
-        >
-          <h2 class="text-2xl font-bold">{variant.name}</h2>
-          <p class="mt-2">{variant.tagline}</p>
-          <a class="btn btn-primary mt-6" href={href(`/${variant.slug}/`)}>
-            {variant.name} ansehen
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
-</Layout>
+<!doctype html>
+<html lang="de" data-theme="lofi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Mehrere Namensvorschläge für unser Hobby-Spielestudio, jeder als eigene Version der Website."
+    />
+    <link rel="icon" href="data:," />
+    <title>Namensvorschläge für unser Spielestudio</title>
+  </head>
+  <body class="bg-base-100 text-base-content">
+    <main class="mx-auto max-w-5xl px-4 py-12">
+      <h1 class="text-4xl font-bold">Wie soll unser Spielestudio heissen?</h1>
+      <p class="mt-4 max-w-prose text-lg">
+        Jeder Vorschlag ist eine eigene Version der Website, mit Startseite,
+        «Über uns» und einer Seite pro Spiel. Schau dir alle an und sag uns,
+        welcher Name dir am besten gefällt.
+      </p>
+      <ul class="mt-10 grid gap-6 sm:grid-cols-2">
+        {variants.map((variant) => (
+          <li
+            data-theme={variant.slug}
+            class="rounded-box border border-base-300 bg-base-100 p-6 text-base-content"
+          >
+            <h2 class="text-2xl font-bold">{variant.name}</h2>
+            <p class="mt-2">{variant.tagline}</p>
+            <a class="btn btn-primary mt-6" href={href(`/${variant.slug}/`)}>
+              {variant.name} ansehen
+            </a>
+          </li>
+        ))}
+      </ul>
+    </main>
+  </body>
+</html>
