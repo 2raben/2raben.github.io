@@ -2,6 +2,7 @@
 tags: [adr]
 status: accepted
 date: 2026-11-15
+amended-by: [0003-give-each-variant-its-own-pages-and-styles.md]
 sources:
   - package.json
   - astro.config.mjs
@@ -12,6 +13,10 @@ sources:
 ---
 
 # 0001 — Build a static site with Astro and daisyUI on GitHub Pages
+
+> Amended by [ADR 0003](0003-give-each-variant-its-own-pages-and-styles.md):
+> each variant defines its daisyUI theme in `src/variants/<slug>/theme.css`;
+> `src/styles/global.css` no longer exists.
 
 ## Context
 

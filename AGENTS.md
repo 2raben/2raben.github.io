@@ -18,12 +18,13 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) and the
 Consult the [architectural decision records (ADRs)](docs/architecture/decisions/README.md)
 for significant choices and their rationale.
 
-- `src/variants.ts`: the name candidates (slug, name, daisyUI theme, tagline).
+- `src/pages/<slug>/` and `src/variants/<slug>/`: one variant's pages, and its
+  meta, layout, components, stylesheet and daisyUI theme.
+- `src/variants/index.ts`: the list of variants for the overview, with build checks.
+- `src/pages/index.astro` and `src/styles/overview.css`: the overview at `/`.
 - `src/content/games/` and `src/content.config.ts`: one German Markdown file per
-  game and its schema.
-- `src/pages/`: the overview at `/` and each variant's home, about, and game pages.
-- `src/layouts/`, `src/components/`, `src/lib/url.ts`, `src/styles/global.css`:
-  the page shell, shared components, base-path links, and enabled themes.
+  game and its schema, shared by all variants.
+- `src/lib/`: shared helpers, `getGames()` and `href()` for base-path links.
 - `astro.config.mjs`, `package.json`, `.prettierrc.json`: build, dependencies,
   and formatting.
 - `.mise/config.toml` and `.mise/tasks/`: pinned Node.js and the `install`, `dev`,
@@ -48,8 +49,12 @@ concrete fix needs, and distinguish implemented behavior from ideas and pitches.
 
 Write all site text in German with Swiss spelling ("ss", not "ß"). Describe the
 games from their own repositories' documentation; do not invent features. Link
-internal pages through `href()` so the site works under a base path, and enable
-every daisyUI theme a variant uses in `src/styles/global.css`.
+internal pages through `href()` so the site works under a base path.
+
+Variants are independent: change a variant only inside `src/pages/<slug>/` and
+`src/variants/<slug>/`, and never import another variant's files. A change meant
+for every variant must be made in each one. Follow
+[Adding a variant](docs/architecture/README.md#adding-a-variant) for new candidates.
 
 Update architecture documentation alongside changes to structure or behavior.
 Record lasting architectural choices with the

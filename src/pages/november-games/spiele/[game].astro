@@ -1,33 +1,29 @@
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
-import { getCollection, render } from "astro:content";
-import Layout from "../../../layouts/Layout.astro";
+import { render } from "astro:content";
+import { getGames } from "../../../lib/games";
 import { href } from "../../../lib/url";
-import { variants } from "../../../variants";
+import Layout from "../../../variants/november-games/Layout.astro";
+import meta from "../../../variants/november-games/meta";
 
-export const getStaticPaths = (async () => {
-  const games = await getCollection("games");
-  return variants.flatMap((variant) =>
-    games.map((game) => ({
-      params: { variant: variant.slug, game: game.id },
-      props: { variant, game },
-    })),
-  );
-}) satisfies GetStaticPaths;
+export const getStaticPaths = (async () =>
+  (await getGames()).map((game) => ({
+    params: { game: game.id },
+    props: { game },
+  }))) satisfies GetStaticPaths;
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { variant, game } = Astro.props;
+const { game } = Astro.props;
 const { Content } = await render(game);
 ---
 
 <Layout
-  title={`${game.data.title} – ${variant.name}`}
+  title={`${game.data.title} – ${meta.name}`}
   description={game.data.tagline}
-  variant={variant}
 >
   <div class="mx-auto max-w-3xl px-4 py-12">
-    <a class="link" href={href(`/${variant.slug}/#spiele`)}>
+    <a class="link" href={href(`/${meta.slug}/#spiele`)}>
       Alle Spiele
     </a>
     <h1 class="mt-6 text-5xl font-bold">{game.data.title}</h1>
