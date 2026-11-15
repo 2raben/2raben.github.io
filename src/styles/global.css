@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Every theme a variant in src/variants.ts uses must be listed here. "lofi" is the
+   neutral theme of the overview page. */
+@plugin "daisyui" {
+  themes:
+    lofi --default,
+    retro,
+    cupcake,
+    nord,
+    forest;
+}
