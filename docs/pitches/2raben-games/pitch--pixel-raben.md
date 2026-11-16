@@ -169,7 +169,8 @@ allgemein und zeigt keine Namen, Fotos oder anderen Angaben zu Kindern.
   nach, was die Dokumentation der Spiele sagt, und erfinden nichts dazu. Sie
   bleiben kurz und werden geprüft, wenn sich ein Spieltext ändert.
 - **Die ISE AG nennen.** Sie erscheint nur im Text, ohne Logo oder Gestaltung,
-  und wir fragen sie vorher, ob sie damit einverstanden ist.
+  und wir fragen sie vorher, ob sie damit einverstanden ist. Sie ist damit
+  einverstanden, genannt zu werden.
 
 # No-Gos
 
