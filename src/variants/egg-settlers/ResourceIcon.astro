@@ -1,0 +1,63 @@
+---
+/** A small pixel-art icon for a counter in the resource bar. Decorative. */
+import Paths from "./Paths.astro";
+import { Pixels, colors, egg } from "./pixel";
+
+interface Props {
+  kind: "games" | "ideas" | "eggs";
+}
+
+const { kind } = Astro.props;
+
+const p = new Pixels(10, 10);
+if (kind === "games") {
+  p.rows(
+    [
+      "....oo....",
+      "...oRRo...",
+      "..oRRRRo..",
+      ".oRRRRRRo.",
+      "oRRRRRRRRo",
+      ".oWWWWWWo.",
+      ".oWWddWWo.",
+      ".oWWddWWo.",
+      ".oWWddWWo.",
+      ".oooooooo.",
+    ],
+    {
+      o: colors.ink,
+      R: colors.thatch,
+      W: colors.wall,
+      d: colors.door,
+    },
+  );
+} else if (kind === "ideas") {
+  p.rows(
+    [
+      "...oooo...",
+      "..oYYYYo..",
+      ".oYwYYYYo.",
+      ".oYwYYYYo.",
+      ".oYYYYYYo.",
+      "..oYYYYo..",
+      "...oYYo...",
+      "...oGGo...",
+      "...oGGo...",
+      "....oo....",
+    ],
+    { o: colors.ink, Y: "#ffe14d", w: colors.white, G: colors.stone },
+  );
+} else {
+  p.stamp(egg(8, 10), 1, 0);
+}
+---
+
+<svg
+  class="size-6 flex-none"
+  viewBox="0 0 10 10"
+  shape-rendering="crispEdges"
+  aria-hidden="true"
+  focusable="false"
+>
+  <Paths layers={p.layers()} />
+</svg>

@@ -102,6 +102,57 @@ page scrolls. A static SVG remains if JavaScript or the 2D context is unavailabl
 the unavailable scene control stays hidden. Phone layouts retain readable game
 controls without promising mobile game support.
 
+### Egg Settlers
+
+A strategy-game interface in which the settlers build a giant egg, shaped in the
+[pitch](../pitches/egg-settlers/pitch--egg-settlers.md). The pages lie on a
+pixel-art meadow, and the illustrations are top-down pixel art in the manner of
+1990s settlement games, drawn for this variant and copied from none. Text sits
+on parchment, stone and wooden panels; headings use Cinzel, self-hosted from
+`@fontsource/cinzel`. The header is a resource bar whose "Spiele" counter counts
+the game collection; the other counters are jokes. Its folder
+`src/variants/egg-settlers/` adds:
+
+| Path | Contents |
+| --- | --- |
+| `pixel.ts`, `Paths.astro` | The pixel-art renderer: drawings as color grids from hand-drawn rows or seeded generators (grass, paths, trees, huts, the egg), output as one SVG path per color with crisp edges |
+| `sprites.ts` | Detailed sprites on top of the renderer: houses in an oblique view with walls, gables and tiled, thatched or slate roofs; the monastery of Einsiedeln with arcades and fountain, the dam, towers, windmill, crane, ships; settlers, men and women, in two frames; animals, goods and a building site |
+| `map.ts` | The home page's 480 × 300 map, computed at build time and loosely after Einsiedeln: the Sihlsee with its dam, the Sihl and the Alp with bridges, the monastery square, roads, plaza, fields, buildings, seeded woods, settlers at work and on the roads, the walkers' keyframes, the water names, and the grid of cells where visitors may have houses built |
+| `Settlement.astro`, `Thing.astro` | The map as the home page's fixed fullscreen background, with the giant egg in six rings of shell inside a wooden frame, and over it the intro and a command bar with progress, status, "Bauen", "Haus bauen" and the settler |
+| `settlement.ts` | The optional interactions ([ADR 0004](decisions/0004-allow-optional-client-side-scripts-in-a-variant.md)): building the egg ring by ring, the settler's replies, and crews that walk to a clicked spot of meadow, fell its trees and build a house |
+| `Settler.astro` | The foreman's portrait, a settler woman with a calm and a grumpy face |
+| `Building.astro`, `buildings.ts`, `vehicles.ts` | Each game's picture, keyed by game id: Moto Devil's stunt track in side view (bike, ramp, spikes, loop, raven, gravestone, goal) and Car Drive's three-lane road from above (traffic, truck, pickups, hearts, boost, garage); a house for any game without an entry |
+| `MotoPractice.astro`, `CarPractice.astro`, `practice.ts`, `motoPractice.ts`, `carPractice.ts`, `motoCourse.ts`, `carRoad.ts` | The practice grounds on the game pages: small simulations with simplified rules from each game's text, driven by the keys of its controls table or on-screen buttons, with a demonstration that plays until somebody takes over |
+| `TechIcon.astro` | The icons of the name's tech tree on the about page: Ei, siedeln, Ei-siedeln, Egg Settlers |
+| `ResourceIcon.astro` | The resource bar's icons |
+
+The pixel art is generated at build time, so the same build always draws the
+same picture; `Layout.astro` sets the grass tile as the page background. On the
+home page the map lies fixed behind the page (`main` isolates its stacking
+context) and is cropped around the egg on narrow screens; on phones it moves
+down behind the taller resource bar. On wide screens the intro sits beside the
+command bar at the bottom, leaving the top of the map free. Sprites are defined
+once and placed with `<use>`; two-frame sprites alternate through CSS, and
+walkers follow keyframes that `map.ts` writes into the SVG. The home page weighs
+about 150 kB gzipped.
+
+The map follows Einsiedeln's water loosely: the Sihl leaves the Sihlsee's dam at
+the north end and the Alp flows from the south through the village into it. The
+lake lies west of the village, not east as in reality, to keep the picture's
+composition. The monastery is a simplified drawing without religious symbols.
+The names of the lake and the rivers are SVG text, not drawn letters.
+
+Without JavaScript the egg stands with its first ring, its planned outline and
+the status "Im Bau"; the buttons and the settler stay hidden, and so do the
+practice grounds. The scripts read their text from the page's data attributes
+or their own source, create sprites with `createElementNS` and never set HTML
+from strings; they store nothing, and a reload starts over. A click on the map
+reaches it through the overlay, whose empty parts ignore the pointer; "Haus
+bauen" offers the same for keyboards. The practice grounds run only while on
+screen. Reduced motion stops every animation of the map, which then shows each
+sprite's first frame; houses then appear at once, and the practice grounds play
+no demonstration but still respond to input.
+
 ### Adding a variant
 
 1. Copy `src/pages/<existing>/` and `src/variants/<existing>/` to the new slug.

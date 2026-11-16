@@ -44,4 +44,4 @@ What this pitch explicitly does not include.
 | --- | --- |
 | [Schafbock Studio: pop-art superhero](schafbock-studio/pitch--pop-art-superhero.md) | Implemented |
 | [November Games: Zukunftstag im Cyberpunk-Stil](november-games/pitch--zukunftstag-cyberpunk.md) | implemented |
-| [Egg Settlers: a strategy-game variant where settlers build a giant egg](egg-settlers/pitch--egg-settlers.md) | proposed |
+| [Egg Settlers: a strategy-game variant where settlers build a giant egg](egg-settlers/pitch--egg-settlers.md) | implemented |

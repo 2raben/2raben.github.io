@@ -1,0 +1,179 @@
+---
+/**
+ * Car Drive's practice road: three lanes from above, traffic in your
+ * direction and oncoming, cars that blink before they change lanes, trucks
+ * from 4000 metres, hearts and a shield on the road, three hearts and the
+ * boost, as the game's text describes them. It plays a demonstration until
+ * somebody takes over with the keys from the game's controls table or the
+ * buttons below. Not the game itself; carPractice.ts runs it, and without
+ * JavaScript it stays hidden.
+ */
+import Paths from "./Paths.astro";
+import { Pixels, colors, grassTile, tree } from "./pixel";
+import { road as roadLayout } from "./carRoad";
+import { conifer } from "./sprites";
+import * as V from "./vehicles";
+
+const { width, height, roadX, roadWidth, lane } = roadLayout;
+
+const meadow = new Pixels(width, height + 48);
+{
+  const tile = grassTile(23);
+  for (let y = 0; y < meadow.height; y += tile.height) {
+    for (let x = 0; x < width; x += tile.width) meadow.stamp(tile, x, y);
+  }
+}
+const road = V.road(roadWidth, height + 8, lane);
+
+const colorsByName = {
+  blue: "#2f6690",
+  red: "#a63d2a",
+  green: "#3f6e2a",
+  purple: "#7d4f8c",
+};
+const sprites: Record<string, Pixels> = {
+  "es-player": V.car(colors.yolk, { stripes: true }),
+  "es-exhaust-0": V.exhaust(0),
+  "es-exhaust-1": V.exhaust(1),
+  "es-truck": V.truck(),
+  "es-truck-down": V.flipped(V.truck("#a63d2a")),
+  "es-heart": V.heart(true),
+  "es-heart-empty": V.heart(false),
+  "es-shield": V.shieldPickup(),
+  "es-fir": conifer(5, 6),
+  "es-tree": tree(12, 5),
+};
+for (const [name, color] of Object.entries(colorsByName)) {
+  sprites[`es-car-${name}`] = V.car(color);
+  sprites[`es-car-${name}-left`] = V.car(color, { blink: "left" });
+  sprites[`es-car-${name}-right`] = V.car(color, { blink: "right" });
+  sprites[`es-car-${name}-down`] = V.flipped(V.car(color));
+}
+
+const keys = [
+  { action: "left", label: "A / ←", text: "Links" },
+  { action: "right", label: "D / →", text: "Rechts" },
+  { action: "boost", label: "Leertaste", text: "Boost" },
+  { action: "restart", label: "R", text: "Neustart" },
+];
+const scenery = [
+  ["es-fir", 20, 0],
+  ["es-tree", 52, 30],
+  ["es-fir", 140, 18],
+  ["es-tree", 170, 60],
+  ["es-fir", 4, 70],
+  ["es-fir", 128, 90],
+] as const;
+---
+
+<section
+  class="practice stone mt-10 p-5"
+  tabindex="0"
+  role="group"
+  aria-labelledby="car-practice-title"
+  aria-describedby="car-practice-help"
+  data-practice="car"
+  data-colors={JSON.stringify(Object.keys(colorsByName))}
+  data-label-demo="Vorführung – drück eine Taste, dann fährst du."
+  data-label-manual="Du fährst."
+  hidden
+>
+  <p class="kicker text-yolk">Übungsplatz</p>
+  <h2 id="car-practice-title" class="display text-2xl sm:text-3xl">
+    Probefahrt mit Car Drive
+  </h2>
+  <p id="car-practice-help" class="mt-2">
+    Eine kleine Übungsstrecke, nicht das Spiel: Klick hinein, wechsle mit den
+    Tasten aus dem Spiel die Spur und setz den Boost im richtigen Moment ein.
+    Blinkende Autos wechseln gleich die Spur.
+  </p>
+  <div class="frame practice-screen practice-road mt-4">
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      shape-rendering="crispEdges"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        {Object.entries(sprites).map(([id, pixels]) => (
+          <g id={id}>
+            <Paths layers={pixels.layers()} />
+          </g>
+        ))}
+      </defs>
+      <g data-meadow>
+        <Paths layers={meadow.layers()} />
+      </g>
+      <g data-road>
+        <g transform={`translate(${roadX} 0)`}>
+          <Paths layers={road.layers()} />
+        </g>
+      </g>
+      {scenery.map(([id, x, y]) => (
+        <use href={`#${id}`} x={x} y={y} data-scenery />
+      ))}
+      <use href="#es-heart" data-pickup></use>
+      {Array.from({ length: 6 }, () => (
+        <use href="#es-car-blue" data-vehicle></use>
+      ))}
+      <g data-player>
+        <use href="#es-exhaust-0" x="0" y="12" data-exhaust></use>
+        <use href="#es-player"></use>
+        <rect
+          x="-2"
+          y="-2"
+          width="13"
+          height="17"
+          fill="none"
+          stroke="#7fc8ff"
+          stroke-width="1"
+          data-shield
+        ></rect>
+      </g>
+      {[0, 1, 2].map((i) => (
+        <use href="#es-heart" x={3 + i * 9} y="3" data-heart />
+      ))}
+      <rect x="3" y={height - 9} width="32" height="6" fill="#1d1d1f"></rect>
+      <rect
+        x="4"
+        y={height - 8}
+        width="30"
+        height="4"
+        fill="#f4a63a"
+        data-gauge
+      ></rect>
+    </svg>
+  </div>
+  <p class="mt-2 flex flex-wrap gap-x-5 gap-y-1 font-semibold">
+    <span>
+      Strecke: <span data-meters>0</span> m
+    </span>
+    <span>
+      Level <span data-level>1</span>
+    </span>
+    <span>
+      Münzen: <span data-coins>0</span>
+    </span>
+  </p>
+  <p class="min-h-6 font-semibold">
+    <span data-practice-mode></span>
+    <span class="ml-2 text-yolk" data-practice-status></span>
+  </p>
+  <div class="mt-3 flex flex-wrap gap-2">
+    {keys.map((key) => (
+      <button
+        type="button"
+        class="practice-key"
+        tabindex="-1"
+        data-action={key.action}
+      >
+        <kbd>{key.label}</kbd> {key.text}
+      </button>
+    ))}
+  </div>
+  <p class="sr-only" aria-live="polite" data-practice-live></p>
+</section>
+
+<script>
+  import "./carPractice";
+</script>

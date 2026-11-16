@@ -3,5 +3,5 @@ import type { VariantMeta } from "../types";
 export default {
   slug: "egg-settlers",
   name: "Egg Settlers",
-  tagline: "Aus kleinen Ideen schlüpfen Spiele.",
+  tagline: "Wir bauen ein Riesenei – und nebenbei Spiele.",
 } satisfies VariantMeta;

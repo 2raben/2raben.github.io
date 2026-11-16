@@ -1,32 +1,58 @@
 ---
 import { getGames } from "../../lib/games";
+import { href } from "../../lib/url";
 import GameCard from "../../variants/egg-settlers/GameCard.astro";
 import Layout from "../../variants/egg-settlers/Layout.astro";
 import meta from "../../variants/egg-settlers/meta";
+import Settlement from "../../variants/egg-settlers/Settlement.astro";
+import TechIcon from "../../variants/egg-settlers/TechIcon.astro";
 
 const games = await getGames();
 ---
 
 <Layout title={meta.name} description={meta.tagline}>
-  <section class="hero bg-base-200 py-16">
-    <div class="hero-content text-center">
-      <div class="max-w-2xl">
-        <h1 class="text-5xl font-bold">{meta.name}</h1>
-        <p class="py-6 text-xl">{meta.tagline}</p>
-        <p>
-          Wir sind ein kleines Hobby-Spielestudio. Unsere Spiele laufen direkt
-          im Browser, ohne Installation.
+  <Settlement>
+    <section class="parchment scroll-panel max-w-xl p-4 sm:p-6">
+      <h1 class="display text-3xl sm:text-5xl">{meta.name}</h1>
+      <p class="display mt-2 text-base sm:text-xl">{meta.tagline}</p>
+      <p class="mt-2 text-sm sm:mt-3 sm:text-base">
+        Wir sind ein kleines Hobby-Spielestudio. Unsere Spiele laufen direkt im
+        Browser, ohne Installation.
+      </p>
+    </section>
+  </Settlement>
+
+  <div class="mx-auto max-w-6xl px-4 pt-10 pb-16">
+    <section id="spiele" class="scroll-mt-4">
+      <div class="banner wood inline-block px-5 py-3">
+        <h2 class="display text-3xl sm:text-4xl">Gebäude</h2>
+        <p class="mt-1">
+          Jedes Gebäude der Siedlung ist eines unserer Spiele. Entstanden am
+          Nationalen Zukunftstag 2026.
         </p>
       </div>
-    </div>
-  </section>
-  <section id="spiele" class="mx-auto max-w-5xl px-4 py-12">
-    <h2 class="text-3xl font-bold">Unsere Spiele</h2>
-    <p class="mt-2">Entstanden am Nationalen Zukunftstag 2026.</p>
-    <div class="mt-8 grid gap-6 md:grid-cols-2">
-      {games.map((game) => (
-        <GameCard game={game} />
-      ))}
-    </div>
-  </section>
+      <div class="mt-6 grid gap-6 md:grid-cols-2">
+        {games.map((game) => (
+          <GameCard game={game} />
+        ))}
+      </div>
+    </section>
+
+    <section class="parchment mt-16 flex flex-col gap-5 p-6 sm:flex-row">
+      <TechIcon stage="eisiedeln" class="w-24 flex-none" />
+      <div>
+        <h2 class="display text-2xl">Warum «Egg Settlers»?</h2>
+        <p class="mt-2">
+          Ei und siedeln ergibt Ei-siedeln. Schnell gesagt klingt das wie
+          Einsiedeln, und Wort für Wort auf Englisch heisst es Egg Settlers.
+        </p>
+        <a
+          class="link-game mt-3 inline-block"
+          href={href(`/${meta.slug}/ueber-uns/#name`)}
+        >
+          Zum Forschungsbaum
+        </a>
+      </div>
+    </section>
+  </div>
 </Layout>
