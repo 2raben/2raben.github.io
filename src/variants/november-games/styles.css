@@ -667,14 +667,20 @@ kbd {
   inset: 0;
   content: "";
   background:
-    linear-gradient(
-      90deg,
-      #0d0825e8,
-      #0d0825a6 35%,
-      #0d08251a 65%,
+    radial-gradient(
+      ellipse 36% 22% at 20% 77%,
+      #0b0622e6,
+      #0b0622b3 55%,
       transparent
     ),
-    linear-gradient(0deg, #0d082570, transparent 30%);
+    radial-gradient(
+      ellipse 48% 62% at 18% 52%,
+      #0b0622c7,
+      #0b06228c 45%,
+      transparent
+    ),
+    linear-gradient(90deg, #0b062299, transparent 32%),
+    linear-gradient(0deg, #0b062259, transparent 25%);
 }
 
 .scene-fallback,
@@ -936,39 +942,17 @@ kbd {
   aspect-ratio: 4 / 3;
 }
 
-.origin-landscape .mountain-layer {
-  x: -10%;
-  width: 120%;
-}
-
-.origin-landscape .monastery-layer {
-  x: 6%;
-  width: 88%;
-}
-
-.origin-landscape .sun-layer {
-  x: 15%;
-  y: 10%;
-  width: 70%;
-  height: 40%;
+.horizon-art .layout-narrow {
+  display: none;
 }
 
 @media (max-width: 47.5rem) {
-  .horizon-art .mountain-layer {
-    x: -10%;
-    width: 120%;
+  .horizon-art .layout-wide {
+    display: none;
   }
 
-  .horizon-art .monastery-layer {
-    x: 6%;
-    width: 88%;
-  }
-
-  .horizon-art .sun-layer {
-    x: 15%;
-    y: 10%;
-    width: 70%;
-    height: 40%;
+  .horizon-art .layout-narrow {
+    display: inline;
   }
 
   .synthwave-scene::after {
