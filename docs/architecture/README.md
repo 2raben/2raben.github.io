@@ -135,9 +135,12 @@ ten past ten. It is projected so that its
 lines meet the floor grid's vanishing point, where the sun sets. Where the page
 leaves a margin of at least 200 px left of its text column (from 105rem), the
 monastery stands in that margin instead: further away, turned towards the
-viewer and drawn 1.3 times taller so that it does not look squat from the front
+viewer and drawn 1.15 times taller so that it does not look squat from the front
 (`abbeyPose()` in `landmarks.ts`); its lines meet the horizon at their own
-point. The Alp is drawn freely, from below Grosser Mythen
+point. About 54° off the centre of the view, a flat projection would stretch it
+sideways by 1.7 times, so it is projected as if looked at straight on and then
+moved to where its heading lies on the screen; it keeps its proportions and size
+while the view turns. The Alp is drawn freely, from below Grosser Mythen
 across the floor towards the viewer. On its far bank, on the right, stand the
 ski jumps of Einsiedeln, drawn freely after a photograph and facing left
 towards the monastery: the large and the medium hill with in-runs on concrete

@@ -54,12 +54,13 @@ export function toCamera(camera: View, [x, y, z]: Point): Point {
   return [dx * cos - dz * sin, y, dx * sin + dz * cos];
 }
 
-/** Vertical stretch of the drawing being projected (see Pose). */
+/** Vertical stretch and sideways shift of the drawing being projected (see Pose). */
 let rise = 1;
+let shiftX = 0;
 
 function project(point: Point) {
   const [x, y, z] = toCamera(view, point);
-  return [(focal * x) / z, (focal * (eyeHeight - y * rise)) / z];
+  return [(focal * x) / z + shiftX, (focal * (eyeHeight - y * rise)) / z];
 }
 
 /** Whether the outside of a wall plane faces the camera (see `at`). */
@@ -69,8 +70,9 @@ const facing = (axis: "x" | "z", plane: number) =>
 /**
  * Where the monastery stands: the middle of the church front in world
  * metres, how far the building is turned (radians, positive: right), how
- * many degrees the view orbits around it per degree turned left, and how
- * much taller than measured it is drawn.
+ * many degrees the view orbits around it per degree turned left, how much
+ * taller than measured it is drawn, and optionally the heading (radians)
+ * from which it is drawn as if looked at straight on.
  */
 export interface Pose {
   x: number;
@@ -78,6 +80,7 @@ export interface Pose {
   turn: number;
   orbit: number;
   rise: number;
+  look?: number;
 }
 const centre = [front + 3, 102.4] as const;
 export const homePose: Pose = {
@@ -125,9 +128,10 @@ function poseCamera(camera: View, pose: Pose): View {
  * units wide: further away, and turned towards the viewer up to `oblique`
  * degrees short of facing it, so that it is still seen from the north-west.
  */
-export function poseAt(target: number, span: number, oblique = 32): Pose {
-  // The turned front and its receding wings take about 230 m of the view.
-  const distance = (focal * 230) / span;
+export function poseAt(target: number, span: number, oblique = 20): Pose {
+  // Close enough that the turned front and its wings overfill `span` a
+  // little, reaching under the text.
+  const distance = (focal * 100) / span;
   const bearing = Math.atan(target / focal);
   return {
     x: distance * Math.sin(bearing),
@@ -138,7 +142,11 @@ export function poseAt(target: number, span: number, oblique = 32): Pose {
     // the monastery moves with it, behind the text if need be.
     orbit: 0,
     // Seen nearly from the front, the long building looks squat.
-    rise: 1.3,
+    rise: 1.15,
+    // Far off the centre of the view, a flat projection stretches it
+    // sideways by 1 / cos(bearing), about 1.7 times; it is drawn as if
+    // looked at, then moved to where its heading lies on the screen.
+    look: bearing,
   };
 }
 
@@ -795,8 +803,10 @@ export function monasteryFrom(
   at: ClockTime = time,
   pose: Pose = homePose,
 ) {
-  view = poseCamera(camera, pose);
+  const look = pose.look ?? camera.yaw;
+  view = poseCamera({ ...camera, yaw: look }, pose);
   rise = pose.rise;
+  shiftX = focal * Math.tan(look - camera.yaw);
   time = at;
   shapes = [];
   const wingSpec = { eave: 15.9, ridge: 23, rows: wingRows };
@@ -817,6 +827,7 @@ export function monasteryFrom(
   wing(front + 1.5, 30, 49, { ...pavilion, seed: 5 });
   view = standing;
   rise = 1;
+  shiftX = 0;
   return shapes;
 }
 
