@@ -1,0 +1,70 @@
+---
+import { href } from "../../lib/url";
+import Layout from "../../variants/2raben-games/Layout.astro";
+import meta from "../../variants/2raben-games/meta";
+import PixelArt from "../../variants/2raben-games/PixelArt.astro";
+import { aboutPicture } from "../../variants/2raben-games/scenes";
+---
+
+<Layout
+  title={`Über uns – ${meta.name}`}
+  description={`Wer hinter ${meta.name} steckt und warum zwei Raben.`}
+>
+  <div class="mx-auto max-w-4xl px-4 py-12">
+    <h1 class="pixel-title text-6xl sm:text-7xl">Über uns</h1>
+
+    <div class="mt-10 grid items-center gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <div class="px-frame px-drop">
+        <PixelArt
+          picture={aboutPicture()}
+          class="w-full"
+          label="Pixelbild: zwei Raben auf der Wiese, der mit dem Schal ruft «Krah!»."
+        />
+      </div>
+      <div>
+        <h2 class="font-pixel text-4xl">Warum zwei Raben?</h2>
+        <p class="mt-4 text-lg">
+          Im Wappen von Einsiedeln fliegen zwei schwarze Raben übereinander. Sie
+          erinnern an den heiligen Meinrad, der der Legende nach zwei Raben bei
+          sich hatte.
+        </p>
+        <p class="mt-4 text-lg">
+          Unsere Raben sind keine Wappentiere, sondern eigene Pixel-Raben: Sie
+          fliegen gern, rufen «Krah!» und rempeln sich gegenseitig an. Einer
+          trägt einen roten Schal, damit man sie auseinanderhalten kann.
+        </p>
+      </div>
+    </div>
+
+    <article class="prose-pixel prose prose-lg mt-14 max-w-none px-frame px-panel p-6 sm:p-10">
+      <h2>Wie alles begann</h2>
+      <p>
+        Am Nationalen Zukunftstag, dem 12. November 2026, haben wir bei der ISE
+        AG in Einsiedeln aus Skizzen auf Papier unsere ersten spielbaren
+        Prototypen gebaut: Moto Devil und Car Drive. Zwei Raben, zwei Spiele.
+        Für einen dritten Raben bräuchten wir ein drittes Spiel.
+      </p>
+      <h2>Raben in unseren Spielen</h2>
+      <p>
+        In Moto Devil haben Raben eine Gastrolle: im Sturzflug, als Hindernis.
+        Car Drive zeigt die Strasse aus der Vogelperspektive. Raben kommen dort
+        keine vor, aber die Aussicht ist ihre.
+      </p>
+      <h2>Wie wir arbeiten</h2>
+      <p>
+        Jede Idee beginnt als Skizze. Daraus schreiben wir einen kurzen Plan:
+        Was fehlt, wie könnte die Lösung aussehen, und was lassen wir bewusst
+        weg? Dann bauen wir einen Prototyp und probieren ihn aus.
+      </p>
+      <h2>Womit wir bauen</h2>
+      <p>
+        Unsere Spiele sind in Rust mit der Spiel-Engine Bevy geschrieben und
+        laufen als WebAssembly im Browser. Der Quellcode ist auf GitHub
+        öffentlich.
+      </p>
+      <p>
+        <a href={href(`/${meta.slug}/#spiele`)}>Zu den Spielen</a>
+      </p>
+    </article>
+  </div>
+</Layout>

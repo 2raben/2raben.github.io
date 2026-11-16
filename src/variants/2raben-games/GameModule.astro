@@ -1,0 +1,41 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { href } from "../../lib/url";
+import meta from "./meta";
+import PixelArt from "./PixelArt.astro";
+import type { GameRavens } from "./ravens";
+import { carVignette, icons, motoVignette } from "./scenes";
+
+interface Props {
+  game: CollectionEntry<"games">;
+  ravens: GameRavens;
+}
+
+const { game, ravens } = Astro.props;
+const label = ravens.picture === "car" ? "#2f6fd6" : "#d7263d";
+const vignette = ravens.picture === "car" ? carVignette() : motoVignette();
+---
+
+<article class="cartridge">
+  <div class="cartridge-label" style={`--label: ${label}`}>
+    <span class="shrink-0 bg-cream p-2">
+      <PixelArt picture={icons[ravens.picture]} scale={3} />
+    </span>
+    <h3 class="font-pixel text-4xl leading-none">{game.data.title}</h3>
+  </div>
+  <div class="cartridge-screen">
+    <PixelArt picture={vignette} class="w-full" />
+  </div>
+  <p class="text-lg">{game.data.tagline}</p>
+  <div class="mt-auto flex flex-wrap gap-2">
+    <a class="px-btn" href={game.data.playUrl}>
+      Spielen!<span class="sr-only">: {game.data.title}</span>
+    </a>
+    <a
+      class="px-btn px-btn-light"
+      href={href(`/${meta.slug}/spiele/${game.id}/`)}
+    >
+      Mehr erfahren<span class="sr-only"> über {game.data.title}</span>
+    </a>
+  </div>
+</article>

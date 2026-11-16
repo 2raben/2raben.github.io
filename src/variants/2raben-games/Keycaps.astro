@@ -1,0 +1,20 @@
+---
+import type { GameRavens } from "./ravens";
+
+interface Props {
+  keys: GameRavens["keys"];
+}
+
+const { keys } = Astro.props;
+---
+
+<ul class="flex flex-wrap gap-x-6 gap-y-3">
+  {keys.map((entry) => (
+    <li class="flex flex-wrap items-center gap-1">
+      {entry.keys.map((key) => (
+        <kbd class="px-key">{key}</kbd>
+      ))}
+      <span class="ml-1 font-semibold">{entry.action}</span>
+    </li>
+  ))}
+</ul>

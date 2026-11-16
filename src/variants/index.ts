@@ -7,6 +7,7 @@
  *
  * Only the game texts (src/content/games/) and src/lib/ are shared.
  */
+import zweiRabenGames from "./2raben-games/meta";
 import eggSettlers from "./egg-settlers/meta";
 import novemberGames from "./november-games/meta";
 import schafbockStudio from "./schafbock-studio/meta";
@@ -18,6 +19,7 @@ export const variants: VariantMeta[] = [
   eggSettlers,
   novemberGames,
   waldstattGames,
+  zweiRabenGames,
 ];
 
 /**

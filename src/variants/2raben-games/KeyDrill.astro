@@ -1,0 +1,85 @@
+---
+/**
+ * A warm-up for a game's keys on its game page: focus it and press the keys
+ * from the game's controls table; drill.ts moves the motorbike or the car on a
+ * pixel canvas. Not the game itself. Needs JavaScript, so it stays hidden
+ * without it (ADR 0004).
+ */
+interface Props {
+  picture: "moto" | "car";
+}
+
+const { picture } = Astro.props;
+const id = `drill-${picture}`;
+
+const keys =
+  picture === "moto"
+    ? [
+        { action: "gas", label: "W ↑", text: "Gas" },
+        { action: "brake", label: "S ↓", text: "Bremsen" },
+        { action: "back", label: "A ←", text: "Kippen" },
+        { action: "forward", label: "D →", text: "Kippen" },
+        { action: "jump", label: "Leertaste", text: "Springen, halten: Düse" },
+        { action: "turn", label: "E", text: "Umdrehen" },
+        { action: "restart", label: "R", text: "Neu" },
+      ]
+    : [
+        { action: "left", label: "A ←", text: "Links" },
+        { action: "boost", label: "Leertaste", text: "Boost" },
+        { action: "right", label: "D →", text: "Rechts" },
+        { action: "restart", label: "R", text: "Neustart" },
+      ];
+
+const help =
+  picture === "moto"
+    ? "Klick hier hinein und probier die Tasten aus dem Spiel: Gas, Bremsen, Kippen bis zum Salto, über die Rampe springen – und die Leertaste halten für den Düsenschub. Fallen gibt es hier keine, die warten im echten Spiel."
+    : "Klick hier hinein und lenk mit A und D oder den Pfeiltasten von Spur zu Spur, mit der Leertaste zündest du den Boost. Mit der Maus folgt das Auto deinem Zeiger. Verkehr gibt es hier keinen, den findest du im echten Spiel.";
+---
+
+<section
+  class="drill"
+  tabindex="0"
+  role="group"
+  aria-labelledby={`${id}-title`}
+  aria-describedby={`${id}-help`}
+  data-drill={picture}
+  hidden
+>
+  <div class="drill-head">
+    <h2 id={`${id}-title`} class="font-pixel text-3xl sm:text-4xl">
+      Probefahrt
+    </h2>
+    <span class="drill-tag">Nur zum Aufwärmen</span>
+  </div>
+  <p id={`${id}-help`} class="px-5 pt-4">
+    {help}
+  </p>
+  <div class="drill-screen">
+    <canvas aria-hidden="true"></canvas>
+    <p class="drill-start" aria-hidden="true">
+      Klick hier, dann Tasten!
+    </p>
+  </div>
+  <div class="flex flex-wrap gap-x-2 gap-y-1 px-4 pb-5">
+    {keys.map((key) => (
+      <button
+        type="button"
+        class="px-key drill-key"
+        tabindex="-1"
+        data-action={key.action}
+      >
+        {key.label}
+        <span class="drill-key-text">{key.text}</span>
+      </button>
+    ))}
+  </div>
+  <p class="sr-only" aria-live="polite" data-drill-status></p>
+</section>
+
+<script>
+  import { mountDrill } from "./drill";
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-drill]")) {
+    mountDrill(root);
+  }
+</script>

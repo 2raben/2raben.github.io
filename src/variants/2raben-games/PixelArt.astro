@@ -1,0 +1,36 @@
+---
+/**
+ * Renders a pixel picture from scenes.ts as crisp SVG. Without a label the
+ * picture is decoration and hidden from assistive technology.
+ */
+import type { Picture } from "./scenes";
+
+interface Props {
+  picture: Picture;
+  /** Size of one pixel in CSS pixels; the SVG scales with its box otherwise. */
+  scale?: number;
+  label?: string;
+  class?: string;
+  /** For pictures that fill a box of another shape. */
+  fit?: "meet" | "slice";
+}
+
+const { picture, scale, label, class: className, fit = "meet" } = Astro.props;
+---
+
+<svg
+  class:list={["pixel-art", className]}
+  viewBox={`0 0 ${picture.w} ${picture.h}`}
+  width={scale ? picture.w * scale : undefined}
+  height={scale ? picture.h * scale : undefined}
+  preserveAspectRatio={`xMidYMax ${fit}`}
+  shape-rendering="crispEdges"
+  role={label ? "img" : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : "true"}
+  focusable="false"
+>
+  {picture.runs.map((r) => (
+    <rect x={r.x} y={r.y} width={r.w} height={r.h} fill={r.color} />
+  ))}
+</svg>

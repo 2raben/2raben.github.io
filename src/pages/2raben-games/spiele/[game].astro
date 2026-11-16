@@ -1,0 +1,95 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import { render } from "astro:content";
+import { href } from "../../../lib/url";
+import KeyDrill from "../../../variants/2raben-games/KeyDrill.astro";
+import Keycaps from "../../../variants/2raben-games/Keycaps.astro";
+import Layout from "../../../variants/2raben-games/Layout.astro";
+import meta from "../../../variants/2raben-games/meta";
+import PixelArt from "../../../variants/2raben-games/PixelArt.astro";
+import { getRavenGames } from "../../../variants/2raben-games/ravens";
+import {
+  carVignette,
+  motoVignette,
+  speaker,
+} from "../../../variants/2raben-games/scenes";
+
+export const getStaticPaths = (async () =>
+  (await getRavenGames()).map(({ game, ravens }) => ({
+    params: { game: game.id },
+    props: { game, ravens },
+  }))) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { game, ravens } = Astro.props;
+const { Content } = await render(game);
+const vignette = ravens.picture === "car" ? carVignette() : motoVignette();
+const vignetteLabel =
+  ravens.picture === "car"
+    ? "Pixelbild: drei Spuren von oben mit Autos, darüber fliegt ein Rabe."
+    : "Pixelbild: Ein Rabe stürzt sich auf einen Motorradfahrer vor einer Rampe.";
+---
+
+<Layout
+  title={`${game.data.title} – ${meta.name}`}
+  description={game.data.tagline}
+>
+  <div class="mx-auto max-w-5xl px-4 py-10">
+    <a class="px-link" href={href(`/${meta.slug}/#spiele`)}>
+      ← Alle Spiele
+    </a>
+    <h1 class="pixel-title mt-6 text-5xl sm:text-7xl">{game.data.title}</h1>
+    <p class="mt-5 text-xl">{game.data.tagline}</p>
+
+    <div class="mt-10 grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div class="px-frame px-drop">
+        <PixelArt picture={vignette} label={vignetteLabel} class="w-full" />
+      </div>
+      <div class="flex flex-col gap-6">
+        <figure class="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+          <PixelArt
+            picture={speaker(ravens.scarf)}
+            scale={4}
+            class="shrink-0"
+          />
+          <blockquote class="px-bubble text-lg">
+            <p>{ravens.says}</p>
+          </blockquote>
+          <figcaption class="sr-only">
+            {ravens.scarf ? "Der Rabe mit Schal" : "Der Rabe ohne Schal"}
+          </figcaption>
+        </figure>
+        <div class="flex flex-wrap items-center gap-3">
+          <a class="px-btn px-btn-lg" href={game.data.playUrl}>
+            Spielen!<span class="sr-only">: {game.data.title}</span>
+          </a>
+          <a class="px-link" href={game.data.sourceUrl}>
+            Quellcode auf GitHub
+          </a>
+        </div>
+        <p class="text-sm">
+          Läuft in einem aktuellen Browser auf dem Computer, mit Tastatur oder
+          Controller.
+        </p>
+      </div>
+    </div>
+
+    <section class="mt-14" aria-labelledby="tasten">
+      <h2 id="tasten" class="font-pixel text-4xl">
+        Die wichtigsten Tasten
+      </h2>
+      <div class="mt-5">
+        <Keycaps keys={ravens.keys} />
+      </div>
+    </section>
+
+    <div class="mt-12">
+      <KeyDrill picture={ravens.picture} />
+    </div>
+
+    <article class="prose-pixel prose prose-lg mt-14 max-w-none px-frame px-panel p-6 sm:p-10">
+      <Content />
+    </article>
+  </div>
+</Layout>

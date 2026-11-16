@@ -1,0 +1,89 @@
+---
+import "./styles.css";
+import { href } from "../../lib/url";
+import meta from "./meta";
+import PixelArt from "./PixelArt.astro";
+import { crest } from "./scenes";
+
+interface Props {
+  title: string;
+  description: string;
+  /** The page opens with a full-width hero right under the header. */
+  hero?: boolean;
+}
+
+const { title, description, hero = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="de" data-theme={meta.slug}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" href="data:," />
+    <title>{title}</title>
+  </head>
+  <body class="flex min-h-screen flex-col text-base-content">
+    <a
+      class="px-btn px-btn-sm sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
+      href="#inhalt"
+    >
+      Zum Inhalt
+    </a>
+    <header class="site-header">
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+        <a class="brand" href={href(`/${meta.slug}/`)}>
+          <span class="brand-crest" aria-hidden="true">
+            <PixelArt picture={crest(0)} class="brand-frame" />
+            <PixelArt picture={crest(1)} class="brand-frame brand-frame-alt" />
+          </span>
+          <span class="brand-name">
+            <span class="text-[#ffc93c]">2</span>raben games
+          </span>
+        </a>
+        <nav aria-label="Hauptnavigation" class="ml-auto">
+          <ul class="flex flex-wrap gap-2">
+            <li>
+              <a
+                class="px-btn px-btn-sm px-btn-light"
+                href={href(`/${meta.slug}/#spiele`)}
+              >
+                Spiele
+              </a>
+            </li>
+            <li>
+              <a
+                class="px-btn px-btn-sm px-btn-light"
+                href={href(`/${meta.slug}/ueber-uns/`)}
+              >
+                Über uns
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main
+      id="inhalt"
+      class:list={["flex-1 overflow-x-clip", !hero && "pt-10 sm:pt-14"]}
+    >
+      <slot />
+    </main>
+    <footer class="site-footer mt-20">
+      <div class="h-2 bg-grass"></div>
+      <div class="soil h-6"></div>
+      <div class="bg-ink px-4 py-8 text-center text-white">
+        <p class="font-pixel text-2xl">
+          Beim Programmieren wurden keine Raben verletzt.
+        </p>
+        <p class="mt-3">
+          «{meta.name}» ist einer von mehreren Namensvorschlägen.{" "}
+          <a class="px-link text-white" href={href("/")}>
+            Alle Vorschläge ansehen
+          </a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

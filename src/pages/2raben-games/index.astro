@@ -1,0 +1,57 @@
+---
+import { href } from "../../lib/url";
+import GameModule from "../../variants/2raben-games/GameModule.astro";
+import Layout from "../../variants/2raben-games/Layout.astro";
+import meta from "../../variants/2raben-games/meta";
+import PixelArt from "../../variants/2raben-games/PixelArt.astro";
+import RavenStage from "../../variants/2raben-games/RavenStage.astro";
+import { getRavenGames } from "../../variants/2raben-games/ravens";
+import { pair } from "../../variants/2raben-games/scenes";
+
+const games = await getRavenGames();
+---
+
+<Layout title={meta.name} description={meta.tagline} hero>
+  <RavenStage>
+    <h1 class="landing-title">
+      <span class="text-[#ffc93c]">2</span>raben games
+    </h1>
+    <p class="landing-tagline">{meta.tagline}</p>
+    <p class="landing-intro">
+      Wir sind ein kleines Hobby-Spielestudio. Unsere ersten Spiele sind am
+      Nationalen Zukunftstag bei der ISE AG in Einsiedeln entstanden. Und im
+      Wappen von Einsiedeln fliegen zwei Raben. Die beiden zeigen dir hier
+      unsere Spiele.
+    </p>
+    <a slot="actions" class="px-btn" href="#spiele">
+      Zu den Spielen
+    </a>
+  </RavenStage>
+  <div class="soil h-10" aria-hidden="true"></div>
+
+  <section id="spiele" class="mx-auto max-w-6xl scroll-mt-4 px-4 pt-16">
+    <h2 class="pixel-title text-4xl sm:text-6xl">Wähle dein Spiel</h2>
+    <p class="mt-4 text-lg">
+      Beide laufen direkt im Browser. Münzen einwerfen ist nicht nötig.
+    </p>
+    <div class="mt-10 grid gap-10 md:grid-cols-2">
+      {games.map(({ game, ravens }) => (
+        <GameModule game={game} ravens={ravens} />
+      ))}
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-4 pt-28">
+    <div class="relative">
+      <PixelArt picture={pair()} class="perched-pair" />
+      <div class="px-frame px-drop px-panel flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <p class="font-pixel text-3xl sm:text-4xl">
+          Warum eigentlich zwei Raben?
+        </p>
+        <a class="px-btn px-btn-light" href={href(`/${meta.slug}/ueber-uns/`)}>
+          Zur Geschichte
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
