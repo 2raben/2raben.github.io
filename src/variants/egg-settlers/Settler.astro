@@ -1,0 +1,110 @@
+---
+/**
+ * The foreman's portrait in pixel art, as a strategy game shows it for the
+ * selected unit: a settler woman with a spotted headscarf, a braid over the
+ * shoulder, an apron and a hammer. Decorative; the caller names it. The calm
+ * and grumpy faces are both drawn; styles.css shows the grumpy one when a
+ * parent has data-mood="grumpy".
+ */
+import Paths from "./Paths.astro";
+import { Pixels, colors, ellipse, line } from "./pixel";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+
+const skinDark = "#d39a6a";
+const scarf = "#c0392b";
+const scarfDark = "#8e2a1f";
+const hair = "#6b3d1e";
+const hairDark = "#4a2a14";
+const dress = "#2f6690";
+
+const base = new Pixels(20, 20);
+base.rect(0, 0, 20, 20, "#9bd16b");
+base.rect(0, 15, 20, 5, "#7fb955");
+for (let y = 14; y < 20; y++) {
+  const inset = y === 14 ? 5 : y === 15 ? 3 : 2;
+  base.rect(inset, y, 20 - inset * 2, 1, dress);
+}
+base.rect(7, 15, 6, 5, "#f4ecd6");
+base.rect(7, 15, 6, 1, "#d8cdb2");
+base.rect(8, 12, 4, 2, skinDark);
+ellipse(base, 10, 9.5, 6.5, 5.5, hair);
+ellipse(base, 10, 9.5, 5.5, 5, (x) =>
+  x <= 5 || x >= 15 ? skinDark : colors.skin,
+);
+/* The headscarf, tied at the back, with white spots. */
+ellipse(base, 10, 6, 6.5, 4.5, (_x, y) =>
+  y > 6 ? undefined : y === 6 ? scarfDark : scarf,
+);
+for (const [x, y] of [
+  [7, 3],
+  [11, 2],
+  [13, 4],
+  [9, 5],
+  [5, 5],
+] as const) {
+  base.set(x, y, "#f4ecd6");
+}
+base.rect(16, 6, 2, 2, scarfDark);
+base.set(18, 8, scarf);
+/* The braid over the left shoulder. */
+for (let y = 11; y < 18; y++) base.set(4, y, y % 2 ? hair : hairDark);
+base.set(3, 12, hairDark);
+base.set(4, 18, scarf);
+base.set(8, 9, colors.ink);
+base.set(12, 9, colors.ink);
+base.set(10, 10, skinDark);
+base.set(6, 11, "#e8957a");
+base.set(14, 11, "#e8957a");
+line(base, 15, 19, 18, 12, colors.trunk);
+base.rect(16, 10, 4, 2, colors.stone);
+
+/** Brows in ink, then the mouth in a soft red. */
+const face = (pixels: [number, number][]) => {
+  const p = new Pixels(20, 20);
+  pixels.forEach(([x, y], i) => p.set(x, y, i < 4 ? colors.ink : "#9a4434"));
+  return p.layers();
+};
+const calm = face([
+  [7, 8],
+  [8, 8],
+  [12, 8],
+  [13, 8],
+  [8, 12],
+  [9, 13],
+  [10, 13],
+  [11, 13],
+  [12, 12],
+]);
+const grumpy = face([
+  [7, 7],
+  [8, 8],
+  [13, 7],
+  [12, 8],
+  [8, 13],
+  [9, 12],
+  [10, 12],
+  [11, 12],
+  [12, 13],
+]);
+---
+
+<svg
+  class={className}
+  viewBox="0 0 20 20"
+  shape-rendering="crispEdges"
+  aria-hidden="true"
+  focusable="false"
+>
+  <Paths layers={base.layers()} />
+  <g class="face-calm">
+    <Paths layers={calm} />
+  </g>
+  <g class="face-grumpy">
+    <Paths layers={grumpy} />
+  </g>
+</svg>

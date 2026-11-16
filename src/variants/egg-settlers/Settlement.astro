@@ -1,0 +1,307 @@
+---
+/**
+ * The home page's settlement, seen from above like the map of a 1990s
+ * settlement game, filling the screen behind the page: a coast with a harbour,
+ * woods, houses, farms and a church with two towers, and in the middle the
+ * giant egg that the settlers build ring by ring. map.ts draws it.
+ *
+ * Over the map lie the page's intro (the slot) and a command bar with the
+ * construction site's progress, status, "Bauen", "Haus bauen" and the
+ * settler. With settlement.ts, a click on free meadow sends a crew to build a
+ * house there; "Haus bauen" does the same for keyboards, at a free spot of
+ * its own choosing. Without the script, the egg stands with its first ring,
+ * the status says "Im Bau", and the buttons and the settler stay hidden.
+ */
+import * as map from "./map";
+import Paths from "./Paths.astro";
+import Settler from "./Settler.astro";
+import Thing from "./Thing.astro";
+
+/** How many rings of shell stand from the start. */
+const startBuilt = 1;
+const total = map.rings;
+
+/** One status line per number of finished rings, from 1 to total. */
+const statuses = [
+  "Das Fundament steht. Im Bau.",
+  "Die Siedlerinnen und Siedler schleppen Schale heran.",
+  "Halbzeit! Alle machen Znüni.",
+  "Weiter geht's. Jemand pfeift bei der Arbeit.",
+  "Nur noch die Spitze. Wer hat Höhenangst?",
+  "Das Riesenei ist fertig! Die ganze Siedlung jubelt.",
+];
+
+/** The settler's replies, polite at first, then more and more fed up. */
+const replies = [
+  "Ja, Chef?",
+  "Zu Befehl!",
+  "Bin ja schon dran.",
+  "Noch mehr Schale?",
+  "Ich bin Siedlerin, kein Huhn.",
+  "Hör auf, mich anzuklicken!",
+  "So. Ich mach jetzt Znüni.",
+];
+
+const progressFormat = "{built} von {total} Schalenringen";
+const progressText = progressFormat
+  .replace("{built}", String(startBuilt))
+  .replace("{total}", String(total));
+---
+
+<section
+  class="settlement-hero"
+  data-build
+  data-statuses={JSON.stringify(statuses)}
+  data-progress-format={progressFormat}
+  data-label-build="Bauen"
+  data-label-rebuild="Neu bauen"
+  data-grid={JSON.stringify(map.buildGrid)}
+  data-houses={JSON.stringify(map.newHouses)}
+  data-site={JSON.stringify(map.houseSite)}
+  data-crew={JSON.stringify(map.crew)}
+  data-crew-start={JSON.stringify(map.crewStart)}
+>
+  <div class="settlement" data-scene>
+    <svg
+      viewBox={`0 0 ${map.width} ${map.height}`}
+      preserveAspectRatio="xMidYMid slice"
+      shape-rendering="crispEdges"
+      role="img"
+      aria-label="Die Siedlung von oben, frei nach Einsiedeln: links der Sihlsee mit Staumauer, Hafen und Segelschiffen. Aus der Staumauer fliesst die Sihl, und die Alp fliesst durchs Dorf in die Sihl. Rechts oben das Kloster mit seinen zwei Türmen und dem Klosterplatz, dazu Wald, Fachwerkhäuser, eine Windmühle, Felder und ein Hühnerhof. Überall sind Siedlerinnen und Siedler unterwegs. In der Mitte bauen sie in einem Holzgerüst ein riesiges Ei."
+    >
+      <style is:inline set:html={map.walkCss} />
+      <defs>
+        {map.patterns.map((pattern) => (
+          <pattern
+            id={pattern.id}
+            width={pattern.width}
+            height={pattern.height}
+            patternUnits="userSpaceOnUse"
+          >
+            <Paths layers={pattern.layers} />
+          </pattern>
+        ))}
+        {map.defs.map((sprite) => (
+          <g id={sprite.id}>
+            <Paths layers={sprite.layers} />
+          </g>
+        ))}
+      </defs>
+
+      <rect width={map.width} height={map.height} fill="url(#es-grass)"></rect>
+      <Paths layers={map.groundLayers} />
+      <g class="frames glints" style="--frame: 1.4s">
+        {map.glintLayers.map((layers) => (
+          <g>
+            <Paths layers={layers} />
+          </g>
+        ))}
+      </g>
+      {map.ships.map((ship) => (
+        <Thing thing={ship} />
+      ))}
+
+      {map.behind.map((thing) => (
+        <Thing thing={thing} />
+      ))}
+
+      <g class="egg-plan" transform={`translate(${map.eggX} ${map.eggY})`}>
+        <Paths layers={map.planLayers} />
+      </g>
+      {map.courses.map((course) => (
+        <g
+          class:list={["egg-course", course.number <= startBuilt && "is-built"]}
+          data-course={course.number}
+        >
+          <g transform={`translate(${map.eggX} ${map.eggY})`}>
+            <Paths layers={course.layers} />
+          </g>
+        </g>
+      ))}
+      <g class="dust">
+        <use href="#es-smoke" x={map.eggX - 6} y={map.eggY + 72}></use>
+        <use href="#es-smoke" x={map.eggX + 30} y={map.eggY + 78}></use>
+        <use href="#es-smoke" x={map.eggX + 62} y={map.eggY + 72}></use>
+      </g>
+
+      <g class="scaffold">
+        <Paths layers={map.scaffoldLayers} />
+        {map.builders.map((w) => (
+          <g class="worker" style={`--frame: ${w.speed}`}>
+            <g class="frames work">
+              <use href={`#es-${w.work[0]}`} x={w.x} y={w.y} />
+              <use href={`#es-${w.work[1]}`} x={w.x} y={w.y} />
+            </g>
+          </g>
+        ))}
+        <Thing thing={map.crane} />
+        <Thing thing={map.craneLoad} />
+        <g class="worker" style={`--frame: ${map.wheelWalker.speed}`}>
+          <g class="frames">
+            <use
+              href={`#es-${map.wheelWalker.work[0]}`}
+              x={map.wheelWalker.x}
+              y={map.wheelWalker.y}
+            ></use>
+            <use
+              href={`#es-${map.wheelWalker.work[1]}`}
+              x={map.wheelWalker.x}
+              y={map.wheelWalker.y}
+            ></use>
+          </g>
+        </g>
+      </g>
+
+      {map.before.map((thing) => (
+        <Thing thing={thing} />
+      ))}
+      <g data-new-houses></g>
+      {map.animals.map((animal) => (
+        <Thing thing={animal} />
+      ))}
+
+      {map.workers.map((w) => (
+        <g class="worker" style={`--frame: ${w.speed}`}>
+          <g class="frames work">
+            <use href={`#es-${w.work[0]}`} x={w.x} y={w.y} />
+            <use href={`#es-${w.work[1]}`} x={w.x} y={w.y} />
+          </g>
+          <g class="cheer">
+            <use href={`#es-${w.cheer[0]}`} x={w.x} y={w.y} />
+          </g>
+        </g>
+      ))}
+
+      {map.walkers.map((w) => (
+        <g
+          class="walker"
+          style={`animation-name: ${w.name}; animation-duration: ${w.duration}s; animation-delay: ${w.delay}s`}
+        >
+          <g class="frames" style="--frame: 0.5s">
+            <use href={`#es-${w.frames[0]}`} x={w.x} y={w.y} />
+            <use href={`#es-${w.frames[1]}`} x={w.x} y={w.y} />
+          </g>
+        </g>
+      ))}
+
+      <g data-crews></g>
+
+      <g class="map-labels" aria-hidden="true">
+        {map.labels.map((label) => (
+          <text
+            x={label.x}
+            y={label.y}
+            font-size={label.size}
+            transform={
+              label.rotate
+                ? `rotate(${label.rotate} ${label.x} ${label.y})`
+                : undefined
+            }
+          >
+            {label.text}
+          </text>
+        ))}
+      </g>
+
+      {map.smokes.map((smoke) => (
+        <Thing thing={smoke} />
+      ))}
+      <Thing thing={map.sails} />
+
+      <g class="celebration">
+        <Paths layers={map.buntingLayers} />
+        <Paths layers={map.partyLayers} />
+      </g>
+
+      {map.clouds.map((cloud) => (
+        <g class="cloud" style={cloud.style}>
+          <g transform={`translate(0 ${cloud.y})`}>
+            <Paths layers={cloud.layers} />
+          </g>
+        </g>
+      ))}
+      {map.gulls.map((gull) => (
+        <Thing thing={gull} />
+      ))}
+    </svg>
+  </div>
+
+  <div class="settlement-overlay">
+    <slot />
+
+    <aside class="command-bar stone" aria-labelledby="es-site-title">
+      <div
+        class="command-settler"
+        data-settler
+        data-replies={JSON.stringify(replies)}
+        hidden
+      >
+        <p class="bubble" aria-live="polite" data-reply></p>
+        <button
+          type="button"
+          class="settler-button frame"
+          aria-label="Siedlerin anklicken"
+          data-mood="calm"
+        >
+          <Settler class="block w-full" />
+        </button>
+      </div>
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-baseline gap-x-3">
+          <p class="kicker text-yolk">Baustelle</p>
+          <h2 id="es-site-title" class="display text-xl sm:text-2xl">
+            Das Riesenei
+          </h2>
+        </div>
+        <label class="sr-only" for="es-progress">
+          Baufortschritt
+        </label>
+        <progress
+          id="es-progress"
+          class="build-progress mt-2"
+          max={total}
+          value={startBuilt}
+          data-progress
+        ></progress>
+        <div class="mt-1 flex flex-wrap justify-between gap-x-4 text-sm">
+          <p class="font-semibold" role="status" data-status>
+            {statuses[startBuilt - 1]}
+          </p>
+          <p class="opacity-80" data-progress-text>
+            {progressText}
+          </p>
+        </div>
+      </div>
+      <div class="command-build flex gap-2 sm:flex-col">
+        <button
+          type="button"
+          class="btn-game btn-meadow btn-big"
+          data-build-button
+          hidden
+        >
+          Bauen
+        </button>
+        <button
+          type="button"
+          class="btn-game btn-small"
+          data-house-button
+          hidden
+        >
+          Haus bauen
+        </button>
+      </div>
+      <p class="command-hint" data-house-hint hidden>
+        <span class="hidden sm:inline">
+          <span aria-hidden="true">Tipp:</span> Klick auf eine freie Wiese, dann
+          bauen die Siedler dort ein Haus.
+        </span>
+        <strong class="text-yolk sm:ml-1" data-house-count></strong>
+        <span class="sr-only" aria-live="polite" data-house-status></span>
+      </p>
+    </aside>
+  </div>
+</section>
+
+<script>
+  import "./settlement";
+</script>

@@ -1,35 +1,120 @@
 ---
+import Building from "../../variants/egg-settlers/Building.astro";
 import Layout from "../../variants/egg-settlers/Layout.astro";
 import meta from "../../variants/egg-settlers/meta";
+import Settler from "../../variants/egg-settlers/Settler.astro";
+import TechIcon, {
+  type TechStage,
+} from "../../variants/egg-settlers/TechIcon.astro";
+
+const stages: { stage: TechStage; name: string; text: string }[] = [
+  {
+    stage: "egg",
+    name: "Ei",
+    text: "Am Anfang steht ein Ei. Auf Englisch heisst es egg.",
+  },
+  {
+    stage: "settle",
+    name: "siedeln",
+    text: "Siedeln heisst, sich irgendwo niederlassen. Wer siedelt, ist ein Siedler, auf Englisch settler.",
+  },
+  {
+    stage: "eisiedeln",
+    name: "Ei-siedeln",
+    text: "Sag es schnell hintereinander: Ei-siedeln klingt wie Einsiedeln.",
+  },
+  {
+    stage: "settlers",
+    name: "Egg Settlers",
+    text: "Wort für Wort übersetzt wird aus Ei-siedeln Egg Settlers. Forschung abgeschlossen!",
+  },
+];
 ---
 
 <Layout
   title={`Über uns – ${meta.name}`}
-  description={`Wer hinter ${meta.name} steckt und wie unsere Spiele entstehen.`}
+  description={`Wer hinter ${meta.name} steckt, woher der Name kommt und wie unsere Spiele entstehen.`}
 >
-  <article class="prose prose-lg mx-auto px-4 py-12">
-    <h1>Über uns</h1>
-    <p>
-      {meta.name} ist ein kleines Hobby-Spielestudio. Wir programmieren Spiele,
-      die direkt im Browser laufen, ohne Installation.
-    </p>
-    <h2>Wie alles begann</h2>
-    <p>
-      Am Nationalen Zukunftstag, dem 12. November 2026, haben wir aus Skizzen
-      auf Papier unsere ersten spielbaren Prototypen gebaut: Moto Devil und Car
-      Drive. Seither entwickeln wir beide weiter.
-    </p>
-    <h2>Wie wir arbeiten</h2>
-    <p>
-      Jede Idee beginnt als Skizze. Daraus schreiben wir einen kurzen Plan: Was
-      fehlt, wie könnte die Lösung aussehen, und was lassen wir bewusst weg?
-      Dann bauen wir einen Prototyp und probieren ihn aus.
-    </p>
-    <h2>Womit wir bauen</h2>
-    <p>
-      Unsere Spiele sind in Rust mit der Spiel-Engine Bevy geschrieben und
-      laufen als WebAssembly im Browser. Der Quellcode ist auf GitHub
-      öffentlich.
-    </p>
-  </article>
+  <div class="mx-auto max-w-6xl px-4 py-10">
+    <div class="parchment max-w-3xl p-6">
+      <h1 class="display text-4xl sm:text-6xl">Über uns</h1>
+      <p class="mt-4 text-lg">
+        {meta.name} ist ein kleines Hobby-Spielestudio. Wir programmieren
+        Spiele, die direkt im Browser laufen, ohne Installation.
+      </p>
+    </div>
+
+    <section id="name" class="mt-12 scroll-mt-4">
+      <div class="banner wood inline-block px-5 py-3">
+        <p class="kicker text-yolk">Forschungsbaum</p>
+        <h2 class="display text-3xl sm:text-4xl">Woher der Name kommt</h2>
+      </div>
+      <ol class="tech-tree mt-8 grid gap-7 md:grid-cols-4">
+        {stages.map((item, index) => (
+          <li class="tech-node stone relative flex flex-col items-center gap-3 p-4 text-center">
+            <div class="frame flex size-24 items-center justify-center rounded-full bg-parchment p-2">
+              <TechIcon stage={item.stage} class="w-full" />
+            </div>
+            <p class="kicker text-yolk">Stufe {index + 1}</p>
+            <h3 class="display text-xl">{item.name}</h3>
+            <p>{item.text}</p>
+            <p class="mt-auto text-sm font-semibold text-[#b5df8f]">
+              ✓ Erforscht
+            </p>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="mt-16">
+      <div class="banner wood inline-block px-5 py-3">
+        <p class="kicker text-yolk">Chronik</p>
+        <h2 class="display text-3xl sm:text-4xl">
+          Aus der Geschichte der Siedlung
+        </h2>
+      </div>
+      <div class="mt-8 flex flex-col gap-6">
+        <article class="parchment flex flex-col gap-5 p-6 sm:flex-row">
+          <div class="frame w-32 flex-none self-start">
+            <Settler class="block w-full" />
+          </div>
+          <div>
+            <h3 class="display text-2xl">Wie alles begann</h3>
+            <p class="mt-2">
+              Am Nationalen Zukunftstag, dem 12. November 2026, haben wir aus
+              Skizzen auf Papier unsere ersten spielbaren Prototypen gebaut:
+              Moto Devil und Car Drive. Seither entwickeln wir beide weiter.
+            </p>
+          </div>
+        </article>
+        <article class="parchment flex flex-col gap-5 p-6 sm:flex-row-reverse">
+          <div class="frame building w-40 flex-none self-start">
+            <Building kind="house" />
+          </div>
+          <div>
+            <h3 class="display text-2xl">Wie wir arbeiten</h3>
+            <p class="mt-2">
+              Jede Idee beginnt als Skizze. Daraus schreiben wir einen kurzen
+              Plan: Was fehlt, wie könnte die Lösung aussehen, und was lassen
+              wir bewusst weg? Dann bauen wir einen Prototyp und probieren ihn
+              aus.
+            </p>
+          </div>
+        </article>
+        <article class="parchment flex flex-col gap-5 p-6 sm:flex-row">
+          <div class="frame flex w-32 flex-none items-center justify-center self-start bg-parchment p-3">
+            <TechIcon stage="egg" class="w-full" />
+          </div>
+          <div>
+            <h3 class="display text-2xl">Womit wir bauen</h3>
+            <p class="mt-2">
+              Unsere Spiele sind in Rust mit der Spiel-Engine Bevy geschrieben
+              und laufen als WebAssembly im Browser. Der Quellcode ist auf
+              GitHub öffentlich.
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
 </Layout>

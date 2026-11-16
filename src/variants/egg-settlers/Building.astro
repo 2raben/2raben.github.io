@@ -1,0 +1,133 @@
+---
+/**
+ * A game's picture in the settlement's pixel art, 128 × 80 pixels: Moto
+ * Devil's stunt track in side view, Car Drive's three-lane road from above
+ * with the garage, or a house for a game without a picture of its own. Each
+ * shows only what the game's text describes (see vehicles.ts).
+ */
+import { buildingLabels, type BuildingKind } from "./buildings";
+import Paths from "./Paths.astro";
+import { Pixels, bush, colors, grassTile, tree, trails } from "./pixel";
+import { blossom, conifer, house, person } from "./sprites";
+import * as V from "./vehicles";
+
+interface Props {
+  kind: BuildingKind;
+  class?: string;
+}
+
+const { kind, class: className } = Astro.props;
+
+const width = 128;
+const height = 80;
+let p = new Pixels(width, height);
+const meadow = () => {
+  const tile = grassTile(23);
+  for (let y = 0; y < height; y += tile.height) {
+    for (let x = 0; x < width; x += tile.width) p.stamp(tile, x, y);
+  }
+};
+
+if (kind === "stunt-track") {
+  const ground = 62;
+  p = V.trackBackdrop(width, height, ground);
+  p.stamp(V.ramp(26, 14), 6, ground - 14);
+  p.stamp(V.spikes(4, 10), 38, ground - 10);
+  p.stamp(V.loop(13), 80, ground - 34);
+  p.stamp(V.gravestone(), 66, ground - 9);
+  p.stamp(V.goalFlag(), 117, ground - 18);
+  p.stamp(V.raven(1), 102, 6);
+  /* Speed lines behind the bike in mid-air. */
+  for (const [x, y, w] of [
+    [22, 26, 8],
+    [18, 30, 11],
+    [24, 36, 6],
+  ] as const) {
+    p.rect(x, y, w, 1, "#fffdf4");
+  }
+  p.stamp(V.bike(0), 34, 16);
+  p.stamp(V.jet(0), 22, 28);
+} else if (kind === "garage") {
+  meadow();
+  const roadX = 45;
+  p.stamp(V.road(38, height, 12), roadX, 0);
+  p.stamp(conifer(12, 6), 0, 18);
+  p.stamp(conifer(5, 5), 22, 40);
+  p.stamp(tree(12, 5), 4, 52);
+  p.stamp(V.garage(), 84, 2);
+  trails(
+    p,
+    [
+      [
+        [100, 40],
+        [86, 46],
+      ],
+    ],
+    5,
+    3,
+  );
+  p.stamp(V.car("#a63d2a"), 92, 46);
+  p.stamp(V.car("#3f6e2a"), 104, 48);
+  const lane = (n: number) => roadX + 1 + n * 12 + 2;
+  p.stamp(V.flipped(V.car("#7d4f8c")), lane(2), 2);
+  p.stamp(V.car("#2f6690", { blink: "left" }), lane(0), 6);
+  p.stamp(V.truck(), lane(2) - 1, 26);
+  p.stamp(V.shieldPickup(), lane(1) + 1, 30);
+  p.stamp(V.heart(), lane(0) + 1, 40);
+  p.stamp(V.car(colors.yolk, { stripes: true }), lane(1), 54);
+  p.stamp(V.exhaust(0), lane(1), 66);
+  /* Three hearts, one lost, and the boost gauge. */
+  [true, true, false].forEach((full, i) =>
+    p.stamp(V.heart(full), 2 + i * 8, 2),
+  );
+  p.rect(2, 72, 26, 5, "#1d1d1f");
+  p.rect(3, 73, 17, 3, "#f4a63a");
+  p.rect(3, 73, 17, 1, "#fff4c2");
+} else {
+  meadow();
+  trails(
+    p,
+    [
+      [
+        [58, 50],
+        [62, 80],
+      ],
+    ],
+    4,
+    5,
+  );
+  const home = house({
+    w: 26,
+    d: 10,
+    h: 10,
+    roof: "tile",
+    wall: "timber",
+    door: 11,
+    windows: [3, 19],
+    chimney: 4,
+  });
+  p.stamp(home.pixels, 40, 52 - home.pixels.height);
+  p.stamp(conifer(31, 7), 92, 4);
+  p.stamp(blossom(8, 6), 8, 10);
+  p.stamp(bush(8, 4), 18, 54);
+  p.stamp(
+    person(
+      { woman: true, clothes: "#d24a32", hair: "#5a3a1c", apron: true },
+      "walk",
+      0,
+    ),
+    66,
+    56,
+  );
+}
+---
+
+<svg
+  class={className}
+  viewBox={`0 0 ${width} ${height}`}
+  shape-rendering="crispEdges"
+  role="img"
+  aria-label={buildingLabels[kind]}
+>
+  <Paths layers={p.layers()} />
+</svg>

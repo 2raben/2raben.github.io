@@ -1,0 +1,25 @@
+---
+/**
+ * One placed sprite of the settlement map (see map.ts): a single drawing, or
+ * two frames that styles.css alternates. The wrapping group carries the
+ * sprite's own animation, such as a ship's drift or a gull's flight.
+ */
+import type { Thing } from "./map";
+
+interface Props {
+  thing: Thing;
+}
+
+const { sprite, x, y, className, style, foot } = Astro.props.thing;
+---
+
+<g class={className} style={style} data-foot={foot?.join(" ")}>
+  {typeof sprite === "string" ? (
+    <use href={`#es-${sprite}`} x={x} y={y} />
+  ) : (
+    <g class="frames">
+      <use href={`#es-${sprite[0]}`} x={x} y={y} />
+      <use href={`#es-${sprite[1]}`} x={x} y={y} />
+    </g>
+  )}
+</g>

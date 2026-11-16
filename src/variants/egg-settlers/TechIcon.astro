@@ -1,0 +1,59 @@
+---
+/**
+ * A pixel-art icon for one stage of the name's tech tree on the about page: an
+ * egg, a settler's bundle by a hut, an egg before a loose two-tower silhouette
+ * (a nod to Einsiedeln, not a picture of the monastery), and the finished
+ * giant egg with its settlers. Decorative; the stage's text says what it means.
+ */
+import Paths from "./Paths.astro";
+import { Pixels, colors, egg, ellipse, hut, line, settler } from "./pixel";
+
+export type TechStage = "egg" | "settle" | "eisiedeln" | "settlers";
+
+interface Props {
+  stage: TechStage;
+  class?: string;
+}
+
+const { stage, class: className } = Astro.props;
+
+const p = new Pixels(24, 24);
+if (stage === "egg") {
+  p.stamp(egg(14, 18), 5, 3);
+} else if (stage === "settle") {
+  p.stamp(hut(12, 6, 6), 10, 9);
+  line(p, 3, 22, 9, 7, colors.trunk);
+  ellipse(p, 9, 6, 3.5, 3, colors.hat);
+  p.set(9, 3, colors.thatchOutline);
+  p.set(9, 4, colors.thatchOutline);
+} else if (stage === "eisiedeln") {
+  for (const x of [2, 16]) {
+    p.rect(x, 5, 6, 16, colors.stone);
+    p.rect(x, 5, 1, 16, colors.stoneLight);
+    p.rect(x + 5, 5, 1, 16, colors.stoneDark);
+    p.rect(x + 1, 2, 4, 3, colors.dome);
+    p.rect(x + 2, 1, 2, 1, colors.dome);
+    p.set(x + 2, 0, colors.ink);
+    p.rect(x + 2, 9, 2, 2, colors.ink);
+  }
+  p.rect(8, 11, 8, 10, colors.stone);
+  p.rect(8, 10, 8, 1, colors.slate);
+  p.stamp(egg(10, 13), 7, 10);
+} else {
+  p.stamp(egg(12, 16, 3), 6, 7);
+  line(p, 12, 7, 12, 1, colors.ink);
+  p.rows(["YYYY", "YY.."], { Y: colors.yolk }, 13, 1);
+  p.stamp(settler(colors.wall), 0, 13);
+  p.stamp(settler(colors.leaf), 19, 13);
+}
+---
+
+<svg
+  class={className}
+  viewBox="0 0 24 24"
+  shape-rendering="crispEdges"
+  aria-hidden="true"
+  focusable="false"
+>
+  <Paths layers={p.layers()} />
+</svg>

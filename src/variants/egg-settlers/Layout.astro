@@ -1,7 +1,10 @@
 ---
 import "./styles.css";
+import { getGames } from "../../lib/games";
 import { href } from "../../lib/url";
 import meta from "./meta";
+import { grassTile, svgUrl } from "./pixel";
+import ResourceIcon from "./ResourceIcon.astro";
 
 interface Props {
   title: string;
@@ -9,6 +12,8 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+const games = await getGames();
+const meadow = `background-image: ${svgUrl(grassTile(11, 64, 3))}`;
 ---
 
 <!doctype html>
@@ -20,31 +25,64 @@ const { title, description } = Astro.props;
     <link rel="icon" href="data:," />
     <title>{title}</title>
   </head>
-  <body class="flex min-h-screen flex-col bg-base-100 text-base-content">
-    <header class="navbar bg-base-200 px-4">
-      <div class="flex-1">
-        <a class="text-xl font-bold" href={href(`/${meta.slug}/`)}>
+  <body
+    class="meadow flex min-h-screen flex-col text-base-content"
+    style={meadow}
+  >
+    <header class="hud wood relative z-10 px-4 py-2">
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-2">
+        <a
+          class="display text-xl text-shell sm:text-2xl"
+          href={href(`/${meta.slug}/`)}
+        >
           {meta.name}
         </a>
-      </div>
-      <nav aria-label="Hauptnavigation">
-        <ul class="menu menu-horizontal gap-1 px-0">
-          <li>
-            <a href={href(`/${meta.slug}/#spiele`)}>Spiele</a>
+        <ul
+          class="order-last flex w-full flex-wrap gap-2 sm:order-none sm:w-auto"
+          aria-label="Vorräte"
+        >
+          <li class="hud-resource">
+            <ResourceIcon kind="games" />
+            Spiele: <strong>{games.length}</strong>
           </li>
-          <li>
-            <a href={href(`/${meta.slug}/ueber-uns/`)}>Über uns</a>
+          <li class="hud-resource">
+            <ResourceIcon kind="ideas" />
+            Ideen: <strong>viele</strong>
+          </li>
+          <li class="hud-resource">
+            <ResourceIcon kind="eggs" />
+            Eier: <strong>1 (riesig)</strong>
           </li>
         </ul>
-      </nav>
+        <nav aria-label="Hauptnavigation" class="ml-auto">
+          <ul class="flex gap-2">
+            <li>
+              <a
+                class="btn-game btn-stone"
+                href={href(`/${meta.slug}/#spiele`)}
+              >
+                Spiele
+              </a>
+            </li>
+            <li>
+              <a
+                class="btn-game btn-stone"
+                href={href(`/${meta.slug}/ueber-uns/`)}
+              >
+                Über uns
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </header>
-    <main class="flex-1">
+    <main class="isolate flex-1 overflow-x-clip">
       <slot />
     </main>
-    <footer class="footer footer-center bg-base-200 p-6 text-sm">
+    <footer class="stone relative z-10 rounded-none border-x-0 border-b-0 px-4 py-6 text-center">
       <p>
         «{meta.name}» ist einer von mehreren Namensvorschlägen.{" "}
-        <a class="link" href={href("/")}>
+        <a class="link-game" href={href("/")}>
           Alle Vorschläge ansehen
         </a>
       </p>

@@ -1,0 +1,14 @@
+---
+/** A pixel drawing's layers as SVG paths, one per color (see pixel.ts). */
+import type { Layer } from "./pixel";
+
+interface Props {
+  layers: Layer[];
+}
+
+const { layers } = Astro.props;
+---
+
+{layers.map((layer) => (
+  <path fill={layer.fill} d={layer.d} />
+))}
