@@ -127,7 +127,9 @@ swisstopo. The monastery is a simplified 3D model
 of the west front after photographs and measured from them: corner pavilions
 with turrets, four-storey wings, the twin towers with their stages, clocks,
 belfries and copper domes over a square plan with lanterns, and the convex
-church front with its attic, niche and statues, about 145 m in all. The main
+church front with its attic, niche and statues, about 145 m in all, and the
+north wing with the north-east pavilion behind, about 105 m deep after the
+abbey's outline in OpenStreetMap; the east and south wings stay out of sight. The main
 tower clocks show the time in Einsiedeln (Europe/Zurich) with an hour and a
 minute hand, the upper ones a single minute hand across the dial, as on the
 real towers; the canvas redraws them every minute, and the static SVG shows
@@ -135,7 +137,8 @@ ten past ten. It is projected so that its
 lines meet the floor grid's vanishing point, where the sun sets. Where the page
 leaves a margin of at least 200 px left of its text column (from 105rem), the
 monastery stands in that margin instead: further away, turned towards the
-viewer and drawn 1.15 times taller so that it does not look squat from the front
+viewer at 45°, close enough that the near tower stands larger than the far
+one, and drawn 1.15 times taller so that it does not look squat from the front
 (`abbeyPose()` in `landmarks.ts`); its lines meet the horizon at their own
 point. About 54° off the centre of the view, a flat projection would stretch it
 sideways by 1.7 times, so it is projected as if looked at straight on and then

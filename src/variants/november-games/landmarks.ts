@@ -128,10 +128,10 @@ function poseCamera(camera: View, pose: Pose): View {
  * units wide: further away, and turned towards the viewer up to `oblique`
  * degrees short of facing it, so that it is still seen from the north-west.
  */
-export function poseAt(target: number, span: number, oblique = 20): Pose {
-  // Close enough that the turned front and its wings overfill `span` a
-  // little, reaching under the text.
-  const distance = (focal * 100) / span;
+export function poseAt(target: number, span: number, oblique = 45): Pose {
+  // Close, so that the near (left) tower stands larger than the far one,
+  // and the front and its wings overfill `span` a little.
+  const distance = (focal * 65) / span;
   const bearing = Math.atan(target / focal);
   return {
     x: distance * Math.sin(bearing),
@@ -818,6 +818,23 @@ export function monasteryFrom(
     nearEnd: true,
     turret: true,
   };
+  // The north wing runs east from the north-west pavilion to the north-east
+  // pavilion, about 105 m, after the abbey's outline in OpenStreetMap
+  // (© OpenStreetMap contributors, measurements only); the
+  // east and south wings stay out of sight from the north-west. wing()
+  // draws fronts that face +X, so these are drawn in a frame turned 90° to
+  // the right, where local X points north (-Z) and local Z west (+X), far
+  // end first; painted first, the front stands before them.
+  const outer = view;
+  view = { x: -outer.z, z: outer.x, yaw: outer.yaw - Math.PI / 2 };
+  wing(-28.5, front - 145, front - 123, {
+    ...pavilion,
+    nearEnd: false,
+    turret: false,
+    seed: 1,
+  });
+  wing(-30, front - 123, front + 1.5 - 20, { ...wingSpec, seed: 4 });
+  view = outer;
   wing(front + 1.5, 155.8, 174.8, { ...pavilion, seed: 2 });
   wing(front, 128.2, 155.8, { ...wingSpec, seed: 3 });
   tower(117.9, true);
@@ -842,8 +859,10 @@ export function abbeyPose(
 ) {
   const margin = (width - Math.min(width - 96, 1280)) / 2;
   if (width < 1024 || margin < 200) return homePose;
+  // The church front stands near the text, so that the north wing has room
+  // to recede to the left.
   return poseAt(
-    (margin / 2 - layout.vanishX) / layout.scale,
+    (margin * 0.9 - layout.vanishX) / layout.scale,
     Math.min(340, (margin * 0.8) / layout.scale),
   );
 }
