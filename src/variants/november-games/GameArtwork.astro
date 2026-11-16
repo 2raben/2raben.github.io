@@ -3,150 +3,408 @@ interface Props {
   game: string;
 }
 const { game } = Astro.props;
+
+/*
+ * Car Drive: a three-lane highway in perspective towards a sunset, seen from
+ * just behind the player's car. Ground points (X metres to the side, Z ahead)
+ * project to x = 300 + 110·X/Z, y = 112 + 380/Z; the road is 3 × 3.6 m wide.
+ */
+const horizon = 112;
+const ground = (x: number, z: number) =>
+  `${(300 + (110 * x) / z).toFixed(1)} ${(horizon + 380 / z).toFixed(1)}`;
+const segment = (x: number, z0: number, z1: number) =>
+  `M${ground(x, z0)}L${ground(x, z1)}`;
+const lane = 3.6;
+const edge = (lane * 3) / 2;
+const roadPath = `M${ground(-edge, 2.6)}L${ground(-edge, 900)}L${ground(edge, 900)}L${ground(edge, 2.6)}Z`;
+const edges = segment(-edge, 2.6, 900) + segment(edge, 2.6, 900);
+// Lane dashes: 2.5 m long every 6 m, shrinking towards the horizon.
+const dashes = [-lane / 2, lane / 2]
+  .flatMap((x) =>
+    Array.from({ length: 14 }, (_, i) => 2.8 + i * 6).map((z) =>
+      segment(x, z, z + 2.5),
+    ),
+  )
+  .join("");
+// The floor grid beside the road.
+const rows = [3, 3.8, 4.9, 6.4, 8.6, 12, 18, 30]
+  .map((z) => `M0 ${(horizon + 380 / z).toFixed(1)}h600`)
+  .join("");
+const columns = [-1, 1]
+  .flatMap((side) =>
+    [7.6, 11, 15, 20, 27, 38].map((x) => segment(side * x, 1.8, 900)),
+  )
+  .join("");
+const sunStripes = [8, 18, 30, 44, 60]
+  .map((dy) => `M228 ${horizon - 62 + dy * 1.12}h144`)
+  .join("");
 ---
 
 <div class="game-artwork" aria-hidden="true">
   <svg viewBox="0 0 600 240" fill="none">
-    <defs>
-      <linearGradient id={`${game}-glow`} x2="1" y2="1">
-        <stop stop-color="#ffb487" />
-        <stop offset="1" stop-color="#f255de" />
-      </linearGradient>
-      <linearGradient id={`${game}-ground`} x2="0" y2="1">
-        <stop stop-color="#341448" />
-        <stop offset="1" stop-color="#110c29" />
-      </linearGradient>
-    </defs>
-    <path d="M0 0h600v240H0z" fill={`url(#${game}-ground)`} />
-    <circle cx="440" cy="100" r="77" fill={`url(#${game}-glow)`} opacity=".8" />
-    <path
-      d="M350 110h180m-180 15h180m-180 18h180m-180 21h180"
-      stroke="#2c133f"
-      stroke-width="6"
-    />
-    <g stroke="#8b55c8" opacity=".5">
-      <path d="M0 178h600M0 205h600M0 237h600M300 160 60 240m240-80L180 240m120-80v80m0-80 120 80m-120-80 240 80" />
-    </g>
-    {game === "moto-devil" ? (
-      <g>
-        <path
-          d="M0 204h80l105-40 95 53h110l100-52 110 29"
-          stroke="#70efff"
-          stroke-width="3"
-        />
-        <path
-          d="m80 204 14 36m91-76-28 76m28-76 41 76m264-75-26 75m26-75 45 75"
-          stroke="#70efff"
-          opacity=".3"
-        />
-        <g transform="translate(210 105) rotate(-18)">
+    {game === "car-drive" ? (
+      <>
+        <defs>
+          <linearGradient id={`${game}-sky`} x2="0" y2="1">
+            <stop stop-color="#0b0624" />
+            <stop offset=".55" stop-color="#3a1160" />
+            <stop offset="1" stop-color="#b8277e" />
+          </linearGradient>
+          <linearGradient id={`${game}-sun`} x2="0" y2="1">
+            <stop stop-color="#fff1a8" />
+            <stop offset=".45" stop-color="#ffa36c" />
+            <stop offset="1" stop-color="#ff3f9e" />
+          </linearGradient>
+          <linearGradient id={`${game}-floor`} x2="0" y2="1">
+            <stop stop-color="#2a0c45" />
+            <stop offset="1" stop-color="#0a0620" />
+          </linearGradient>
+          <linearGradient id={`${game}-glass`} x2="0" y2="1">
+            <stop stop-color="#9ff8ff" stop-opacity=".55" />
+            <stop offset="1" stop-color="#3b2fc2" stop-opacity=".35" />
+          </linearGradient>
+          <linearGradient id={`${game}-flame`} x2="0" y2="1">
+            <stop stop-color="#fff1a8" />
+            <stop offset=".45" stop-color="#ffa36c" />
+            <stop offset="1" stop-color="#ff3f9e" stop-opacity="0" />
+          </linearGradient>
+          <radialGradient id={`${game}-beam`}>
+            <stop stop-color="#fff6d8" stop-opacity=".9" />
+            <stop offset="1" stop-color="#fff6d8" stop-opacity="0" />
+          </radialGradient>
+          {/* In user space, so that straight lines (empty boxes) glow too. */}
+          <filter
+            id={`${game}-neon`}
+            filterUnits="userSpaceOnUse"
+            x="-1000"
+            y="-1000"
+            width="2600"
+            height="2400"
+          >
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <clipPath id={`${game}-above`}>
+            <path d={`M0 0h600v${horizon}H0z`} />
+          </clipPath>
+          {/* A sports car from behind, 160 units wide, standing on (0, 0). */}
+          <g id={`${game}-rear`}>
+            <ellipse
+              cx="0"
+              cy="-2"
+              rx="88"
+              ry="6"
+              fill="#05030f"
+              opacity=".7"
+            />
+            <path
+              d="M-78-16h16v18h-16zM62-16h16v18h-16z"
+              fill="#0d0820"
+              stroke="#3cf2ff"
+              stroke-width="1.5"
+            />
+            <path
+              d="M-78-20-75-46Q-73-56-62-58H62Q73-56 75-46L78-20Q78-10 68-10H-68Q-78-10-78-20Z"
+              fill="#1d0f3a"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M-48-10-42-20H42L48-10"
+              fill="#0d0820"
+              stroke="#3cf2ff"
+              stroke-width="1.5"
+            />
+            <path
+              d="M-50-58-38-84Q-36-88-30-88H30Q36-88 38-84L50-58Z"
+              fill="#160b2e"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M-42-61-33-81H33L42-61Z"
+              fill={`url(#${game}-glass)`}
+              stroke="#9ff8ff"
+              stroke-width="1.5"
+            />
+            <path
+              d="M-82-64H82M-58-64v6m116-6v6"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+            />
+            <g filter={`url(#${game}-neon)`} stroke-linecap="round">
+              <path d="M-68-44H68" stroke="#ff3f6e" stroke-width="7" />
+              <path
+                d="M-64-44h22m84 0h22"
+                stroke="#ffd3f4"
+                stroke-width="2.5"
+              />
+            </g>
+            <rect
+              x="-17"
+              y="-36"
+              width="34"
+              height="10"
+              fill="#e9fbff"
+              stroke="#3cf2ff"
+            />
+            <text
+              y="-28.4"
+              text-anchor="middle"
+              font-family='"Courier New", monospace'
+              font-size="7.5"
+              font-weight="700"
+              fill="#1d0f3a"
+            >
+              CARRRGH
+            </text>
+            <circle cx="-34" cy="-14" r="3.5" fill="#0d0820" stroke="#9ff8ff" />
+            <circle cx="34" cy="-14" r="3.5" fill="#0d0820" stroke="#9ff8ff" />
+          </g>
+        </defs>
+        <path d={`M0 0h600v${horizon}H0z`} fill={`url(#${game}-sky)`} />
+        <g fill="#dce7ff">
+          <path d="M130 24v12m-6-6h12M520 44v12m-6-6h12" stroke="#dce7ff" />
+          <circle cx="160" cy="52" r="1.5" />
+          <circle cx="420" cy="22" r="1.5" />
+          <circle cx="470" cy="70" r="1.2" />
+          <circle cx="40" cy="78" r="1.2" />
+        </g>
+        {/* The banded sun sets at the road's vanishing point. */}
+        <g clip-path={`url(#${game}-above)`}>
           <circle
-            cx="0"
-            cy="35"
-            r="28"
-            fill="#160d2e"
-            stroke="#ff8add"
-            stroke-width="4"
+            cx="300"
+            cy={horizon}
+            r="70"
+            fill={`url(#${game}-sun)`}
+            filter={`url(#${game}-neon)`}
           />
-          <circle
-            cx="105"
-            cy="35"
-            r="28"
-            fill="#160d2e"
-            stroke="#ff8add"
-            stroke-width="4"
-          />
+          <path d={sunStripes} stroke="#3a1160" stroke-width="5" />
+        </g>
+        <g filter={`url(#${game}-neon)`} stroke-linejoin="round">
           <path
-            d="M0 35 28-4 62 35H0m62 0 22-52 21 52M28-4h42m8-13h20M17-10h30"
-            stroke="#83f4ff"
-            stroke-width="5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <path
-            d="m51-7-13-25 16-16 20 26h14M40-30l-14 21"
-            stroke="#f7dfef"
-            stroke-width="8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <path
-            d="M17-9h30l15-10h14l5 20H23z"
-            fill="#ff8add"
-            stroke="#f7dfef"
+            d={`M0 ${horizon}V86l38-14 30 10 34-24 26 22 40-6 42 26H0z`}
+            fill="#231040"
+            stroke="#b967ff"
             stroke-width="2"
           />
           <path
-            d="M32 4h28l9 19-12 10H34L23 21z"
-            fill="#211331"
-            stroke="#83f4ff"
-            stroke-width="3"
+            d={`M600 ${horizon}V80l-30 8-36-34-22 26-22-12-28 18-24-6-36 32z`}
+            fill="#231040"
+            stroke="#ff5fd2"
+            stroke-width="2"
           />
-          <path
-            d="M33 12h23m-22 7h25m-22 7h21M19 28-3 5h-18"
-            stroke="#f7dfef"
-            stroke-width="3"
-            stroke-linecap="round"
-          />
-          <path
-            d="M9-11h32m48 16h25"
-            stroke="#ff8add"
-            stroke-width="7"
-            stroke-linecap="round"
-          />
-          <circle cx="0" cy="35" r="20" stroke="#83f4ff" stroke-width="3" />
-          <circle cx="105" cy="35" r="20" stroke="#83f4ff" stroke-width="3" />
-          <path d="M45-58a13 13 0 0 1 26-3v13H57z" fill="#f7dfef" />
-          <path d="M58-61h13v7H61z" fill="#672469" />
         </g>
         <path
-          d="M95 77h58m-86 15h66m-40 17h39"
-          stroke="#fa6ada"
-          stroke-width="2"
+          d={`M0 ${horizon}h600v${240 - horizon}H0z`}
+          fill={`url(#${game}-floor)`}
         />
-      </g>
+        <path d={rows + columns} stroke="#ff46d7" opacity=".45" />
+        <path d={roadPath} fill="#120a2a" />
+        <path
+          d={edges}
+          stroke="#9ff8ff"
+          stroke-width="2.5"
+          filter={`url(#${game}-neon)`}
+        />
+        <path d={dashes} stroke="#ff5fd2" stroke-width="2" />
+        <path
+          d={`M0 ${horizon}h600`}
+          stroke="#9ff8ff"
+          stroke-width="2"
+          filter={`url(#${game}-neon)`}
+        />
+        {/* Oncoming in the left lane, headlights first. */}
+        <g filter={`url(#${game}-neon)`}>
+          <ellipse
+            cx="282"
+            cy="132"
+            rx="14"
+            ry="5"
+            fill={`url(#${game}-beam)`}
+          />
+          <circle cx="278" cy="130" r="1.8" fill="#fff6d8" />
+          <circle cx="286" cy="130" r="1.8" fill="#fff6d8" />
+        </g>
+        {/* A car ahead in the right lane blinks before changing lanes. */}
+        <use
+          href={`#${game}-rear`}
+          transform={`translate(${300 + (110 * lane) / 13} ${horizon + 380 / 13}) scale(.2)`}
+          color="#3cf2ff"
+        />
+        <circle
+          cx={300 + (110 * lane) / 13 - 13}
+          cy={horizon + 380 / 13 - 9}
+          r="2.4"
+          fill="#ffb347"
+          filter={`url(#${game}-neon)`}
+        />
+        {/* A heart lies in the left lane. */}
+        <path
+          d="M0 9c-11-7-14-14-9-19 4-4 8-2 9 1 1-3 5-5 9-1 5 5 2 12-9 19z"
+          transform="translate(243 160)"
+          fill="#ff5fd2"
+          stroke="#ffd3f4"
+          stroke-width="1.5"
+          filter={`url(#${game}-neon)`}
+        />
+        {/* The player's car, its boost flaring from both exhausts. */}
+        <use
+          href={`#${game}-rear`}
+          transform="translate(300 232) scale(.85)"
+          color="#ff5fd2"
+        />
+        <g filter={`url(#${game}-neon)`}>
+          {[-1, 1].map((side) => (
+            <g
+              transform={`translate(${300 + side * 28.9} 220.1) rotate(${-side * 18})`}
+            >
+              <path
+                d="M-4.5 0Q-7 11-1 24 5 11 4.5 0Z"
+                fill={`url(#${game}-flame)`}
+              />
+              <circle r="3.2" fill="#fff1a8" />
+            </g>
+          ))}
+        </g>
+        {/* The game's HUD: three hearts and the boost gauge. */}
+        <g filter={`url(#${game}-neon)`}>
+          {[0, 1, 2].map((i) => (
+            <path
+              d={`M${24 + i * 20} 28c-7-4.5-9-9-6-12 2.5-2.5 5-1.3 6 .6 1-1.9 3.5-3.1 6-.6 3 3 1 7.5-6 12z`}
+              fill={i < 2 ? "#ff5fd2" : "none"}
+              stroke="#ff5fd2"
+              stroke-width="1.5"
+            />
+          ))}
+        </g>
+        <rect x="16" y="36" width="64" height="6" stroke="#9ff8ff" />
+        <rect
+          x="17.5"
+          y="37.5"
+          width="40"
+          height="3"
+          fill="#3cf2ff"
+          filter={`url(#${game}-neon)`}
+        />
+      </>
     ) : (
-      <g>
-        <path
-          d="M200 240 280 65m120 175L320 65"
-          stroke="#71f2ff"
-          stroke-width="3"
+      <>
+        <defs>
+          <linearGradient id={`${game}-glow`} x2="1" y2="1">
+            <stop stop-color="#ffb487" />
+            <stop offset="1" stop-color="#f255de" />
+          </linearGradient>
+          <linearGradient id={`${game}-ground`} x2="0" y2="1">
+            <stop stop-color="#341448" />
+            <stop offset="1" stop-color="#110c29" />
+          </linearGradient>
+        </defs>
+        <path d="M0 0h600v240H0z" fill={`url(#${game}-ground)`} />
+        <circle
+          cx="440"
+          cy="100"
+          r="77"
+          fill={`url(#${game}-glow)`}
+          opacity=".8"
         />
         <path
-          d="m262 240 30-175m46 175L308 65"
-          stroke="#efb4fb"
-          stroke-width="2"
-          stroke-dasharray="18 16"
+          d="M350 110h180m-180 15h180m-180 18h180m-180 21h180"
+          stroke="#2c133f"
+          stroke-width="6"
         />
-        <g transform="translate(300 157)">
+        <g stroke="#8b55c8" opacity=".5">
+          <path d="M0 178h600M0 205h600M0 237h600M300 160 60 240m240-80L180 240m120-80v80m0-80 120 80m-120-80 240 80" />
+        </g>
+        <g>
           <path
-            d="m-32-49-12 24v55l9 17h70l9-17v-55L32-49z"
-            fill="#28123e"
-            stroke="#ff83da"
+            d="M0 204h80l105-40 95 53h110l100-52 110 29"
+            stroke="#70efff"
             stroke-width="3"
           />
           <path
-            d="m-25-25 7-15h36l7 15 5 33h-60z"
-            fill="#72e7f3"
-            fill-opacity=".4"
-            stroke="#73f6ff"
+            d="m80 204 14 36m91-76-28 76m28-76 41 76m264-75-26 75m26-75 45 75"
+            stroke="#70efff"
+            opacity=".3"
+          />
+          <g transform="translate(210 105) rotate(-18)">
+            <circle
+              cx="0"
+              cy="35"
+              r="28"
+              fill="#160d2e"
+              stroke="#ff8add"
+              stroke-width="4"
+            />
+            <circle
+              cx="105"
+              cy="35"
+              r="28"
+              fill="#160d2e"
+              stroke="#ff8add"
+              stroke-width="4"
+            />
+            <path
+              d="M0 35 28-4 62 35H0m62 0 22-52 21 52M28-4h42m8-13h20M17-10h30"
+              stroke="#83f4ff"
+              stroke-width="5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="m51-7-13-25 16-16 20 26h14M40-30l-14 21"
+              stroke="#f7dfef"
+              stroke-width="8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M17-9h30l15-10h14l5 20H23z"
+              fill="#ff8add"
+              stroke="#f7dfef"
+              stroke-width="2"
+            />
+            <path
+              d="M32 4h28l9 19-12 10H34L23 21z"
+              fill="#211331"
+              stroke="#83f4ff"
+              stroke-width="3"
+            />
+            <path
+              d="M33 12h23m-22 7h25m-22 7h21M19 28-3 5h-18"
+              stroke="#f7dfef"
+              stroke-width="3"
+              stroke-linecap="round"
+            />
+            <path
+              d="M9-11h32m48 16h25"
+              stroke="#ff8add"
+              stroke-width="7"
+              stroke-linecap="round"
+            />
+            <circle cx="0" cy="35" r="20" stroke="#83f4ff" stroke-width="3" />
+            <circle cx="105" cy="35" r="20" stroke="#83f4ff" stroke-width="3" />
+            <path d="M45-58a13 13 0 0 1 26-3v13H57z" fill="#f7dfef" />
+            <path d="M58-61h13v7H61z" fill="#672469" />
+          </g>
+          <path
+            d="M95 77h58m-86 15h66m-40 17h39"
+            stroke="#fa6ada"
             stroke-width="2"
           />
-          <path d="M-27 20h54m-45-12v-33m36 33v-33" stroke="#71eaff" />
-          <path d="M-33 34h16m18 0h16" stroke="#ff86de" stroke-width="5" />
         </g>
-        <path
-          d="m232 171-30 65m166-65 30 65"
-          stroke="#ff7cdd"
-          stroke-width="3"
-          opacity=".6"
-        />
-      </g>
+        <g fill="#dce7ff">
+          <path d="M85 34v12m-6-6h12M530 55v12m-6-6h12" stroke="#dce7ff" />
+          <circle cx="170" cy="50" r="1.5" />
+          <circle cx="355" cy="30" r="1.5" />
+        </g>
+      </>
     )}
-    <g fill="#dce7ff">
-      <path d="M85 34v12m-6-6h12M530 55v12m-6-6h12" stroke="#dce7ff" />
-      <circle cx="170" cy="50" r="1.5" />
-      <circle cx="355" cy="30" r="1.5" />
-    </g>
   </svg>
 </div>

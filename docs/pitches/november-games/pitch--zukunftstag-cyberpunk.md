@@ -58,19 +58,30 @@ Der Vorschlag umfasst fünf Elemente:
 5. **Eine Landschaft zum Ausprobieren.** Auf ausdrücklichen Wunsch wurde der
    Pitch nach der ersten Umsetzung um Synthwave-Grafiken, ein interaktives Canvas
    und Tastaturnavigation erweitert. Der Sonnenuntergang liegt als bildschirmfüllender
-   Hintergrund hinter allen Seiten der Variante. Eine stilisierte Mythen-Silhouette
-   und das Kloster Einsiedeln stehen im Neon-Gitter; die Zahl als Bildmotiv entfällt.
+   Hintergrund hinter allen Seiten der Variante. Links steht das Kloster Einsiedeln
+   in der Perspektive des Neon-Gitters, dahinter ein echtes, beschriftetes
+   Panorama mit den Mythen (Gipfelnamen und Höhen von swisstopo). Aus den Mythen
+   fliesst die Alp ins Gitter; die Zahl als Bildmotiv entfällt.
    Mausbewegungen verändern die Aussicht. Klicks ausserhalb von Bedienelementen
    oder die Aktivierung von «Szene steuern» senden einen Lichtimpuls. Bei Fokus
-   auf diesem Knopf lenken Pfeiltasten die Szene, Tab führt normal weiter. Ein sichtbares Menü mit
+   auf diesem Knopf drehen ← → die Aussicht und ↑ ↓ neigen sie, Tab führt normal weiter.
+   Nach links kreist der Blick wie in einer 3D-Karte um das Kloster, bis man die
+   Westfassade fast von vorne sieht. Jede Spielseite hat eine «Probefahrt»: eine
+   Neon-Vorschau mit vereinfachten Regeln, die sich selbst vorführt, bis man mit
+   den Tasten aus dem Spiel übernimmt. Ein sichtbares Menü mit
    `Alt+K`, Pfeiltasten in der Navigation und Spielauswahl sowie die normale
    Tab-Reihenfolge ermöglichen Tastaturbedienung. Die Effekte sind pausierbar und
    beachten reduzierte Bewegung; SVG und normale Links funktionieren ohne Skript.
 
-Die Landschaft ist eine freie Synthwave-Komposition der Region. Als visuelle
-Referenzen dienen das [beschriftete Mythen-Panorama von RAOnline](https://www.raonline.ch/pages/ch/gal/chpanoal04b3b.html)
-und die [Frontansicht des Klosters Einsiedeln](https://de.academic.ru/pictures/dewiki/75/Kloster_Einsiedeln_Frontansicht.jpg).
-Die Silhouetten sind eigene Vektorzeichnungen; keine Fotos werden eingebunden.
+Die Landschaft ist eine Synthwave-Komposition der Region. Die Bergsilhouetten
+werden aus Höhendaten von swisstopo (swissALTI3D/DHM25, Gipfelnamen aus
+swissNAMES3D) für einen Blick aus rund 450 m über dem Klosterplatz Einsiedeln
+berechnet, mit 2,2-fach überhöhten Höhen. Als visuelle Referenzen dienen das
+[beschriftete Mythen-Panorama von RAOnline](https://www.raonline.ch/pages/ch/gal/chpanoal04b3b.html),
+die [Frontansicht des Klosters Einsiedeln](https://de.academic.ru/pictures/dewiki/75/Kloster_Einsiedeln_Frontansicht.jpg)
+sowie ein Foto der Westfassade aus Nordwesten und eine Google-Earth-Ansicht, die
+uns zur Verfügung gestellt wurden. Kloster und Alp sind eigene Vektorzeichnungen;
+keine Fotos werden eingebunden.
 Leseflächen bleiben dunkel und transparent, während die Startseite Raum für den
 Hintergrund lässt.
 

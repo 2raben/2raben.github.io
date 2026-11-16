@@ -1,0 +1,120 @@
+---
+/**
+ * A game's preview on its page: a neon canvas that plays a demonstration
+ * until somebody takes over with the keys from the game's controls table or
+ * the on-screen keys. Not the game itself; preview.ts runs it, and without
+ * JavaScript it stays hidden (ADR 0004). Games without a preview render
+ * nothing.
+ */
+interface Props {
+  game: string;
+}
+const { game } = Astro.props;
+
+const previews: Record<
+  string,
+  {
+    title: string;
+    help: string;
+    keys: { action: string; label: string; text: string }[];
+    stats: { name: string; label: string; unit?: string }[];
+  }
+> = {
+  "moto-devil": {
+    title: "Probefahrt mit Moto Devil",
+    help: "Eine kleine Übungsstrecke, nicht das Spiel: Klick hinein und probier die Tasten aus dem Spiel. Gib Gas, spring über die Rampe, kipp das Motorrad bis zum Salto und halte die Leertaste nach dem Sprung für den Düsenschub. Fallen gibt es hier keine – die warten im echten Spiel.",
+    keys: [
+      { action: "gas", label: "W / ↑", text: "Gas" },
+      { action: "brake", label: "S / ↓", text: "Bremsen" },
+      { action: "back", label: "A / ←", text: "Kippen" },
+      { action: "forward", label: "D / →", text: "Kippen" },
+      { action: "jump", label: "Leertaste", text: "Springen, halten: Düse" },
+      { action: "turn", label: "E", text: "Umdrehen" },
+      { action: "restart", label: "R", text: "Neu" },
+    ],
+    stats: [{ name: "saltos", label: "Saltos" }],
+  },
+  "car-drive": {
+    title: "Probefahrt mit Car Drive",
+    help: "Eine kleine Übungsstrecke, nicht das Spiel: Klick hinein, wechsle mit den Tasten aus dem Spiel die Spur und zünde den Boost, wenn die Strasse frei ist. Blinkende Autos wechseln gleich die Spur.",
+    keys: [
+      { action: "left", label: "A / ←", text: "Links" },
+      { action: "right", label: "D / →", text: "Rechts" },
+      { action: "boost", label: "Leertaste", text: "Boost" },
+      { action: "restart", label: "R", text: "Neustart" },
+    ],
+    stats: [
+      { name: "metres", label: "Strecke", unit: "m" },
+      { name: "level", label: "Level" },
+      { name: "coins", label: "Münzen" },
+    ],
+  },
+};
+const preview = previews[game];
+const id = `preview-${game}`;
+---
+
+{preview && (
+  <section
+    class="game-preview"
+    tabindex="0"
+    role="group"
+    aria-labelledby={`${id}-title`}
+    aria-describedby={`${id}-help`}
+    data-preview={game}
+    data-label-demo="Vorführung – drück eine Taste, dann fährst du."
+    data-label-manual="Du fährst."
+    hidden
+  >
+    <div class="preview-screen">
+      <canvas aria-hidden="true" />
+    </div>
+    <div class="preview-panel">
+      <p class="eyebrow">Probefahrt / Nur zum Aufwärmen</p>
+      <h2 id={`${id}-title`}>{preview.title}</h2>
+      <p id={`${id}-help`} class="preview-help">
+        {preview.help}
+      </p>
+      <p class="preview-stats">
+        {preview.stats.map((stat) => (
+          <span>
+            {stat.label}: <strong data-stat={stat.name}>0</strong>
+            {stat.unit && ` ${stat.unit}`}
+          </span>
+        ))}
+      </p>
+      <p class="preview-mode">
+        <span data-preview-mode />
+        <span class="preview-status" data-preview-status />
+      </p>
+      <div class="preview-keys">
+        {preview.keys.map((key) => (
+          <button
+            type="button"
+            class="preview-key"
+            tabindex="-1"
+            data-action={key.action}
+          >
+            <kbd>{key.label}</kbd> {key.text}
+          </button>
+        ))}
+      </div>
+      <p class="sr-only" aria-live="polite" data-preview-live />
+    </div>
+  </section>
+)}
+
+<script>
+  import { mountPreview } from "./preview";
+  import { carGame } from "./previewCar";
+  import { motoGame } from "./previewMoto";
+
+  for (const section of document.querySelectorAll<HTMLElement>(
+    "[data-preview]",
+  )) {
+    mountPreview(
+      section,
+      section.dataset.preview === "car-drive" ? carGame : motoGame,
+    );
+  }
+</script>

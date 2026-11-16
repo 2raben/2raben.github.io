@@ -1,9 +1,96 @@
 ---
-import { mythen, monastery } from "./landmarks";
+import {
+  eyeHeight,
+  focal,
+  labelText,
+  layoutLabels,
+  monasteryFrom,
+  ridges,
+  riverPath,
+  skiJump,
+  valleyX,
+  abbeyPose,
+  homePose,
+  landscapeLayout,
+  viewFor,
+  type LandmarkShape,
+} from "./landmarks";
+import { panoramaPeaks } from "./panorama";
 interface Props {
   id: string;
+  /** "narrow" always uses the phone composition, e.g. inside a small card. */
+  layout?: "responsive" | "narrow";
 }
-const { id } = Astro.props;
+const { id, layout = "responsive" } = Astro.props;
+
+// Mirrors landscapeLayout() in landmarks.ts. The scene layers are nested SVGs
+// whose bottom-right corner is the vanishing point; "meet" then scales scene
+// units like the canvas (min(width / 1440, height / 840) on wide screens,
+// width / 672 on phones). Chrome ignores CSS geometry on nested SVGs, so each
+// layout is rendered with attributes and switched with a media query.
+const standingView = viewFor(0);
+const home = monasteryFrom(standingView, undefined, homePose);
+// From 105rem the monastery stands in the margin left of the text, as the
+// canvas places it for 1920 × 1080; the floor keeps the standing camera.
+const margin = monasteryFrom(
+  standingView,
+  undefined,
+  abbeyPose(1920, landscapeLayout(1920, 1080)),
+);
+const placements = {
+  // `dimLeft`: labels left of it sit behind the headline, as on the canvas.
+  wide: {
+    vanish: 0.6,
+    viewBox: "-864 -588 864 588",
+    sun: [-342, 189],
+    dimLeft: -350,
+    abbeys: [
+      { shapes: home, class: "abbey-home" },
+      { shapes: margin, class: "abbey-margin" },
+    ],
+  },
+  narrow: {
+    vanish: 0.38,
+    viewBox: `-${0.38 * 672} -1 ${0.38 * 672} 1`,
+    sun: [-560, 190],
+    dimLeft: -Infinity,
+    abbeys: [{ shapes: home, class: undefined }],
+  },
+};
+const variants = (
+  layout === "narrow" ? (["narrow"] as const) : (["wide", "narrow"] as const)
+).map((name) => ({ name, ...placements[name] }));
+
+const labels = layoutLabels(
+  panoramaPeaks.map((peak) => ({
+    ...peak,
+    width: labelText(peak).length * 6.6,
+  })),
+);
+
+// Floor grid in a 1600 × 300 box: 8 m squares in the monastery's perspective.
+const floorWidth = 1600;
+const floorDepth = 300;
+const metre = floorDepth / eyeHeight;
+const near = (focal * eyeHeight) / 270;
+const crossLines = Array.from({ length: 40 }, (_, i) => {
+  const y = (floorDepth * near) / (near + i * 8);
+  return `M0 ${y.toFixed(1)}h${floorWidth}`;
+}).join("");
+const grid = (vanish: number) => {
+  const x = vanish * floorWidth;
+  return Array.from({ length: 31 }, (_, i) => (i - 15) * 8 * metre)
+    .map((dx) => `M${x} 0L${(x + dx).toFixed(1)} ${floorDepth}`)
+    .join("");
+};
+const river = riverPath(valleyX);
+const paths = (shapes: LandmarkShape[]) =>
+  shapes.map(({ d, fill, stroke, width }) => ({
+    d,
+    fill,
+    stroke,
+    "stroke-width": width,
+  }));
 ---
 
 <svg
@@ -15,19 +102,44 @@ const { id } = Astro.props;
 >
   <defs>
     <linearGradient id={`${id}-sky`} x2="0" y2="1">
-      <stop stop-color="#100a2a" />
-      <stop offset=".7" stop-color="#43133f" />
-      <stop offset="1" stop-color="#100b29" />
+      <stop stop-color="#0b0624" />
+      <stop offset=".32" stop-color="#2a0f52" />
+      <stop offset=".56" stop-color="#6a1662" />
+      <stop offset=".7" stop-color="#c42a7f" />
     </linearGradient>
     <linearGradient id={`${id}-sun`} x2="0" y2="1">
-      <stop stop-color="#ffe6a2" />
-      <stop offset=".5" stop-color="#ff9cbb" />
-      <stop offset="1" stop-color="#ef3fce" />
+      <stop stop-color="#fff1a8" />
+      <stop offset=".4" stop-color="#ffa36c" />
+      <stop offset=".75" stop-color="#ff3f9e" />
+      <stop offset="1" stop-color="#d61fd0" />
     </linearGradient>
+    <radialGradient id={`${id}-halo`}>
+      <stop offset=".35" stop-color="#ff5fb4" stop-opacity=".4" />
+      <stop offset=".6" stop-color="#ff3fa5" stop-opacity=".13" />
+      <stop offset="1" stop-color="#ff3fa5" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id={`${id}-floor`} x2="0" y2="1">
+      <stop stop-color="#2a0c45" />
+      <stop offset=".25" stop-color="#120a2e" />
+      <stop offset="1" stop-color="#0a0620" />
+    </linearGradient>
+    <linearGradient id={`${id}-water`} x2="0" y2="1">
+      <stop stop-color="#9ff8ff" stop-opacity=".93" />
+      <stop offset=".35" stop-color="#2fb8e8" stop-opacity=".7" />
+      <stop offset="1" stop-color="#3b2fc2" stop-opacity=".6" />
+    </linearGradient>
+    <filter id={`${id}-glow`} x="-5%" y="-15%" width="110%" height="130%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
     <mask id={`${id}-stripes`}>
-      <path fill="white" d="M0 0h500v500H0z" />
+      <path fill="white" d="M-250 -250h500v500h-500z" />
       <path
-        d="M0 275h500m-500 25h500m-500 30h500m-500 33h500m-500 38h500m-500 40h500"
+        d="M-250 25h500m-500 25h500m-500 30h500m-500 33h500m-500 38h500m-500 40h500"
         stroke="black"
         stroke-width="10"
       />
@@ -40,80 +152,102 @@ const { id } = Astro.props;
     viewBox="0 0 1600 700"
     preserveAspectRatio="none"
   >
-    {Array.from({ length: 60 }, (_, i) => (
+    {Array.from({ length: 90 }, (_, i) => (
       <circle
         cx={(i * 173 + 47) % 1600}
-        cy={(i * 139 + 23) % 600}
-        r={i % 5 === 0 ? 1.7 : 0.8}
-        fill="#e6d7ff"
-        opacity=".6"
+        cy={(i * 139 + 23) % 560}
+        r={i % 7 === 0 ? 1.8 : i % 3 === 0 ? 1.1 : 0.7}
+        fill={i % 11 === 0 ? "#7ff3ff" : i % 13 === 0 ? "#ff9ee6" : "#efe4ff"}
+        opacity=".7"
       />
     ))}
   </svg>
-  <svg
-    class="sun-layer"
-    x="50%"
-    y="7%"
-    width="45%"
-    height="50%"
-    viewBox="0 0 500 500"
-  >
-    <circle
-      cx="250"
-      cy="250"
-      r="210"
-      fill={`url(#${id}-sun)`}
-      mask={`url(#${id}-stripes)`}
-    />
-  </svg>
-  <svg
-    class="mountain-layer"
-    x="40%"
-    y="10%"
-    width="65%"
-    height="60%"
-    viewBox="0 0 1000 400"
-    preserveAspectRatio="xMidYMax meet"
-  >
-    {mythen.map((shape) => (
-      <path
-        d={shape.d}
-        fill={shape.fill}
-        stroke={shape.stroke}
-        stroke-width={shape.width}
-      />
-    ))}
-  </svg>
-  <svg
-    y="70%"
-    width="100%"
-    height="30%"
-    viewBox="0 0 1600 300"
-    preserveAspectRatio="none"
-  >
-    <path d="M0 0h1600v300H0z" fill="#100b29" />
-    <g stroke="#a94da5" opacity=".65">
-      <path d="M0 2h1600M0 12h1600M0 28h1600M0 52h1600M0 90h1600M0 145h1600M0 220h1600M0 298h1600" />
-      <path d="M800 0-800 300M800 0-400 300M800 0 0 300M800 0 400 300M800 0v300M800 0l400 300M800 0l800 300M800 0l1200 300M800 0l1600 300" />
+  {variants.map((place) => (
+    <g class={layout === "responsive" ? `layout-${place.name}` : undefined}>
+      <svg
+        width={`${place.vanish * 100}%`}
+        height="70%"
+        viewBox={place.viewBox}
+        preserveAspectRatio="xMaxYMax meet"
+        overflow="visible"
+      >
+        <g transform={`translate(0 ${place.sun[0]})`}>
+          <circle r={place.sun[1] * 2.7} fill={`url(#${id}-halo)`} />
+          <g transform={`scale(${place.sun[1] / 210})`}>
+            <circle
+              r="210"
+              fill={`url(#${id}-sun)`}
+              mask={`url(#${id}-stripes)`}
+            />
+          </g>
+        </g>
+        <g filter={`url(#${id}-glow)`}>
+          {paths(ridges).map((shape) => (
+            <path {...shape} />
+          ))}
+        </g>
+        <g
+          font-family='"Courier New", monospace'
+          font-size="11"
+          font-weight="600"
+          text-anchor="middle"
+        >
+          {labels.map((label) => (
+            <g opacity={label.x < place.dimLeft ? 0.2 : undefined}>
+              <path
+                d={`M${label.x} ${label.y - 4}V${label.baseline + 4}`}
+                stroke="#9ff8ff"
+                stroke-opacity=".55"
+              />
+              <circle cx={label.x} cy={label.y - 4} r="1.8" fill="#9ff8ff" />
+              <text x={label.x} y={label.baseline} fill="#e9fbff">
+                {labelText(label)}
+              </text>
+            </g>
+          ))}
+        </g>
+      </svg>
+      <svg
+        y="70%"
+        width="100%"
+        height="30%"
+        viewBox={`0 0 ${floorWidth} ${floorDepth}`}
+        preserveAspectRatio="none"
+      >
+        <path
+          d={`M0 0h${floorWidth}v${floorDepth}H0z`}
+          fill={`url(#${id}-floor)`}
+        />
+        <path d={crossLines} stroke="#ff46d7" opacity=".6" />
+        <path d={grid(place.vanish)} stroke="#ff46d7" opacity=".7" />
+        <path d={`M0 1h${floorWidth}`} stroke="#9ff8ff" stroke-width="2" />
+      </svg>
+      <svg
+        width={`${place.vanish * 100}%`}
+        height="70%"
+        viewBox={place.viewBox}
+        preserveAspectRatio="xMaxYMax meet"
+        overflow="visible"
+      >
+        <g filter={`url(#${id}-glow)`}>
+          {paths(skiJump).map((shape) => (
+            <path {...shape} />
+          ))}
+        </g>
+        <path
+          d={river}
+          fill={`url(#${id}-water)`}
+          stroke="#9ff8ff"
+          stroke-width="1.5"
+        />
+        {place.abbeys.map((abbey) => (
+          <g class={abbey.class} filter={`url(#${id}-glow)`}>
+            {paths(abbey.shapes).map((shape) => (
+              <path {...shape} />
+            ))}
+          </g>
+        ))}
+      </svg>
     </g>
-    <path d="M0 1h1600" stroke="#76ecff" opacity=".6" />
-  </svg>
-  <svg
-    class="monastery-layer"
-    x="60%"
-    y="50%"
-    width="37%"
-    height="36%"
-    viewBox="0 0 800 340"
-    preserveAspectRatio="xMidYMax meet"
-  >
-    {monastery.map((shape) => (
-      <path
-        d={shape.d}
-        fill={shape.fill}
-        stroke={shape.stroke}
-        stroke-width={shape.width}
-      />
-    ))}
-  </svg>
+  ))}
 </svg>

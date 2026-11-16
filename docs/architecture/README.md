@@ -64,9 +64,12 @@ school levels; the world-saving motto is studio copy, not a claim about game
 content. Game pages retain the shared Markdown and existing play/source links.
 The overview automatically uses the updated theme and tagline.
 
-The variant owns `Horizon.astro` (SVG landscape), `landmarks.ts` (shared original
-Mythen and Einsiedeln monastery paths), `GameArtwork.astro` (decorative SVG game
-illustrations), `SynthwaveScene.astro` (fixed full-viewport canvas with SVG fallback
+The variant owns `Horizon.astro` (SVG landscape), `landmarks.ts` (the projected
+monastery model, river, label layout and scene placement), `panorama.ts`
+(generated skyline and summit data) and its generator `tools/panorama.mjs`,
+`GameArtwork.astro` (decorative SVG game
+illustrations), `GamePreview.astro` with `preview.ts`, `previewMoto.ts` and
+`previewCar.ts` (the game previews), `SynthwaveScene.astro` (fixed full-viewport canvas with SVG fallback
 on every November Games page), `KeyboardControls.astro`, `interactions.ts` and
 `scene.ts`. No game assets, external
 fonts, rendering libraries or remote services are loaded. The numeric November
@@ -88,9 +91,86 @@ its native click, Enter and Space activation send a light impulse. Tab continues
 to the next control. A hint appears when that button is focused or hovered.
 Game artwork still tilts towards the pointer, and focused games are highlighted.
 
-The Mythen ridge and the monastery are an original synthwave composition, not a
-literal geographic viewpoint. Both the canvas and fallback SVG use the same
-landmark paths; responsive placement keeps the landmarks in the phone viewport.
+Each game page shows a preview («Probefahrt») below its heading: a neon canvas
+with simplified rules from the game's text, not the game itself. Moto Devil's
+follows the 2raben games key warm-up: the motorbike accelerates, brakes, tilts
+into a salto, jumps over a ramp, fires the jet while Space is held after a jump,
+turns round, restarts and crashes back to the start on a bad landing. Car
+Drive's follows the Egg Settlers practice road: three lanes with traffic both
+ways, cars that blink before changing lanes, levels every 1000 m, trucks from
+4000 m, hearts, a shield, coins and the boost gauge. Both rule sets were copied
+into this variant and redrawn; nothing is imported from another variant. A
+demonstration plays while the preview is on screen until somebody presses a key
+from the controls table or an on-screen key; after eight idle seconds it takes
+over again. Keys are handled only while the preview has focus, Escape leaves
+it, and the on-screen keys work by pointer and touch, held while pressed. A live
+region announces actions while somebody plays. There is no demonstration with
+reduced motion or with the effects switched off. The loop runs at about 30
+frames per second, only while the preview is on screen and moving. Without
+JavaScript or a 2D canvas the preview stays hidden; clicks in it send no
+impulse to the background.
+
+The landscape is a synthwave composition of a real view. The mountain panorama
+is generated from swisstopo elevation data and swissNAMES3D summit names as seen
+from about 450 m above the Klosterplatz Einsiedeln, looking south-west towards
+the Mythen. It is drawn in four depth bands with heights exaggerated 2.2 times
+over headings 140° to 252°, easing down into the plain over the outer 12° at
+both ends, and labels each visible summit outside those ends with its official
+height. `panorama.ts` records
+the viewpoint and is not edited by hand: `node
+src/variants/november-games/tools/panorama.mjs` downloads the data from
+api3.geo.admin.ch into `node_modules/.cache/november-games-panorama/` (about
+3000 requests on the first run; later runs fetch only what is missing) and
+regenerates it. The script holds the viewpoint, the drawing parameters and the
+labelled summits with their names and heights. The site itself never contacts
+swisstopo. The monastery is a simplified 3D model
+of the west front after photographs and measured from them: corner pavilions
+with turrets, four-storey wings, the twin towers with their stages, clocks,
+belfries and copper domes over a square plan with lanterns, and the convex
+church front with its attic, niche and statues, about 145 m in all, and the
+north wing with the north-east pavilion behind, about 105 m deep after the
+abbey's outline in OpenStreetMap; the east and south wings stay out of sight. The main
+tower clocks show the time in Einsiedeln (Europe/Zurich) with an hour and a
+minute hand, the upper ones a single minute hand across the dial, as on the
+real towers; the canvas redraws them every minute, and the static SVG shows
+ten past ten. It is projected so that its
+lines meet the floor grid's vanishing point, where the sun sets. Where the page
+leaves a margin of at least 200 px left of its text column (from 105rem), the
+monastery stands in that margin instead: further away, turned towards the
+viewer at 45°, close enough that the near tower stands larger than the far
+one, and drawn 1.15 times taller so that it does not look squat from the front
+(`abbeyPose()` in `landmarks.ts`); its lines meet the horizon at their own
+point. About 54° off the centre of the view, a flat projection would stretch it
+sideways by 1.7 times, so it is projected as if looked at straight on and then
+moved to where its heading lies on the screen; it keeps its proportions and size
+while the view turns. The Alp is drawn freely, from below Grosser Mythen
+across the floor towards the viewer. On its far bank, on the right, stand the
+ski jumps of Einsiedeln, drawn freely after a photograph and facing left
+towards the monastery: the large and the medium hill with in-runs on concrete
+pillars, the start tower on the hilltop, landing hills with distance marks and
+floodlights, the judges' tower between them, and a small hill behind. Canvas and fallback SVG share these drawings
+in "scene units" whose origin is the vanishing point. Chrome ignores CSS geometry
+on nested SVG elements, so `Horizon.astro` renders the wide and narrow placements
+as attributes and switches between them with a media query; the about-page card
+always uses the narrow placement. The wide placement holds both monasteries, the
+one in the margin computed for 1920 × 1080, and the same media query picks one.
+From 105rem the shade behind the home-page text follows the text column instead
+of the screen's left edge.
+
+Arrow keys on «Szene steuern» turn the view between 35° left and 20° right, and
+mouse movement turns it slightly. The tele panorama and the sun pan by the turn.
+The floor grid, monastery and river are projected in 3D from a near-field camera
+(`viewFor()` in `landmarks.ts`): turning left orbits it around the church front
+by 1.5 times the turn, as in a 3D map, so that the west front is seen more and
+more from the front; turning right turns it in place. Its painting order holds
+while the camera stays north of the towers. Around the monastery in the margin,
+hundreds of metres away, such an orbit would swing the camera across the floor,
+the river and the ski jumps, so there turning left only turns the camera, like
+turning right, and the monastery moves with the view, behind the text if need
+be. The river's distant part bends to meet the
+Alptal in the panorama while the valley is near; when a turn pans the valley
+far away, the bend lets go instead of dragging the river across the floor. Summit labels behind the home-page headline are
+dimmed.
 The home page leaves space to see the landscape; longer content uses translucent
 dark surfaces. Visual reference sources are recorded in the
 [pitch](../pitches/november-games/pitch--zukunftstag-cyberpunk.md#solution).
@@ -99,8 +179,10 @@ The effects button pauses movement, remembering the choice in optional session
 storage. Reduced-motion preferences always disable movement; navigation still
 works. The renderer caps pixel density at 2, raster size at approximately three
 million pixels and drawing at 30 fps, limits concurrent impulses, and suspends
-its animation loop in hidden tabs. The fixed canvas remains visible when the
-page scrolls. A static SVG remains if JavaScript or the 2D context is unavailable;
+its animation loop in hidden tabs. Glowing landmarks are drawn into offscreen
+canvases once per size, and the monastery and ski jumps again whenever the view
+turns by a tenth of a degree, cut to the screen so that a drawing turned far to
+the side never grows past it; each frame only copies them and redraws the floor and river. The fixed canvas remains visible when the page scrolls. A static SVG remains if JavaScript or the 2D context is unavailable;
 the unavailable scene control stays hidden. Phone layouts retain readable game
 controls without promising mobile game support.
 

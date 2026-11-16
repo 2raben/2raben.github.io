@@ -478,6 +478,112 @@
   }
 }
 
+/* Game previews (GamePreview.astro, preview.ts). */
+.game-preview {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(17rem, 2fr);
+  align-items: start;
+  gap: 2rem;
+  margin-top: 3.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--color-base-300);
+  border-top: 3px solid var(--color-secondary);
+  background: var(--color-base-200);
+}
+
+.game-preview[hidden] {
+  display: none;
+}
+
+.game-preview[data-mode="manual"] {
+  border-top-color: var(--color-primary);
+}
+
+.game-preview:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 6px;
+}
+
+.preview-screen canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--color-base-300);
+  background: #0a0620;
+  cursor: pointer;
+}
+
+.preview-panel h2 {
+  margin-top: 0.75rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+}
+
+.preview-help {
+  margin-top: 1rem;
+  color: var(--november-muted);
+}
+
+.preview-stats,
+.preview-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  margin-top: 1rem;
+  font:
+    700 0.85rem "Courier New",
+    monospace;
+}
+
+.preview-stats strong {
+  color: var(--color-secondary);
+}
+
+.preview-mode {
+  min-height: 2.6em;
+  margin-top: 0.5rem;
+  font-weight: 400;
+  color: var(--november-muted);
+}
+
+.preview-status {
+  color: var(--color-primary);
+}
+
+.preview-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.preview-key {
+  min-height: 2.5rem;
+  border: 1px solid var(--color-base-300);
+  padding: 0.35rem 0.65rem;
+  background: var(--color-base-100);
+  color: var(--color-base-content);
+  font-size: 0.85rem;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.preview-key:hover,
+.preview-key.is-pressed {
+  border-color: var(--color-secondary);
+}
+
+.preview-key.is-pressed {
+  background: color-mix(in oklch, var(--color-secondary) 22%, transparent);
+}
+
+.preview-key kbd {
+  margin-right: 0.3rem;
+}
+
 @media (max-width: 64rem) {
   .shell {
     width: calc(100% - 3rem);
@@ -491,6 +597,11 @@
   .about-grid,
   .game-detail-grid {
     gap: 2rem;
+  }
+
+  .game-preview {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
   }
 }
 
@@ -667,14 +778,41 @@ kbd {
   inset: 0;
   content: "";
   background:
-    linear-gradient(
-      90deg,
-      #0d0825e8,
-      #0d0825a6 35%,
-      #0d08251a 65%,
+    radial-gradient(
+      ellipse 36% 22% at 20% 77%,
+      #0b0622e6,
+      #0b0622b3 55%,
       transparent
     ),
-    linear-gradient(0deg, #0d082570, transparent 30%);
+    radial-gradient(
+      ellipse 48% 62% at 18% 52%,
+      #0b0622c7,
+      #0b06228c 45%,
+      transparent
+    ),
+    linear-gradient(90deg, #0b062299, transparent 32%),
+    linear-gradient(0deg, #0b062259, transparent 25%);
+}
+
+/* From 105rem the shell leaves a margin where the monastery stands
+   (abbeyPose in landmarks.ts), so the shade follows the text column. */
+@media (min-width: 105rem) {
+  .synthwave-scene::after {
+    background:
+      radial-gradient(
+        ellipse 32rem 22% at calc(50% - 22rem) 77%,
+        #0b0622e6,
+        #0b0622b3 55%,
+        transparent
+      ),
+      radial-gradient(
+        ellipse 38rem 62% at calc(50% - 24rem) 52%,
+        #0b0622c7,
+        #0b06228c 45%,
+        transparent
+      ),
+      linear-gradient(0deg, #0b062259, transparent 25%);
+  }
 }
 
 .scene-fallback,
@@ -936,39 +1074,31 @@ kbd {
   aspect-ratio: 4 / 3;
 }
 
-.origin-landscape .mountain-layer {
-  x: -10%;
-  width: 120%;
+.horizon-art .layout-narrow {
+  display: none;
 }
 
-.origin-landscape .monastery-layer {
-  x: 6%;
-  width: 88%;
+.horizon-art .abbey-margin {
+  display: none;
 }
 
-.origin-landscape .sun-layer {
-  x: 15%;
-  y: 10%;
-  width: 70%;
-  height: 40%;
+@media (min-width: 105rem) {
+  .horizon-art .abbey-home {
+    display: none;
+  }
+
+  .horizon-art .abbey-margin {
+    display: inline;
+  }
 }
 
 @media (max-width: 47.5rem) {
-  .horizon-art .mountain-layer {
-    x: -10%;
-    width: 120%;
+  .horizon-art .layout-wide {
+    display: none;
   }
 
-  .horizon-art .monastery-layer {
-    x: 6%;
-    width: 88%;
-  }
-
-  .horizon-art .sun-layer {
-    x: 15%;
-    y: 10%;
-    width: 70%;
-    height: 40%;
+  .horizon-art .layout-narrow {
+    display: inline;
   }
 
   .synthwave-scene::after {
