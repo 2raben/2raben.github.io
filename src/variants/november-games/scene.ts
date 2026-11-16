@@ -71,30 +71,48 @@ export function mountScene(root: HTMLElement, isMoving: () => boolean) {
   };
   const sprites = new Map<string, Sprite>();
 
+  /** The screen around a sprite placed at (x, y), with room for its glow. */
+  const screenFrom = (x: number, y: number, slack = 0) => ({
+    left: -x - glowPad,
+    top: -y - glowPad - slack,
+    right: width - x + glowPad,
+    bottom: height - y + glowPad + slack,
+  });
+
   // Neon glow is expensive, so each layer is drawn once per size and view
-  // and reused until either changes.
+  // and reused until either changes. Layers that do not pan with the view
+  // are cut to `visible`: turned close and far to the side, a drawing can
+  // reach thousands of pixels past the screen.
   function sprite(
     name: string,
     variant: string,
     build: () => ReturnType<typeof compile>,
     scale: number,
     maxRatio: number,
+    visible?: ReturnType<typeof screenFrom>,
   ) {
     const pixels = Math.min(ratio, maxRatio);
-    const key = `${variant}:${scale}:${pixels}`;
+    const key = `${variant}:${scale}:${pixels}:${width}x${height}`;
     const cached = sprites.get(name);
     if (cached?.key === key) return cached;
     const shapes = build();
     const box = bounds(shapes);
     const image = cached?.image ?? document.createElement("canvas");
-    const left = box.minX * scale - glowPad;
-    const top = box.minY * scale - glowPad;
-    image.width = Math.ceil(
-      ((box.maxX - box.minX) * scale + glowPad * 2) * pixels,
+    const left = Math.max(
+      box.minX * scale - glowPad,
+      visible?.left ?? -Infinity,
     );
-    image.height = Math.ceil(
-      ((box.maxY - box.minY) * scale + glowPad * 2) * pixels,
+    const top = Math.max(box.minY * scale - glowPad, visible?.top ?? -Infinity);
+    const right = Math.min(
+      box.maxX * scale + glowPad,
+      visible?.right ?? Infinity,
     );
+    const bottom = Math.min(
+      box.maxY * scale + glowPad,
+      visible?.bottom ?? Infinity,
+    );
+    image.width = Math.max(1, Math.ceil((right - left) * pixels));
+    image.height = Math.max(1, Math.ceil((bottom - top) * pixels));
     const layer = image.getContext("2d");
     const result = { image, key, left, top, pixels };
     sprites.set(name, result);
@@ -577,6 +595,8 @@ export function mountScene(root: HTMLElement, isMoving: () => boolean) {
       2,
     );
     ctx.restore();
+    // Tilting moves the horizon by up to 8 px, which the cut allows for.
+    const nearField = screenFrom(layout.vanishX, layout.horizon, 8);
     place(
       sprite(
         "jump",
@@ -584,6 +604,7 @@ export function mountScene(root: HTMLElement, isMoving: () => boolean) {
         () => compile(skiJumpFrom(camera)),
         scale,
         2,
+        nearField,
       ),
       layout.vanishX,
       horizon,
@@ -598,6 +619,7 @@ export function mountScene(root: HTMLElement, isMoving: () => boolean) {
         () => compile(monasteryFrom(camera, now, pose)),
         scale,
         2,
+        nearField,
       ),
       layout.vanishX,
       horizon,

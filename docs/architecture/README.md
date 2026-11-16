@@ -175,7 +175,8 @@ works. The renderer caps pixel density at 2, raster size at approximately three
 million pixels and drawing at 30 fps, limits concurrent impulses, and suspends
 its animation loop in hidden tabs. Glowing landmarks are drawn into offscreen
 canvases once per size, and the monastery and ski jumps again whenever the view
-turns by a tenth of a degree; each frame only copies them and redraws the floor and river. The fixed canvas remains visible when the page scrolls. A static SVG remains if JavaScript or the 2D context is unavailable;
+turns by a tenth of a degree, cut to the screen so that a drawing turned far to
+the side never grows past it; each frame only copies them and redraws the floor and river. The fixed canvas remains visible when the page scrolls. A static SVG remains if JavaScript or the 2D context is unavailable;
 the unavailable scene control stays hidden. Phone layouts retain readable game
 controls without promising mobile game support.
 
