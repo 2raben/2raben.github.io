@@ -196,6 +196,18 @@ export function mountScene(root: HTMLElement, isMoving: () => boolean) {
   let clock = 0;
   let lastTime = 0;
   let frame = 0;
+  const zurich = new Intl.DateTimeFormat("de-CH", {
+    timeZone: "Europe/Zurich",
+    hour: "numeric",
+    minute: "numeric",
+    hourCycle: "h23",
+  });
+  const clockTime = () => {
+    const parts = zurich.formatToParts(new Date());
+    const part = (type: string) =>
+      Number(parts.find((p) => p.type === type)?.value ?? 0);
+    return { hours: part("hour"), minutes: part("minute") };
+  };
   let visible = false;
   let cameraX = 0;
   let cameraY = 0;
@@ -558,11 +570,13 @@ export function mountScene(root: HTMLElement, isMoving: () => boolean) {
     );
     ctx.restore();
     river(ground, ridgeX + valleyX * scale);
+    // The tower clocks show the time in Einsiedeln, to the minute.
+    const now = clockTime();
     place(
       sprite(
         "abbey",
-        String(step),
-        () => compile(monasteryFrom(camera)),
+        `${step}:${now.hours}:${now.minutes}`,
+        () => compile(monasteryFrom(camera, now)),
         scale,
         2,
       ),
@@ -709,5 +723,9 @@ export function mountScene(root: HTMLElement, isMoving: () => boolean) {
   resize.observe(surface);
   observer.observe(surface);
   document.addEventListener("visibilitychange", sync);
+  // Without movement nothing redraws, so the clocks are updated here.
+  window.setInterval(() => {
+    if (!frame && visible && !document.hidden) draw();
+  }, 20_000);
   return sync;
 }

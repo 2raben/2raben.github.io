@@ -122,8 +122,15 @@ api3.geo.admin.ch into `node_modules/.cache/november-games-panorama/` (about
 regenerates it. The script holds the viewpoint, the drawing parameters and the
 labelled summits with their names and heights. The site itself never contacts
 swisstopo. The monastery is a simplified 3D model
-of the west front, projected so that its lines meet the floor grid's vanishing
-point, where the sun sets. The Alp is drawn freely, from below Grosser Mythen
+of the west front after photographs and measured from them: corner pavilions
+with turrets, four-storey wings, the twin towers with their stages, clocks,
+belfries and copper domes over a square plan with lanterns, and the convex
+church front with its attic, niche and statues, about 145 m in all. The main
+tower clocks show the time in Einsiedeln (Europe/Zurich) with an hour and a
+minute hand, the upper ones a single minute hand across the dial, as on the
+real towers; the canvas redraws them every minute, and the static SVG shows
+ten past ten. It is projected so that its
+lines meet the floor grid's vanishing point, where the sun sets. The Alp is drawn freely, from below Grosser Mythen
 across the floor towards the viewer. Canvas and fallback SVG share these drawings
 in "scene units" whose origin is the vanishing point. Chrome ignores CSS geometry
 on nested SVG elements, so `Horizon.astro` renders the wide and narrow placements

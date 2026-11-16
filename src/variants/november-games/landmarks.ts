@@ -65,7 +65,7 @@ const facing = (axis: "x" | "z", plane: number) =>
 
 // Turning left orbits around the church front, as in a 3D map, so that the
 // west front is seen more and more from the front; turning right only turns.
-const pivot = [front + 5, 114] as const;
+const pivot = [front + 5, 102.4] as const;
 const orbitGain = 1.5;
 
 /** The camera for a view turned by `degrees` (negative: left). */
@@ -118,7 +118,36 @@ const face = (z: number, x0: number, x1: number, y0: number, y1: number) =>
 const at = (axis: "x" | "z", plane: number, u: number, y: number): Point =>
   axis === "z" ? [plane, y, u] : [u, y, plane];
 
+/** A point on a wall: u runs along it, y up. */
+type Surface = (u: number, y: number) => Point;
+const wall =
+  (axis: "x" | "z", plane: number): Surface =>
+  (u, y) =>
+    at(axis, plane, u, y);
+
 /** An arched opening between u = from and u = to. */
+function archOn(
+  surface: Surface,
+  from: number,
+  to: number,
+  y0: number,
+  y1: number,
+) {
+  const radius = (to - from) / 2;
+  const points: Point[] = [surface(from, y0), surface(from, y1 - radius)];
+  for (let i = 1; i < 8; i++) {
+    const angle = Math.PI - (i * Math.PI) / 8;
+    points.push(
+      surface(
+        from + radius + Math.cos(angle) * radius,
+        y1 - radius + Math.sin(angle) * radius,
+      ),
+    );
+  }
+  points.push(surface(to, y1 - radius), surface(to, y0));
+  return path(points);
+}
+
 function arch(
   axis: "x" | "z",
   plane: number,
@@ -127,54 +156,150 @@ function arch(
   y0: number,
   y1: number,
 ) {
-  if (!facing(axis, plane)) return "";
-  const radius = (to - from) / 2;
-  const points: Point[] = [
-    at(axis, plane, from, y0),
-    at(axis, plane, from, y1 - radius),
-  ];
-  for (let i = 1; i < 8; i++) {
-    const angle = Math.PI - (i * Math.PI) / 8;
-    points.push(
-      at(
-        axis,
-        plane,
-        from + radius + Math.cos(angle) * radius,
-        y1 - radius + Math.sin(angle) * radius,
-      ),
-    );
-  }
-  points.push(at(axis, plane, to, y1 - radius), at(axis, plane, to, y0));
-  return path(points);
+  return facing(axis, plane) ? archOn(wall(axis, plane), from, to, y0, y1) : "";
 }
 
-/** A clock face with its hands. */
+/** A round window or a clock's rim. */
+function ringOn(surface: Surface, u: number, y: number, r: number, steps = 20) {
+  return path(
+    Array.from({ length: steps }, (_, i) => {
+      const angle = (i / steps) * Math.PI * 2;
+      return surface(u + Math.cos(angle) * r, y + Math.sin(angle) * r);
+    }),
+  );
+}
+
+/** The time the clocks show; set by monasteryFrom(). */
+export interface ClockTime {
+  hours: number;
+  minutes: number;
+}
+let time: ClockTime = { hours: 10, minutes: 10 };
+
+/**
+ * A clock face. The main clocks have an hour and a minute hand; the upper
+ * ones only a minute hand across the full dial, pointing with its tip.
+ */
 function clock(
   axis: "x" | "z",
   plane: number,
   u: number,
   y: number,
   r: number,
+  hands: "both" | "minute" = "both",
 ) {
   if (!facing(axis, plane)) return "";
-  const rim = Array.from({ length: 20 }, (_, i) => {
-    const angle = (i / 20) * Math.PI * 2;
-    return at(axis, plane, u + Math.cos(angle) * r, y + Math.sin(angle) * r);
-  });
+  const surface = wall(axis, plane);
+  // u runs to the right on every wall the camera sees, y up.
+  const minute = (time.minutes / 60) * Math.PI * 2;
+  const hour = (((time.hours % 12) + time.minutes / 60) / 12) * Math.PI * 2;
+  const tip = (angle: number, length: number) =>
+    surface(u + Math.sin(angle) * length, y + Math.cos(angle) * length);
+  if (hands === "minute") {
+    const side = minute + Math.PI / 2;
+    const at = (along: number, across: number) =>
+      surface(
+        u + Math.sin(minute) * along + Math.sin(side) * across,
+        y + Math.cos(minute) * along + Math.cos(side) * across,
+      );
+    return (
+      ringOn(surface, u, y, r) +
+      path([tip(minute + Math.PI, r * 0.92), tip(minute, r * 0.92)], false) +
+      path([at(r * 0.6, -r * 0.14), at(r * 0.92, 0), at(r * 0.6, r * 0.14)])
+    );
+  }
   return (
-    path(rim) +
-    path(
-      [
-        at(axis, plane, u, y + r * 0.7),
-        at(axis, plane, u, y),
-        at(axis, plane, u + r * 0.5, y - r * 0.2),
-      ],
-      false,
-    )
+    ringOn(surface, u, y, r) +
+    path([tip(hour, r * 0.5), surface(u, y), tip(minute, r * 0.82)], false)
+  );
+}
+
+/** A standing figure, `height` tall, on a surface at (u, y). */
+function statueOn(surface: Surface, u: number, y: number, height: number) {
+  const k = height / 2.8;
+  const robe = [
+    [-0.6, 0],
+    [-0.35, 1.7],
+    [-0.5, 2],
+    [0, 2.15],
+    [0.5, 2],
+    [0.35, 1.7],
+    [0.6, 0],
+  ];
+  return (
+    path(robe.map(([du, dy]) => surface(u + du * k, y + dy * k))) +
+    ringOn(surface, u, y + 2.5 * k, 0.32 * k, 10)
   );
 }
 
 const line = (from: Point, to: Point) => path([from, to], false);
+
+/**
+ * A dome over a square plan, such as the towers' copper domes: four curved
+ * faces that meet in ridges at the corners. `rings` are [height above
+ * `base`, half the width] from the bottom up. Returns the faces the camera
+ * sees, and their ridges, seams and bands as lines.
+ */
+function squareDome(
+  cx: number,
+  cz: number,
+  base: number,
+  rings: number[][],
+  band?: number,
+) {
+  const w0 = rings[0][1];
+  // Each side: outward direction in plan, and whether the camera sees it.
+  const sides = [
+    { nx: 0, nz: -1, seen: view.z < cz - w0 },
+    { nx: 1, nz: 0, seen: view.x > cx + w0 },
+    { nx: 0, nz: 1, seen: view.z > cz + w0 },
+    { nx: -1, nz: 0, seen: view.x < cx - w0 },
+  ].filter((side) => side.seen);
+  /** A point on a side at height h; `s` runs from -1 to 1 across it. */
+  const on = (side: (typeof sides)[number], h: number, w: number, s: number) =>
+    [
+      cx + side.nx * w - side.nz * s * w,
+      base + h,
+      cz + side.nz * w + side.nx * s * w,
+    ] as Point;
+  const faces = sides
+    .map((side) =>
+      path([
+        ...rings.map(([h, w]) => on(side, h, w, -1)).reverse(),
+        ...rings.map(([h, w]) => on(side, h, w, 1)),
+      ]),
+    )
+    .join("");
+  const lines = sides
+    .map((side) => {
+      const ridge = (s: number) =>
+        path(
+          rings.map(([h, w]) => on(side, h, w, s)),
+          false,
+        );
+      const seams = [-0.5, 0, 0.5].map(ridge).join("");
+      const ring =
+        band === undefined
+          ? ""
+          : path(
+              [-1, 1].map((s) => on(side, rings[band][0], rings[band][1], s)),
+              false,
+            );
+      return ridge(-1) + ridge(1) + seams + ring;
+    })
+    .join("");
+  return { faces, lines };
+}
+
+/** A ball, round from every side. */
+function ball(cx: number, y: number, cz: number, r: number) {
+  const [px, py] = project([cx, y, cz]);
+  const radius = (focal * r) / toCamera(view, [cx, y, cz])[2];
+  return `M${Array.from({ length: 16 }, (_, i) => {
+    const angle = (i / 16) * Math.PI * 2;
+    return `${fixed(px + Math.cos(angle) * radius)} ${fixed(py + Math.sin(angle) * radius)}`;
+  }).join("L")}Z`;
+}
 
 let shapes: LandmarkShape[] = [];
 const add = (
@@ -183,38 +308,60 @@ const add = (
   stroke: string,
   width: number,
   glow?: number,
-) => shapes.push({ d, fill, stroke, width, glow });
+) => {
+  if (d) shapes.push({ d, fill, stroke, width, glow });
+};
 
-/** A wing: wall, window rows with pediments, string courses, roof, dormers. */
+interface Row {
+  y0: number;
+  y1: number;
+  arched?: boolean;
+  pediment?: boolean;
+}
+// Four storeys under the wings' cornice at 16 m, five in the pavilions.
+const wingRows: Row[] = [
+  { y0: 1.8, y1: 4.6, arched: true },
+  { y0: 5.8, y1: 8.8, pediment: true },
+  { y0: 9.8, y1: 12.4 },
+  { y0: 13.3, y1: 15 },
+];
+const pavilionRows: Row[] = [...wingRows, { y0: 16.3, y1: 17.9 }];
+
+/**
+ * A wing or corner pavilion: wall, window rows with pediments, string
+ * courses, a hipped roof with dormers, and on pavilions a small turret.
+ */
 function wing(
   x: number,
   z0: number,
   z1: number,
-  options: { eave: number; ridge: number; seed: number; nearEnd?: boolean },
+  options: {
+    eave: number;
+    ridge: number;
+    seed: number;
+    rows: Row[];
+    depth?: number;
+    nearEnd?: boolean;
+    turret?: boolean;
+  },
 ) {
-  const { eave, ridge, seed } = options;
-  const depth = 16;
+  const { eave, ridge, seed, rows, depth = 16 } = options;
   if (options.nearEnd)
     add(face(z0, x - depth, x, 0, eave), "#160c2e", pink, 1.6, 8);
   add(side(x, z0, z1, 0, eave), "#1b1036", pink, 2, 10);
-  const rows = [
-    { y0: 2.2, y1: 6, arched: true, pediment: false },
-    { y0: 7.8, y1: 11.2, arched: false, pediment: true },
-    { y0: 12.6, y1: 15.6, arched: false, pediment: false },
-    { y0: 16.8, y1: 18.4, arched: false, pediment: false },
-  ].filter((row) => row.y1 < eave - 0.4);
   const dark: string[] = [];
   const lit: string[] = [];
   const warm: string[] = [];
   const pediments: string[] = [];
-  const count = Math.floor((z1 - z0 - 1.6) / 3.4);
-  const startZ = z0 + (z1 - z0 - (count - 1) * 3.4 - 1.5) / 2;
+  const spacing = 2.9;
+  const count = Math.floor((z1 - z0 - 1.6) / spacing);
+  const startZ = z0 + (z1 - z0 - (count - 1) * spacing - 1.3) / 2;
   rows.forEach((row, r) => {
     for (let c = 0; c < count; c++) {
-      const za = startZ + c * 3.4;
-      const zb = za + 1.5;
+      const za = startZ + c * spacing;
+      const zb = za + 1.3;
       const d = row.arched
-        ? arch("z", x + 0.05, za, zb, row.y0, row.y1)
+        ? arch("z", x + 0.05, za, zb, row.y0, row.y1 + 0.4)
         : side(x + 0.05, za, zb, row.y0, row.y1);
       const pattern = (c * 7 + r * 5 + seed) % 9;
       if (pattern === 0 || pattern === 4) lit.push(d);
@@ -225,7 +372,7 @@ function wing(
           path(
             [
               [x + 0.1, row.y1 + 0.3, za - 0.3],
-              [x + 0.1, row.y1 + 1.2, (za + zb) / 2],
+              [x + 0.1, row.y1 + 1.1, (za + zb) / 2],
               [x + 0.1, row.y1 + 0.3, zb + 0.3],
             ],
             false,
@@ -238,7 +385,7 @@ function wing(
   add(warm.join(""), "#ffb35c", "#ffe0a8", 1.1, 12);
   add(pediments.join(""), "none", "#ff9ee6", 1);
   add(
-    [7, 12, 16.2]
+    [5.2, 9.3, 12.85, 15.6, eave - 0.3]
       .filter((y) => y < eave)
       .map((y) => line([x + 0.1, y, z0], [x + 0.1, y, z1]))
       .join(""),
@@ -247,8 +394,10 @@ function wing(
     1.2,
   );
   // Hipped roof: whichever hip end faces the camera, then the front slope.
+  // Short pavilions get a pyramid roof.
   const back = x - depth / 2;
-  const hip = depth / 2;
+  const mid = (z0 + z1) / 2;
+  const hip = Math.min(depth / 2, (z1 - z0) / 2);
   const tilt = (hip * (eave - eyeHeight)) / (ridge - eave);
   for (const [end, inward] of [
     [z0, 1],
@@ -279,127 +428,180 @@ function wing(
     2,
     10,
   );
-  const dormers: string[] = [];
-  for (let z = z0 + hip + 1; z < z1 - hip - 2; z += 6.8) {
-    const dx = x - 2.6;
-    dormers.push(
-      side(dx, z, z + 1.6, eave + 1.2, eave + 3.2) +
-        path(
-          [
-            [dx, eave + 3.2, z - 0.3],
-            [dx, eave + 4.2, z + 0.8],
-            [dx, eave + 3.2, z + 1.9],
-          ],
-          false,
-        ),
-    );
+  if (!options.turret) {
+    const dormers: string[] = [];
+    for (let z = z0 + hip + 1; z < z1 - hip - 2; z += 5.8) {
+      const dx = x - 2.6;
+      dormers.push(
+        side(dx, z, z + 1.4, eave + 1.2, eave + 3) +
+          path(
+            [
+              [dx, eave + 3, z - 0.3],
+              [dx, eave + 3.9, z + 0.7],
+              [dx, eave + 3, z + 1.7],
+            ],
+            false,
+          ),
+      );
+    }
+    add(dormers.join(""), "#241338", "#ff8ab8", 1.1, 4);
+    return;
   }
-  add(dormers.join(""), "#241338", "#ff8ab8", 1.1, 4);
+  // The small lantern turret on top of a pavilion's roof.
+  add(
+    face(mid - 0.9, back - 0.9, back + 0.9, ridge - 1, ridge + 1.6) +
+      side(back + 0.9, mid - 0.9, mid + 0.9, ridge - 1, ridge + 1.6),
+    "#241338",
+    "#ff8ab8",
+    1.2,
+    5,
+  );
+  add(
+    squareDome(back, mid, ridge + 1.6, [
+      [0, 1.15],
+      [0.4, 1.15],
+      [0.9, 0.95],
+      [1.3, 0.62],
+      [1.6, 0.3],
+      [1.75, 0.12],
+    ]).faces,
+    "#0f3f52",
+    cyan,
+    1.2,
+    6,
+  );
+  add(
+    line([back, ridge + 3.4, mid], [back, ridge + 4.6, mid]),
+    "none",
+    amber,
+    1.4,
+    8,
+  );
 }
 
-/** One of the twin towers: square body, belfry, onion dome and lantern. */
+/**
+ * A tower's copper dome after the photographs, [height above its base, half
+ * the width]: square like the stage below and as wide, a short upright
+ * skirt, then four faces curving in to the lantern.
+ */
+const domeHalf = 4.05;
+const domeRings = [
+  [0, domeHalf],
+  [0.6, domeHalf],
+  ...[0.2, 0.4, 0.55, 0.7, 0.8, 0.88, 0.94, 0.975, 0.992].map((t) => [
+    0.6 + 4.9 * t,
+    domeHalf * Math.sqrt(1 - t * t),
+  ]),
+];
+/** The small square lantern on top of it, with its cap. */
+const lanternRings = [
+  [5.4, 0.5],
+  [6.3, 0.5],
+  [6.45, 0.68],
+  [6.6, 0.42],
+  [6.7, 0.18],
+];
+
+/**
+ * One of the twin towers, 10.3 m square: a shaft rising above the roofs, a
+ * stage with a tall window, the main clock, the belfry with two arched
+ * openings on each side, a small clock under the cornice, then the square
+ * copper dome with its lantern, ball and cross.
+ */
 function tower(z0: number, dim: boolean) {
-  const x0 = front - 6;
+  const x0 = front - 7.3;
   const x1 = front + 3;
-  const z1 = z0 + 9;
-  const mid = (x0 + x1) / 2;
+  const z1 = z0 + 10.3;
+  const mx = (x0 + x1) / 2;
+  const mz = (z0 + z1) / 2;
   const edge = dim ? violet : pink;
   const glass = dim ? "#8a6fe0" : cyan;
   const fill = dim ? "#1a0f34" : "#22133f";
   const glow = dim ? 5 : 10;
-  add(face(z0, x0, x1, 0, 31), fill, edge, 2, glow);
-  add(side(x1, z0, z1, 0, 31), "#1d1039", edge, 2, glow);
-  add(face(z0 + 0.8, x0 + 0.8, x1 - 0.8, 31, 41), fill, edge, 1.8, glow);
-  add(side(x1 - 0.8, z0 + 0.8, z1 - 0.8, 31, 41), "#1d1039", edge, 1.8, glow);
+  // Stages: from, to and how far each is set back.
+  const stages = [
+    [0, 22.4, 0],
+    [22.4, 36.4, 0.3],
+    [36.4, 42.2, 0.6],
+    [42.2, 46.2, 1.1],
+  ];
+  for (const [y0, y1, inset] of stages) {
+    add(
+      face(z0 + inset, x0 + inset, x1 - inset, y0, y1),
+      fill,
+      edge,
+      1.8,
+      glow,
+    );
+    add(
+      side(x1 - inset, z0 + inset, z1 - inset, y0, y1),
+      "#1d1039",
+      edge,
+      1.8,
+      glow,
+    );
+  }
+  // Cornices around the two visible sides, and corner pilasters.
+  const ledge = (y: number, out: number) =>
+    path(
+      [
+        [x0 - out, y, z0 - out],
+        [x1 + out, y, z0 - out],
+        [x1 + out, y, z1 + out],
+      ],
+      false,
+    );
   add(
-    [12, 22, 31, 41]
-      .map((y) =>
-        path(
-          [
-            [x0 - 0.4, y, z0 - 0.4],
-            [x1 + 0.4, y, z0 - 0.4],
-            [x1 + 0.4, y, z1 + 0.4],
-          ],
-          false,
-        ),
-      )
+    [ledge(15.9, 0.2), ledge(22.4, 0.3), ledge(31, 0), ledge(36.4, 0)]
+      .concat([ledge(42.2, -0.2), ledge(46.2, -0.7)])
       .join("") +
-      line([x0 + 1, 0, z0], [x0 + 1, 31, z0]) +
-      line([x1 - 1, 0, z0], [x1 - 1, 31, z0]) +
-      line([x1, 0, z1 - 1], [x1, 31, z1 - 1]),
+      line([x1 - 0.9, 0, z0], [x1 - 0.9, 22.4, z0]) +
+      line([x1, 0, z1 - 0.9], [x1, 22.4, z1 - 0.9]) +
+      line([x1 - 1.2, 22.4, z0 + 0.3], [x1 - 1.2, 36.4, z0 + 0.3]) +
+      line([x1 - 0.3, 22.4, z1 - 1.2], [x1 - 0.3, 36.4, z1 - 1.2]),
     "none",
     "#c189ff",
     1.3,
   );
+  // Windows: the shaft's rows, the tall window, the belfry's openings.
+  const windows = (axis: "x" | "z", u: number) => {
+    const plane = (inset: number) =>
+      axis === "x" ? z0 + inset - 0.05 : x1 - inset + 0.05;
+    return (
+      wingRows
+        .slice(1)
+        .map((row) =>
+          arch(axis, plane(0), u - 0.7, u + 0.7, row.y0, row.y1 + 0.4),
+        )
+        .join("") +
+      arch(axis, plane(0.3), u - 0.85, u + 0.85, 24.4, 29.6) +
+      arch(axis, plane(0.6), u - 2.5, u - 0.6, 37.2, 41.4) +
+      arch(axis, plane(0.6), u + 0.6, u + 2.5, 37.2, 41.4)
+    );
+  };
+  add(windows("x", mx) + windows("z", mz), "#070818", glass, 1.3, dim ? 0 : 8);
   add(
-    [
-      arch("x", z0 - 0.05, mid - 1, mid + 1, 3, 8),
-      arch("x", z0 - 0.05, mid - 1, mid + 1, 14, 19.5),
-      arch("z", x1 + 0.05, z0 + 3.5, z0 + 5.5, 3, 8),
-      arch("z", x1 + 0.05, z0 + 3.5, z0 + 5.5, 14, 19.5),
-      arch("x", z0 + 0.75, x0 + 2, x0 + 3.8, 33, 38.5),
-      arch("x", z0 + 0.75, x1 - 3.8, x1 - 2, 33, 38.5),
-      arch("z", x1 - 0.75, z0 + 2.2, z0 + 4, 33, 38.5),
-      arch("z", x1 - 0.75, z1 - 4, z1 - 2.2, 33, 38.5),
-    ].join(""),
-    "#070818",
-    glass,
-    1.3,
-    dim ? 0 : 8,
-  );
-  add(
-    clock("x", z0 - 0.1, mid, 26.5, 2) +
-      clock("z", x1 + 0.1, z0 + 4.5, 26.5, 2),
+    clock("x", z0 + 0.25, mx, 33.6, 1.7) +
+      clock("z", x1 - 0.25, mz, 33.6, 1.7) +
+      clock("x", z0 + 1.05, mx, 44.2, 1, "minute") +
+      clock("z", x1 - 1.05, mz, 44.2, 1, "minute"),
     "#132240",
     amber,
     1.6,
     dim ? 0 : 10,
   );
-  // The onion dome is round, so its outline is the same from every side.
-  const z = z0 + 4.5;
-  const [cx] = project([mid, 0, z]);
-  const scale = focal / toCamera(view, [mid, 0, z])[2];
-  const y = (height: number) => project([mid, height, z])[1];
-  const outline = (rings: [number, number][]) => {
-    const right = rings.map(([h, r]) => [cx + r * scale, y(h)]);
-    const left = rings.map(([h, r]) => [cx - r * scale, y(h)]).reverse();
-    return `M${[...right, ...left].map(([px, py]) => `${fixed(px)} ${fixed(py)}`).join("L")}Z`;
-  };
+  // The copper dome, its lantern, the gilded ball and the cross.
+  const base = 46.2;
+  const copper = dim ? "#123048" : "#0f3f52";
+  const dome = squareDome(mx, mz, base, domeRings, 1);
+  add(dome.faces, copper, glass, 2, dim ? 5 : 12);
+  add(dome.lines, "none", dim ? "#5a7fc0" : "#9ff8ffaa", 1);
+  const lantern = squareDome(mx, mz, base, lanternRings);
+  add(lantern.faces, copper, glass, 1.6, dim ? 4 : 9);
+  add(ball(mx, base + 7.15, mz, 0.45), "#ffc46b", amber, 1, dim ? 0 : 10);
   add(
-    outline([
-      [41, 4],
-      [42.6, 4.6],
-      [44.2, 4.4],
-      [46, 3],
-      [47.4, 1.2],
-      [48.4, 0.8],
-    ]) +
-      outline([
-        [48.4, 1],
-        [51.2, 1],
-        [51.6, 1.3],
-        [52.6, 1],
-        [53.6, 0.2],
-      ]),
-    dim ? "#123048" : "#0f3f52",
-    glass,
-    2,
-    dim ? 5 : 12,
-  );
-  const top = y(48.4);
-  const base = y(41);
-  const middle = (top + base) / 2;
-  add(
-    `M${fixed(cx)} ${fixed(top)}L${fixed(cx)} ${fixed(base)}` +
-      `M${fixed(cx - 1.6 * scale)} ${fixed(base)}Q${fixed(cx - 2.6 * scale)} ${fixed(middle)} ${fixed(cx)} ${fixed(top)}` +
-      `M${fixed(cx + 1.6 * scale)} ${fixed(base)}Q${fixed(cx + 2.6 * scale)} ${fixed(middle)} ${fixed(cx)} ${fixed(top)}`,
-    "none",
-    dim ? "#5a7fc0" : "#9ff8ffaa",
-    1.1,
-  );
-  add(
-    `M${fixed(cx)} ${fixed(y(53.6))}L${fixed(cx)} ${fixed(y(56.4))}` +
-      `M${fixed(cx - 0.8 * scale)} ${fixed(y(55.4))}L${fixed(cx + 0.8 * scale)} ${fixed(y(55.4))}`,
+    line([mx, base + 7.6, mz], [mx, base + 10.2, mz]) +
+      line([mx, base + 9.4, mz - 0.6], [mx, base + 9.4, mz + 0.6]),
     "none",
     amber,
     1.6,
@@ -407,74 +609,142 @@ function tower(z0: number, dim: boolean) {
   );
 }
 
-/** The convex centre of the west front between the towers, with the nave behind. */
-function church() {
+/**
+ * The convex centre of the west front between the towers: the curved front
+ * with its portal, oculus and tall windows, the balustrade, and the attic
+ * with the Madonna's niche and three statues; the nave's roof behind.
+ */
+function church(z0: number, z1: number) {
+  const mid = (z0 + z1) / 2;
+  const bulge = (z: number) =>
+    front + 3 + 5 * Math.sin((Math.PI * (z - z0)) / (z1 - z0));
+  const surface: Surface = (u, y) => [bulge(u) + 0.05, y, u];
+  const along = (y: number, from = z0, to = z1, steps = 16) =>
+    Array.from({ length: steps + 1 }, (_, i): Point => {
+      const z = from + ((to - from) * i) / steps;
+      return [bulge(z), y, z];
+    });
   add(
     path([
-      [front - 2, 26, 104],
-      [front - 140, 26, 104],
-      [front - 140, 35, 114],
-      [front - 2, 35, 114],
+      [front - 2, 24, z0 + 2],
+      [front - 150, 24, z0 + 2],
+      [front - 150, 33, mid],
+      [front - 2, 33, mid],
     ]),
     "#3d1240",
     roofRed,
     1.8,
     8,
   );
-  const x = front + 5;
-  const gable = Array.from({ length: 13 }, (_, i): Point => {
-    const t = i / 12;
-    return [x, 26 + Math.sin(t * Math.PI) * 6.5, 104 + t * 20];
-  });
-  add(face(104, front - 1, x, 0, 26), "#170c30", pink, 1.6, 6);
-  add(path([[x, 0, 104], ...gable, [x, 0, 124]]), "#211241", pink, 2, 10);
+  // The attic: upright to 31 m, a curved gable over the middle, and
+  // scrolls stepping down to the balustrade at both ends.
+  const half = 10.7;
+  const top = (z: number) => {
+    const d = Math.abs(z - mid);
+    if (d <= 4.5) return 31 + 3.6 * Math.sqrt(1 - (d / 4.5) ** 2);
+    if (d <= 8) return 31;
+    return 27 + 4 * Math.sqrt(Math.max(0, 1 - ((d - 8) / (half - 8)) ** 2));
+  };
+  const attic = along(0, mid - half, mid + half, 40).map(([x, , z]): Point => [
+    x,
+    top(z),
+    z,
+  ]);
   add(
-    [
-      arch("z", x + 0.05, 112, 116, 0, 8),
-      arch("z", x + 0.05, 108, 110.5, 10, 15),
-      arch("z", x + 0.05, 117.5, 120, 10, 15),
-      arch("z", x + 0.05, 112.5, 115.5, 11, 18),
-    ].join(""),
-    "#070818",
-    cyan,
-    1.4,
-    8,
+    path([...along(24, mid - half, mid + half, 40).reverse(), ...attic]),
+    "#211241",
+    pink,
+    2,
+    10,
   );
+  add(path([...along(0), ...along(24).reverse()]), "#1d1039", pink, 2, 10);
+  // Cornices, the balustrade and pilasters.
   add(
-    line([x + 0.1, 9, 104], [x + 0.1, 9, 124]) +
-      line([x + 0.1, 26, 104], [x + 0.1, 26, 124]) +
-      [106, 110.8, 117.2, 122]
-        .map((z) => line([x + 0.1, 0, z], [x + 0.1, 26, z]))
+    path(along(9.2), false) +
+      path(along(17.6), false) +
+      path(along(25.4), false) +
+      along(24, z0, z1, 30)
+        .map(([x, , z]) => line([x, 24, z], [x, 25.4, z]))
+        .join("") +
+      [-14, -11, -6.8, -3.2, 3.2, 6.8, 11, 14]
+        .map((dz) => path([surface(mid + dz, 0), surface(mid + dz, 24)], false))
         .join(""),
     "none",
     "#c189ff",
     1.2,
   );
   add(
-    clock("z", x + 0.1, 114, 22, 1.4) +
-      line([x + 0.2, 32.5, 114], [x + 0.2, 35.5, 114]),
-    "#132240",
+    archOn(surface, mid - 1.4, mid + 1.4, 10.6, 16.2) +
+      archOn(surface, mid - 7.85, mid - 6.15, 11, 15.6) +
+      archOn(surface, mid + 6.15, mid + 7.85, 11, 15.6) +
+      archOn(surface, mid - 7.8, mid - 6.2, 2.2, 6.4) +
+      archOn(surface, mid + 6.2, mid + 7.8, 2.2, 6.4) +
+      ringOn(surface, mid, 19.6, 1.1) +
+      ringOn(surface, mid - 7, 19.6, 0.75) +
+      ringOn(surface, mid + 7, 19.6, 0.75),
+    "#070818",
+    cyan,
+    1.4,
+    8,
+  );
+  // The portal.
+  add(
+    archOn(surface, mid - 1.7, mid + 1.7, 0, 5.8) +
+      path([surface(mid, 0), surface(mid, 4.1)], false),
+    "#2a0c20",
     amber,
     1.6,
-    10,
+    8,
+  );
+  // The Madonna's niche in the attic, and the statues on top.
+  add(
+    archOn(surface, mid - 1.2, mid + 1.2, 26, 30.4),
+    "#070818",
+    violet,
+    1.4,
+    6,
+  );
+  add(
+    statueOn(surface, mid, 26.3, 3.2) +
+      statueOn(surface, mid, top(mid), 3.4) +
+      statueOn(surface, mid - 4.5, top(mid - 4.5), 2.8) +
+      statueOn(surface, mid + 4.5, top(mid + 4.5), 2.8) +
+      statueOn(surface, mid - 8, 31, 1.8) +
+      statueOn(surface, mid + 8, 31, 1.8),
+    "#2a1a10",
+    amber,
+    1.2,
+    8,
   );
 }
 
 /**
- * The monastery as seen by `camera`. The painting order, from the south end
- * towards the north-west corner, holds while the camera stays north of the
- * towers, as every view from viewFor() does.
+ * The monastery as seen by `camera`, after photographs of the west front:
+ * corner pavilions with turrets, wings, the twin towers and the convex
+ * church front, 145 m in all. The painting order, from the south end towards
+ * the north-west corner, holds while the camera stays north of the towers,
+ * as every view from viewFor() does.
  */
-export function monasteryFrom(camera: View) {
+export function monasteryFrom(camera: View, at: ClockTime = time) {
   view = camera;
+  time = at;
   shapes = [];
-  wing(front, 134, 192, { eave: 19, ridge: 27, seed: 3 });
-  tower(124, true);
-  church();
-  tower(95, false);
-  wing(front, 44, 95, { eave: 19, ridge: 27, seed: 0 });
-  // The north-west corner pavilion stands forward a little and rises higher.
-  wing(front + 1.5, 30, 44, { eave: 21, ridge: 30, seed: 5, nearEnd: true });
+  const wingSpec = { eave: 15.9, ridge: 23, rows: wingRows };
+  const pavilion = {
+    eave: 19,
+    ridge: 25,
+    rows: pavilionRows,
+    depth: 20,
+    nearEnd: true,
+    turret: true,
+  };
+  wing(front + 1.5, 155.8, 174.8, { ...pavilion, seed: 2 });
+  wing(front, 128.2, 155.8, { ...wingSpec, seed: 3 });
+  tower(117.9, true);
+  church(86.9, 117.9);
+  tower(76.6, false);
+  wing(front, 49, 76.6, { ...wingSpec, seed: 0 });
+  wing(front + 1.5, 30, 49, { ...pavilion, seed: 5 });
   view = standing;
   return shapes;
 }
