@@ -1,0 +1,67 @@
+---
+/**
+ * The hero of the home page: the raven stage fills it as its background, and
+ * the slotted content sits on top. Without script the stage shows a still
+ * pixel picture; stage.ts replaces it with the canvas scene and reveals the
+ * controls (ADR 0004). The stage is a sibling of the content, so keys pressed
+ * on the content's buttons never reach it.
+ */
+import PixelArt from "./PixelArt.astro";
+import { stageStill } from "./scenes";
+
+const stillLabel =
+  "Zwei Pixel-Raben fliegen übereinander über eine Landschaft mit Bergen, Kloster und Tannen.";
+---
+
+<section class="landing">
+  <div class="stage" data-stage>
+    <PixelArt
+      class="stage-fallback stage-fallback-wide"
+      picture={stageStill()}
+      fit="slice"
+      label={stillLabel}
+    />
+    <PixelArt
+      class="stage-fallback stage-fallback-tall"
+      picture={stageStill(130, 250)}
+      fit="slice"
+      label={stillLabel}
+    />
+    <canvas class="stage-canvas" data-stage-canvas hidden></canvas>
+    <p class="stage-hint" aria-hidden="true">
+      Pfeiltasten: fliegen · Leertaste: Krah! · Esc: fertig
+    </p>
+  </div>
+  <div class="landing-content mx-auto max-w-6xl px-4">
+    <div class="landing-card">
+      <slot />
+      <div class="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <slot name="actions" />
+        <div class="contents" data-stage-controls hidden>
+          <button type="button" class="px-btn px-btn-light" data-stage-steer>
+            Raben steuern
+          </button>
+          <button
+            type="button"
+            class="px-btn px-btn-light"
+            data-stage-pause
+            aria-pressed="false"
+          >
+            Pause
+          </button>
+          <p class="landing-help" id="buehne-hilfe">
+            Klick oder tipp in den Himmel, und der Rabe fliegt hin. Wer einen
+            Raben antippt, hört «Krah!».
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { mountStage } from "./stage";
+
+  const root = document.querySelector<HTMLElement>("[data-stage]");
+  if (root) mountStage(root);
+</script>

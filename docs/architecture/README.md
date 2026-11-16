@@ -6,7 +6,8 @@ published on GitHub Pages. It has no server, and no content depends on client-si
 JavaScript; a variant may add small scripts for optional effects
 ([ADR 0004](decisions/0004-allow-optional-client-side-scripts-in-a-variant.md)). November Games adds
 keyboard navigation and an interactive canvas background
-([ADR 0005](decisions/0005-enhance-november-games-with-local-interactions.md)). Until
+([ADR 0005](decisions/0005-enhance-november-games-with-local-interactions.md)), and
+2raben games a small canvas scene within the rules of ADR 0004. Until
 the studio's name is chosen, the site holds one complete version per name
 candidate ([ADR 0002](decisions/0002-compare-name-candidates-as-variant-routes.md)),
 each with its own pages, layout and theme.
@@ -28,9 +29,10 @@ two folders named after its slug:
 | `src/variants/<slug>/styles.css` | Tailwind, typography plugin, and daisyUI without built-in themes |
 | `src/variants/<slug>/theme.css` | The variant's custom daisyUI theme, named after the slug |
 
-The four variants started from the same layout and pages, and their themes started as
+The first four variants started from the same layout and pages, and their themes started as
 copies of daisyUI's retro (Schafbock Studio), cupcake (Egg Settlers), nord
-(November Games) and forest (Waldstatt Games). A variant may add components and
+(November Games) and forest (Waldstatt Games). 2raben games was added later from
+the same starting point, with its own theme from the start. A variant may add components and
 modules of its own to its folder. Change a variant only inside its own folders;
 never import another variant's files.
 
@@ -152,6 +154,61 @@ bauen" offers the same for keyboards. The practice grounds run only while on
 screen. Reduced motion stops every animation of the map, which then shows each
 sprite's first frame; houses then appear at once, and the practice grounds play
 no demonstration but still respond to input.
+
+### 2raben games
+
+A funny pixel-art version, shaped in the
+[pitch](../pitches/2raben-games/pitch--pixel-raben.md): two ravens, a nod to the
+two ravens in the Einsiedeln coat of arms, host the site. They are our own
+drawings; the site shows neither the coat of arms nor a shield. The theme pairs
+cream paper with raven black and red, with square corners. The header is red with
+the ravens in black, the colours of the district's arms; its crest of two flying
+ravens, one above the other and flapping in turn, is larger than the bar and hangs
+out of it. The pixel face Jersey 10
+comes self-hosted from `@fontsource/jersey-10` and is used only for short text;
+running text stays in the default sans-serif. Its folder
+`src/variants/2raben-games/` adds:
+
+| Path | Contents |
+| --- | --- |
+| `pixels.ts` | The one source of all pixel art: palette, raven poses and scarf, props, the stage scenery (`composeBackdrop`: sky, sun, mountains, hills, monastery, firs, clouds), the 3×5 bubble font |
+| `scenes.ts` | Static pictures composed from it: the stage's still frames, the header crest, the perched pair, vignettes, module icons, the about picture |
+| `PixelArt.astro` | Renders a picture as crisp SVG at build time |
+| `RavenStage.astro`, `stage.ts` | The home page's hero with the raven stage as its background: still SVG, replaced by the canvas scene when the script runs |
+| `GameModule.astro` | A game as a cartridge with its vignette, «Spielen!» and «Mehr erfahren» |
+| `ravens.ts` | The ravens' comment, picture and key summary per game, keyed by game id; `getRavenGames()` fails the build when a game has none |
+| `Keycaps.astro` | The key summary as pixel keys |
+| `KeyDrill.astro`, `drill.ts` | The key warm-up («Probefahrt») on each game page: a pixel canvas driven by the game's keys; hidden until its script runs |
+
+Game pages show a vignette, the raven's comment and the play button first, then
+the key summary, the key warm-up and the shared game Markdown. The warm-up, like
+Schafbock Studio's key demos, is not the game: no traps, no traffic, no score.
+Focused, it handles the keys from the game's controls table. In Moto Devil's, the
+motorbike accelerates, brakes, tilts into a salto, jumps over a ramp, fires the
+jet while Space is held, turns round and restarts, and crashes back to the start
+on a bad landing. In Car Drive's, the car changes between three lanes, boosts and
+restarts, and follows a mouse pointer's lane. A raven comments in the bubble font,
+and a live region announces each action. The on-screen keys work by pointer and
+touch, held as long as they are pressed. The scene only moves while the warm-up
+has focus. The comments only retell the
+games' documentation: Moto Devil's ravens in a dive, Car Drive's bird's-eye view.
+
+The stage fills the hero behind the title, the intro and the buttons; the content
+lets clicks through to the sky, and the stage is a sibling of the content, so keys
+on its buttons never reach the scene. A soil strip closes the hero. The stage draws
+at a low resolution (about 140 pixels high and at least 120 wide) and is scaled up
+by a whole number, so pixels stay sharp. Two ravens start one above the other, then
+fly to perches (ground, monastery roof and towers, firs); the second follows a
+wing length behind and lands next to the first or on the ground below. Idle, they
+blink, peck, call «Krah!» and bump each other. A click or tap sends the first
+raven there; tapping a raven makes it call. «Raben steuern» moves focus to the
+stage (`role="application"`), where arrow keys or WASD fly and Space calls;
+Escape returns to the button and Tab leaves normally. Keys are only handled while
+the stage has focus. «Pause» stops the scene. The loop runs at about 30 frames
+per second and stops while paused, off-screen or in a hidden tab. With reduced
+motion, without script or without a 2D canvas, the still picture stays (one for
+wide and one for tall screens) and the controls stay hidden; the header crest
+stops flapping with reduced motion. Nothing is stored or sent.
 
 ### Adding a variant
 

@@ -18,8 +18,9 @@ The site links to these deployments; it does not build, host, or copy the games.
 
 "2raben" is a temporary name. Each name candidate gets its own complete version of
 the site, so colleagues can compare them and decide: Schafbock Studio, Egg Settlers,
-November Games, and Waldstatt Games. Once the name is chosen, the chosen version
-becomes the site and the organization is renamed.
+November Games, Waldstatt Games, and 2raben games. Once the name is chosen, the
+chosen version becomes the site and the organization is renamed, unless the choice
+is 2raben games, which keeps the current name.
 
 ## Possibilities
 

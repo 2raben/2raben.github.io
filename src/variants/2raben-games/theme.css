@@ -1,0 +1,35 @@
+/* This variant's colors and shapes: cream paper, raven black and the red of
+   the Einsiedeln coat of arms, with square pixel corners everywhere
+   (https://daisyui.com/docs/themes/). */
+@plugin "daisyui/theme" {
+  name: "2raben-games";
+  color-scheme: light;
+  --color-base-100: #fbf5ea;
+  --color-base-200: #f2e7d3;
+  --color-base-300: #e4d3b6;
+  --color-base-content: #17131f;
+  --color-primary: #d7263d;
+  --color-primary-content: #ffffff;
+  --color-secondary: #17131f;
+  --color-secondary-content: #ffffff;
+  --color-accent: #ffc93c;
+  --color-accent-content: #17131f;
+  --color-neutral: #2b2438;
+  --color-neutral-content: #fbf5ea;
+  --color-info: #2f6fd6;
+  --color-info-content: #ffffff;
+  --color-success: #2f6b3f;
+  --color-success-content: #ffffff;
+  --color-warning: #ffc93c;
+  --color-warning-content: #17131f;
+  --color-error: #98172a;
+  --color-error-content: #ffffff;
+  --radius-selector: 0rem;
+  --radius-field: 0rem;
+  --radius-box: 0rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 2px;
+  --depth: 0;
+  --noise: 0;
+}
