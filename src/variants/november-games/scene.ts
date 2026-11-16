@@ -653,7 +653,7 @@ export function mountScene(root: HTMLElement, isMoving: () => boolean) {
       if (
         event.button !== 0 ||
         (event.target as Element).closest(
-          "a, button, input, textarea, select, [contenteditable], dialog",
+          "a, button, input, textarea, select, [contenteditable], dialog, [data-preview]",
         )
       )
         return;

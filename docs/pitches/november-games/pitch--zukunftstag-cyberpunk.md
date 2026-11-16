@@ -66,7 +66,9 @@ Der Vorschlag umfasst fünf Elemente:
    oder die Aktivierung von «Szene steuern» senden einen Lichtimpuls. Bei Fokus
    auf diesem Knopf drehen ← → die Aussicht und ↑ ↓ neigen sie, Tab führt normal weiter.
    Nach links kreist der Blick wie in einer 3D-Karte um das Kloster, bis man die
-   Westfassade fast von vorne sieht. Ein sichtbares Menü mit
+   Westfassade fast von vorne sieht. Jede Spielseite hat eine «Probefahrt»: eine
+   Neon-Vorschau mit vereinfachten Regeln, die sich selbst vorführt, bis man mit
+   den Tasten aus dem Spiel übernimmt. Ein sichtbares Menü mit
    `Alt+K`, Pfeiltasten in der Navigation und Spielauswahl sowie die normale
    Tab-Reihenfolge ermöglichen Tastaturbedienung. Die Effekte sind pausierbar und
    beachten reduzierte Bewegung; SVG und normale Links funktionieren ohne Skript.

@@ -68,7 +68,8 @@ The variant owns `Horizon.astro` (SVG landscape), `landmarks.ts` (the projected
 monastery model, river, label layout and scene placement), `panorama.ts`
 (generated skyline and summit data) and its generator `tools/panorama.mjs`,
 `GameArtwork.astro` (decorative SVG game
-illustrations), `SynthwaveScene.astro` (fixed full-viewport canvas with SVG fallback
+illustrations), `GamePreview.astro` with `preview.ts`, `previewMoto.ts` and
+`previewCar.ts` (the game previews), `SynthwaveScene.astro` (fixed full-viewport canvas with SVG fallback
 on every November Games page), `KeyboardControls.astro`, `interactions.ts` and
 `scene.ts`. No game assets, external
 fonts, rendering libraries or remote services are loaded. The numeric November
@@ -89,6 +90,25 @@ keyboard focus itself. The visible «Szene steuern» button accepts arrow keys;
 its native click, Enter and Space activation send a light impulse. Tab continues
 to the next control. A hint appears when that button is focused or hovered.
 Game artwork still tilts towards the pointer, and focused games are highlighted.
+
+Each game page shows a preview («Probefahrt») below its heading: a neon canvas
+with simplified rules from the game's text, not the game itself. Moto Devil's
+follows the 2raben games key warm-up: the motorbike accelerates, brakes, tilts
+into a salto, jumps over a ramp, fires the jet while Space is held after a jump,
+turns round, restarts and crashes back to the start on a bad landing. Car
+Drive's follows the Egg Settlers practice road: three lanes with traffic both
+ways, cars that blink before changing lanes, levels every 1000 m, trucks from
+4000 m, hearts, a shield, coins and the boost gauge. Both rule sets were copied
+into this variant and redrawn; nothing is imported from another variant. A
+demonstration plays while the preview is on screen until somebody presses a key
+from the controls table or an on-screen key; after eight idle seconds it takes
+over again. Keys are handled only while the preview has focus, Escape leaves
+it, and the on-screen keys work by pointer and touch, held while pressed. A live
+region announces actions while somebody plays. There is no demonstration with
+reduced motion or with the effects switched off. The loop runs at about 30
+frames per second, only while the preview is on screen and moving. Without
+JavaScript or a 2D canvas the preview stays hidden; clicks in it send no
+impulse to the background.
 
 The landscape is a synthwave composition of a real view. The mountain panorama
 is generated from swisstopo elevation data and swissNAMES3D summit names as seen
