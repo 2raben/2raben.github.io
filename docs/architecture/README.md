@@ -113,8 +113,10 @@ impulse to the background.
 The landscape is a synthwave composition of a real view. The mountain panorama
 is generated from swisstopo elevation data and swissNAMES3D summit names as seen
 from about 450 m above the Klosterplatz Einsiedeln, looking south-west towards
-the Mythen. It is drawn in four depth bands with heights exaggerated 2.2 times,
-and labels each visible summit with its official height. `panorama.ts` records
+the Mythen. It is drawn in four depth bands with heights exaggerated 2.2 times
+over headings 140° to 252°, easing down into the plain over the outer 12° at
+both ends, and labels each visible summit outside those ends with its official
+height. `panorama.ts` records
 the viewpoint and is not edited by hand: `node
 src/variants/november-games/tools/panorama.mjs` downloads the data from
 api3.geo.admin.ch into `node_modules/.cache/november-games-panorama/` (about
@@ -130,12 +132,24 @@ tower clocks show the time in Einsiedeln (Europe/Zurich) with an hour and a
 minute hand, the upper ones a single minute hand across the dial, as on the
 real towers; the canvas redraws them every minute, and the static SVG shows
 ten past ten. It is projected so that its
-lines meet the floor grid's vanishing point, where the sun sets. The Alp is drawn freely, from below Grosser Mythen
-across the floor towards the viewer. Canvas and fallback SVG share these drawings
+lines meet the floor grid's vanishing point, where the sun sets. Where the page
+leaves a margin of at least 200 px left of its text column (from 105rem), the
+monastery stands in that margin instead: further away, turned towards the
+viewer and drawn 1.3 times taller so that it does not look squat from the front
+(`abbeyPose()` in `landmarks.ts`); its lines meet the horizon at their own
+point. The Alp is drawn freely, from below Grosser Mythen
+across the floor towards the viewer. On its far bank, on the right, stand the
+ski jumps of Einsiedeln, drawn freely after a photograph and facing left
+towards the monastery: the large and the medium hill with in-runs on concrete
+pillars, the start tower on the hilltop, landing hills with distance marks and
+floodlights, the judges' tower between them, and a small hill behind. Canvas and fallback SVG share these drawings
 in "scene units" whose origin is the vanishing point. Chrome ignores CSS geometry
 on nested SVG elements, so `Horizon.astro` renders the wide and narrow placements
 as attributes and switches between them with a media query; the about-page card
-always uses the narrow placement.
+always uses the narrow placement. The wide placement holds both monasteries, the
+one in the margin computed for 1920 × 1080, and the same media query picks one.
+From 105rem the shade behind the home-page text follows the text column instead
+of the screen's left edge.
 
 Arrow keys on «Szene steuern» turn the view between 35° left and 20° right, and
 mouse movement turns it slightly. The tele panorama and the sun pan by the turn.
@@ -143,8 +157,13 @@ The floor grid, monastery and river are projected in 3D from a near-field camera
 (`viewFor()` in `landmarks.ts`): turning left orbits it around the church front
 by 1.5 times the turn, as in a 3D map, so that the west front is seen more and
 more from the front; turning right turns it in place. Its painting order holds
-while the camera stays north of the towers. The river's distant part bends to
-meet the Alptal in the panorama. Summit labels behind the home-page headline are
+while the camera stays north of the towers. Around the monastery in the margin,
+hundreds of metres away, such an orbit would swing the camera across the floor,
+the river and the ski jumps, so there turning left only turns the camera, like
+turning right, and the monastery moves with the view, behind the text if need
+be. The river's distant part bends to meet the
+Alptal in the panorama while the valley is near; when a turn pans the valley
+far away, the bend lets go instead of dragging the river across the floor. Summit labels behind the home-page headline are
 dimmed.
 The home page leaves space to see the landscape; longer content uses translucent
 dark surfaces. Visual reference sources are recorded in the
@@ -155,8 +174,8 @@ storage. Reduced-motion preferences always disable movement; navigation still
 works. The renderer caps pixel density at 2, raster size at approximately three
 million pixels and drawing at 30 fps, limits concurrent impulses, and suspends
 its animation loop in hidden tabs. Glowing landmarks are drawn into offscreen
-canvases once per size, and the monastery again whenever the view turns by a
-tenth of a degree; each frame only copies them and redraws the floor and river. The fixed canvas remains visible when the page scrolls. A static SVG remains if JavaScript or the 2D context is unavailable;
+canvases once per size, and the monastery and ski jumps again whenever the view
+turns by a tenth of a degree; each frame only copies them and redraws the floor and river. The fixed canvas remains visible when the page scrolls. A static SVG remains if JavaScript or the 2D context is unavailable;
 the unavailable scene control stays hidden. Phone layouts retain readable game
 controls without promising mobile game support.
 

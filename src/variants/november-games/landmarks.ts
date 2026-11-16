@@ -54,35 +54,99 @@ export function toCamera(camera: View, [x, y, z]: Point): Point {
   return [dx * cos - dz * sin, y, dx * sin + dz * cos];
 }
 
+/** Vertical stretch of the drawing being projected (see Pose). */
+let rise = 1;
+
 function project(point: Point) {
   const [x, y, z] = toCamera(view, point);
-  return [(focal * x) / z, (focal * (eyeHeight - y)) / z];
+  return [(focal * x) / z, (focal * (eyeHeight - y * rise)) / z];
 }
 
 /** Whether the outside of a wall plane faces the camera (see `at`). */
 const facing = (axis: "x" | "z", plane: number) =>
   axis === "z" ? view.x > plane : view.z < plane;
 
-// Turning left orbits around the church front, as in a 3D map, so that the
-// west front is seen more and more from the front; turning right only turns.
-const pivot = [front + 5, 102.4] as const;
-const orbitGain = 1.5;
+/**
+ * Where the monastery stands: the middle of the church front in world
+ * metres, how far the building is turned (radians, positive: right), how
+ * many degrees the view orbits around it per degree turned left, and how
+ * much taller than measured it is drawn.
+ */
+export interface Pose {
+  x: number;
+  z: number;
+  turn: number;
+  orbit: number;
+  rise: number;
+}
+const centre = [front + 3, 102.4] as const;
+export const homePose: Pose = {
+  x: centre[0],
+  z: centre[1],
+  turn: 0,
+  orbit: 1.5,
+  rise: 1,
+};
 
-/** The camera for a view turned by `degrees` (negative: left). */
-export function viewFor(degrees: number): View {
-  const orbit = (Math.min(0, degrees) * orbitGain * Math.PI) / 180;
-  const yaw = orbit + (Math.max(0, degrees) * Math.PI) / 180;
-  const [dx, dz] = [-pivot[0], -pivot[1]];
+/**
+ * The camera for a view turned by `degrees` (negative: left). Turning left
+ * orbits around the church front by `pose.orbit` times the turn, as in a 3D
+ * map, so that the west front is seen more and more from the front; whatever
+ * the orbit leaves of the turn, and turning right, only turns the camera.
+ */
+export function viewFor(degrees: number, pose: Pose = homePose): View {
+  const left = Math.min(0, degrees);
+  const orbit = (left * pose.orbit * Math.PI) / 180;
+  const turn = Math.max(0, degrees) + left * Math.max(0, 1 - pose.orbit);
+  // The pivot lies just in front of the church.
+  const [px, pz] = [pose.x + 2, pose.z];
   return {
-    x: pivot[0] + dx * Math.cos(orbit) + dz * Math.sin(orbit),
-    z: pivot[1] - dx * Math.sin(orbit) + dz * Math.cos(orbit),
-    yaw,
+    x: px - px * Math.cos(orbit) - pz * Math.sin(orbit),
+    z: pz + px * Math.sin(orbit) - pz * Math.cos(orbit),
+    yaw: orbit + (turn * Math.PI) / 180,
+  };
+}
+
+/** The camera in the monastery's own coordinates for a pose. */
+function poseCamera(camera: View, pose: Pose): View {
+  const dx = camera.x - pose.x;
+  const dz = camera.z - pose.z;
+  const cos = Math.cos(pose.turn);
+  const sin = Math.sin(pose.turn);
+  return {
+    x: centre[0] + dx * cos - dz * sin,
+    z: centre[1] + dx * sin + dz * cos,
+    yaw: camera.yaw - pose.turn,
+  };
+}
+
+/**
+ * A pose that shows the monastery at scene x `target`, about `span` scene
+ * units wide: further away, and turned towards the viewer up to `oblique`
+ * degrees short of facing it, so that it is still seen from the north-west.
+ */
+export function poseAt(target: number, span: number, oblique = 32): Pose {
+  // The turned front and its receding wings take about 230 m of the view.
+  const distance = (focal * 230) / span;
+  const bearing = Math.atan(target / focal);
+  return {
+    x: distance * Math.sin(bearing),
+    z: distance * Math.cos(bearing),
+    turn: Math.PI / 2 + bearing - (oblique * Math.PI) / 180,
+    // Orbiting around the distant monastery would swing the camera across
+    // the floor, the river and the ski jumps, so the view only turns, and
+    // the monastery moves with it, behind the text if need be.
+    orbit: 0,
+    // Seen nearly from the front, the long building looks squat.
+    rise: 1.3,
   };
 }
 
 const fixed = (n: number) => n.toFixed(1);
 
 function path(points: Point[], closed = true) {
+  // Shapes reaching behind the camera are left out rather than distorted.
+  if (points.some((point) => toCamera(view, point)[2] < 1)) return "";
   const d = points
     .map((point, i) => {
       const [x, y] = project(point);
@@ -398,7 +462,7 @@ function wing(
   const back = x - depth / 2;
   const mid = (z0 + z1) / 2;
   const hip = Math.min(depth / 2, (z1 - z0) / 2);
-  const tilt = (hip * (eave - eyeHeight)) / (ridge - eave);
+  const tilt = (hip * (eave - eyeHeight / rise)) / (ridge - eave);
   for (const [end, inward] of [
     [z0, 1],
     [z1, -1],
@@ -723,10 +787,16 @@ function church(z0: number, z1: number) {
  * corner pavilions with turrets, wings, the twin towers and the convex
  * church front, 145 m in all. The painting order, from the south end towards
  * the north-west corner, holds while the camera stays north of the towers,
- * as every view from viewFor() does.
+ * as every view from viewFor() does. `pose` places and turns the whole
+ * building; moving the camera the opposite way keeps every facing test.
  */
-export function monasteryFrom(camera: View, at: ClockTime = time) {
-  view = camera;
+export function monasteryFrom(
+  camera: View,
+  at: ClockTime = time,
+  pose: Pose = homePose,
+) {
+  view = poseCamera(camera, pose);
+  rise = pose.rise;
   time = at;
   shapes = [];
   const wingSpec = { eave: 15.9, ridge: 23, rows: wingRows };
@@ -746,10 +816,284 @@ export function monasteryFrom(camera: View, at: ClockTime = time) {
   wing(front, 49, 76.6, { ...wingSpec, seed: 0 });
   wing(front + 1.5, 30, 49, { ...pavilion, seed: 5 });
   view = standing;
+  rise = 1;
   return shapes;
 }
 
-export const monastery = monasteryFrom(standing);
+/**
+ * Wide screens leave a margin left of the page's text column (`.shell`:
+ * min(100% - 6rem, 80rem)). From 200 px on the monastery stands there,
+ * centred and filling most of it; otherwise it stays at home.
+ */
+export function abbeyPose(
+  width: number,
+  layout: { vanishX: number; scale: number },
+) {
+  const margin = (width - Math.min(width - 96, 1280)) / 2;
+  if (width < 1024 || margin < 200) return homePose;
+  return poseAt(
+    (margin / 2 - layout.vanishX) / layout.scale,
+    Math.min(340, (margin * 0.8) / layout.scale),
+  );
+}
+
+/*
+ * The ski jumps of Einsiedeln on the far bank of the Alp, drawn freely after
+ * a photograph: two in-runs on concrete pillars, the large one from a start
+ * tower on the hilltop, landing hills with distance marks and
+ * floodlights, and a judges' tower between them. Each jump is laid out along
+ * its axis in metres: `s` downhill from the start tower, `h` up and `w`
+ * across, positive towards the viewer. The jumps face left, towards the
+ * monastery: the axis runs straight across, at about 45° to the line of
+ * sight, so that the in-runs show in profile and the landing hills their
+ * width.
+ */
+const jumpFoot = [330, 400];
+const jumpAxis = [-1, 0];
+const jumpAcross = [0, -1];
+const onJump = (s: number, h: number, w: number): Point => [
+  jumpFoot[0] + s * jumpAxis[0] + w * jumpAcross[0],
+  h,
+  jumpFoot[1] + s * jumpAxis[1] + w * jumpAcross[1],
+];
+
+/** Linear interpolation along a profile of [s, h] points. */
+function profileAt(profile: number[][], s: number) {
+  if (s <= profile[0][0]) return profile[0][1];
+  for (let i = 1; i < profile.length; i++) {
+    const [s0, h0] = profile[i - 1];
+    const [s1, h1] = profile[i];
+    if (s <= s1) return h0 + ((h1 - h0) * (s - s0)) / (s1 - s0);
+  }
+  return profile[profile.length - 1][1];
+}
+
+/** Samples every `step` metres from `from` to `to`, both included. */
+const along = (from: number, to: number, step = 4) =>
+  Array.from(
+    { length: Math.ceil((to - from) / step) + 1 },
+    (_, i) => from + Math.min(i * step, to - from),
+  );
+
+// The large hill: a steep in-run curving into the take-off table, then the
+// knoll, the landing slope and the outrun on the valley floor. The in-run
+// runs well above the hillside, as on the photograph.
+const inrun = [
+  [0, 97],
+  [62, 58],
+  [76, 51],
+  [92, 48],
+];
+const landing = [
+  [91, 44],
+  [108, 40],
+  [128, 30],
+  [160, 12],
+  [184, 3],
+  [204, 0],
+  [250, 0],
+];
+const hillside = [
+  [-110, 0],
+  [-60, 30],
+  [-20, 58],
+  [10, 62],
+  [50, 46],
+  [91, 40],
+];
+const ground = (s: number) =>
+  s < 91 ? profileAt(hillside, s) : profileAt(landing, s);
+
+/** One jump, scaled by `k` and moved `offset` metres down and `w` across. */
+function jump(k: number, offset: number, w: number, half: number) {
+  const at = (s: number, h: number, dw: number) =>
+    onJump(offset + s * k, h * k, w + dw);
+  const end = landing[landing.length - 1][0];
+  const top = inrun[0][1];
+  // The hillside facing the viewer, from the hilltop to the outrun; the
+  // medium hill's would hide the large one's landing behind it.
+  if (k === 1)
+    add(
+      path(along(hillside[0][0], end).map((s) => at(s, ground(s), half))),
+      "#120926",
+      "#7a4fd0",
+      1.4,
+      6,
+    );
+  // The start tower with its wider cabin, seen from downhill and the side.
+  const box = (
+    s0: number,
+    s1: number,
+    w0: number,
+    w1: number,
+    h0: number,
+    h1: number,
+  ) =>
+    path([at(s1, h0, w0), at(s1, h1, w0), at(s1, h1, w1), at(s1, h0, w1)]) +
+    path([at(s0, h0, w1), at(s0, h1, w1), at(s1, h1, w1), at(s1, h0, w1)]);
+  add(
+    box(-5, 2, -3, 3, ground(0) - 2, top + 1) +
+      box(-8, 4, -5, 5, top + 1, top + 5),
+    "#1b1036",
+    pink,
+    1.8,
+    10,
+  );
+  add(
+    path([at(4, top + 3, -5), at(4, top + 3, 5)], false) +
+      path([at(-8, top + 3, 5), at(4, top + 3, 5)], false),
+    "none",
+    cyan,
+    1.2,
+    8,
+  );
+  // The landing surface, its side rails and distance marks.
+  const slope = along(landing[0][0], end);
+  add(
+    path([
+      ...slope.map((s) => at(s, profileAt(landing, s), -half)),
+      ...slope.map((s) => at(s, profileAt(landing, s), half)).reverse(),
+    ]),
+    "#0d3a46",
+    cyan,
+    1.6,
+    10,
+  );
+  add(
+    along(112, 196, 12)
+      .map((s) =>
+        line(
+          at(s, profileAt(landing, s), -half * 0.75),
+          at(s, profileAt(landing, s), half * 0.75),
+        ),
+      )
+      .join(""),
+    "none",
+    "#9ff8ffaa",
+    1,
+  );
+  // Concrete pillars carrying the in-run, the largest under the curve.
+  const deck = (s: number) => profileAt(inrun, s);
+  add(
+    [
+      [14, 1],
+      [30, 1],
+      [46, 1.2],
+      [64, 2.4],
+      [84, 1.4],
+    ]
+      .map(([s, width]) => {
+        const under = deck(s) - 2.4;
+        const foot = Math.min(under, ground(s)) - 1;
+        return path([
+          at(s - width, foot, 1.4),
+          at(s - width, under, 1.4),
+          at(s + width, under, 1.4),
+          at(s + width, foot, 1.4),
+        ]);
+      })
+      .join(""),
+    "#1d1039",
+    pink,
+    1.4,
+    8,
+  );
+  // The in-run: its girder seen from the side, and the lit track on top.
+  const run = along(0, inrun[inrun.length - 1][0], 3);
+  add(
+    path([
+      ...run.map((s) => at(s, deck(s), 1.8)),
+      ...run.map((s) => at(s, deck(s) - 2.6, 1.8)).reverse(),
+    ]),
+    "#22133f",
+    pink,
+    1.8,
+    10,
+  );
+  add(
+    [-1.4, 1.4]
+      .map((dw) =>
+        path(
+          run.map((s) => at(s, deck(s) + 0.4, dw)),
+          false,
+        ),
+      )
+      .join(""),
+    "none",
+    cyan,
+    1.4,
+    10,
+  );
+  // Floodlights along both sides of the landing hill.
+  const poles = along(104, 200, 24).flatMap((s) =>
+    [-1, 1].map((side) => ({
+      s,
+      h: profileAt(landing, s),
+      dw: side * (half + 3),
+    })),
+  );
+  add(
+    poles.map(({ s, h, dw }) => line(at(s, h, dw), at(s, h + 18, dw))).join(""),
+    "none",
+    "#c189ff",
+    1,
+  );
+  add(
+    poles
+      .map(({ s, h, dw }) => {
+        const [x, y, z] = at(s, h + 18, dw);
+        return ball(x, y, z, 0.9 * k);
+      })
+      .join(""),
+    "#fff1c4",
+    amber,
+    1,
+    10,
+  );
+}
+
+/** The ski jumps as seen by `camera`; the large one behind, then the small. */
+export function skiJumpFrom(camera: View) {
+  view = camera;
+  shapes = [];
+  // A small, smooth hill behind the jumps, a little above the hilltop.
+  const crest = along(-90, 230, 5).map((s) => {
+    const t = (s - 10) / (s < 10 ? 100 : 220);
+    return onJump(s, 68 * (1 - t * t) ** 2, -34);
+  });
+  add(path(crest), "#140a2c", "#7a4fd0", 1.4, 6);
+  jump(1, 0, 0, 13);
+  // The judges' tower between the hills, with its lit cabin.
+  const tower = (s: number, w: number) => (h0: number, h1: number, r: number) =>
+    path([
+      onJump(s + r, h0, w - r),
+      onJump(s + r, h1, w - r),
+      onJump(s + r, h1, w + r),
+      onJump(s + r, h0, w + r),
+    ]) +
+    path([
+      onJump(s - r, h0, w + r),
+      onJump(s - r, h1, w + r),
+      onJump(s + r, h1, w + r),
+      onJump(s + r, h0, w + r),
+    ]);
+  const judges = tower(150, 17);
+  add(judges(0, 30, 3.5) + judges(30, 36, 4.5), "#1b1036", pink, 1.6, 8);
+  add(
+    path([onJump(154.5, 33, 13), onJump(154.5, 33, 21)], false) +
+      path([onJump(146, 33, 21.5), onJump(154.5, 33, 21.5)], false),
+    "none",
+    amber,
+    1.2,
+    8,
+  );
+  // The medium hill, closer to the viewer, starts lower on the slope.
+  jump(0.62, 60, 44, 9);
+  view = standing;
+  return shapes;
+}
+
+export const skiJump = skiJumpFrom(standing);
 
 /**
  * The Alp on the floor, a meandering path in metres on the ground plane. It

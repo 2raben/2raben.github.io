@@ -32,10 +32,12 @@ const rayGrids = [
   [195, 216, 0.1],
 ];
 // Scene units per degree (as in landscapeLayout()), heading at the vanishing
-// point, the drawn range of headings, and the vertical drawing.
+// point, the drawn range of headings, how many degrees at either end ease
+// down into the plain, and the vertical drawing.
 const perDegree = 42;
 const heading = 197.5;
-const [fromHeading, toHeading] = [150, 240];
+const [fromHeading, toHeading] = [140, 252];
+const taper = 12;
 const baseAngle = 0.2;
 const exaggeration = 2.2;
 const earthRadius = 6371000;
@@ -265,10 +267,16 @@ function generate(rays, summits) {
 
   const bottom = 60;
   const drawn = rays.filter(([az]) => az >= fromHeading && az <= toHeading);
+  // Smoothly from 0 at the ends of the drawn range to 1 inside it.
+  const ease = (az) => {
+    const t = Math.min(1, (az - fromHeading) / taper, (toHeading - az) / taper);
+    return t * t * (3 - 2 * t);
+  };
   const layers = bands.map(([near, far]) => {
     const points = drawn.map(([az, profile]) => [
       x(az),
-      Math.max(y(highest(profile, (d) => d >= near && d < far)), -1000),
+      Math.max(y(highest(profile, (d) => d >= near && d < far)), -1000) *
+        ease(az),
     ]);
     const line = points
       .map(([px, py]) => `L${px.toFixed(1)} ${Math.min(py, bottom).toFixed(1)}`)
@@ -296,7 +304,7 @@ function generate(rays, summits) {
     const [de, dn] = [summit.te - origin[0], summit.tn - origin[1]];
     const az = ((Math.atan2(de, dn) * 180) / Math.PI + 360) % 360;
     const distance = Math.hypot(de, dn);
-    if (az < fromHeading + 1 || az > toHeading - 1) continue;
+    if (az < fromHeading + taper || az > toHeading - taper) continue;
     const a = angle(summit.top, distance);
     const [, profile] = rays.reduce((nearest, ray) =>
       Math.abs(ray[0] - az) < Math.abs(nearest[0] - az) ? ray : nearest,

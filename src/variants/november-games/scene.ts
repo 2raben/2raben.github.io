@@ -1,4 +1,5 @@
 import {
+  abbeyPose,
   eyeHeight,
   focal,
   labelText,
@@ -8,6 +9,7 @@ import {
   ridges as ridgeShapes,
   riverHalf,
   riverPoint,
+  skiJumpFrom,
   toCamera,
   valleyX,
   viewFor,
@@ -361,7 +363,12 @@ export function mountScene(root: HTMLElement, isMoving: () => boolean) {
       ].map(([bx, bz]) => toCamera(g.camera, [bx, 0, bz]));
       if (banks.some(([, , zc]) => zc < g.nearClip)) break;
       const [left, right] = banks.map(([xc, , zc]) => onScreen(g, xc, zc));
-      if (i === 0) shift = valley - (left[0] + right[0]) / 2;
+      if (i === 0) {
+        // Meet the valley while it is near; when a turn has panned it far
+        // away, let go rather than drag the river across the floor.
+        const gap = valley - (left[0] + right[0]) / 2;
+        shift = gap / (1 + (gap / (width * 0.2)) ** 2);
+      }
       const bend = shift * (1 - t) ** 3;
       left[0] += bend;
       right[0] += bend;
@@ -431,7 +438,8 @@ export function mountScene(root: HTMLElement, isMoving: () => boolean) {
     // (viewFor). Tenths of a degree keep the monastery sprite stable at rest.
     const turned = -turn * layout.perDegree;
     const step = Math.round(turn * 10) / 10;
-    const camera = viewFor(step);
+    const pose = abbeyPose(width, layout);
+    const camera = viewFor(step, pose);
     const horizon = layout.horizon + cameraY * 8;
     const f = focal * scale;
     const ground: Ground = {
@@ -569,14 +577,25 @@ export function mountScene(root: HTMLElement, isMoving: () => boolean) {
       2,
     );
     ctx.restore();
+    place(
+      sprite(
+        "jump",
+        `${step}:${pose.x}:${pose.z}`,
+        () => compile(skiJumpFrom(camera)),
+        scale,
+        2,
+      ),
+      layout.vanishX,
+      horizon,
+    );
     river(ground, ridgeX + valleyX * scale);
     // The tower clocks show the time in Einsiedeln, to the minute.
     const now = clockTime();
     place(
       sprite(
         "abbey",
-        `${step}:${now.hours}:${now.minutes}`,
-        () => compile(monasteryFrom(camera, now)),
+        `${step}:${pose.x}:${pose.z}:${now.hours}:${now.minutes}`,
+        () => compile(monasteryFrom(camera, now, pose)),
         scale,
         2,
       ),

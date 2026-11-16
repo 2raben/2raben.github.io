@@ -794,6 +794,27 @@ kbd {
     linear-gradient(0deg, #0b062259, transparent 25%);
 }
 
+/* From 105rem the shell leaves a margin where the monastery stands
+   (abbeyPose in landmarks.ts), so the shade follows the text column. */
+@media (min-width: 105rem) {
+  .synthwave-scene::after {
+    background:
+      radial-gradient(
+        ellipse 32rem 22% at calc(50% - 22rem) 77%,
+        #0b0622e6,
+        #0b0622b3 55%,
+        transparent
+      ),
+      radial-gradient(
+        ellipse 38rem 62% at calc(50% - 24rem) 52%,
+        #0b0622c7,
+        #0b06228c 45%,
+        transparent
+      ),
+      linear-gradient(0deg, #0b062259, transparent 25%);
+  }
+}
+
 .scene-fallback,
 .scene-canvas {
   position: absolute;
@@ -1055,6 +1076,20 @@ kbd {
 
 .horizon-art .layout-narrow {
   display: none;
+}
+
+.horizon-art .abbey-margin {
+  display: none;
+}
+
+@media (min-width: 105rem) {
+  .horizon-art .abbey-home {
+    display: none;
+  }
+
+  .horizon-art .abbey-margin {
+    display: inline;
+  }
 }
 
 @media (max-width: 47.5rem) {

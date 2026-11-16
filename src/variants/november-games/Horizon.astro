@@ -4,10 +4,15 @@ import {
   focal,
   labelText,
   layoutLabels,
-  monastery,
+  monasteryFrom,
   ridges,
   riverPath,
+  skiJump,
   valleyX,
+  abbeyPose,
+  homePose,
+  landscapeLayout,
+  viewFor,
   type LandmarkShape,
 } from "./landmarks";
 import { panoramaPeaks } from "./panorama";
@@ -23,6 +28,15 @@ const { id, layout = "responsive" } = Astro.props;
 // units like the canvas (min(width / 1440, height / 840) on wide screens,
 // width / 672 on phones). Chrome ignores CSS geometry on nested SVGs, so each
 // layout is rendered with attributes and switched with a media query.
+const standingView = viewFor(0);
+const home = monasteryFrom(standingView, undefined, homePose);
+// From 105rem the monastery stands in the margin left of the text, as the
+// canvas places it for 1920 × 1080; the floor keeps the standing camera.
+const margin = monasteryFrom(
+  standingView,
+  undefined,
+  abbeyPose(1920, landscapeLayout(1920, 1080)),
+);
 const placements = {
   // `dimLeft`: labels left of it sit behind the headline, as on the canvas.
   wide: {
@@ -30,12 +44,17 @@ const placements = {
     viewBox: "-864 -588 864 588",
     sun: [-342, 189],
     dimLeft: -350,
+    abbeys: [
+      { shapes: home, class: "abbey-home" },
+      { shapes: margin, class: "abbey-margin" },
+    ],
   },
   narrow: {
     vanish: 0.38,
     viewBox: `-${0.38 * 672} -1 ${0.38 * 672} 1`,
     sun: [-560, 190],
     dimLeft: -Infinity,
+    abbeys: [{ shapes: home, class: undefined }],
   },
 };
 const variants = (
@@ -210,17 +229,24 @@ const paths = (shapes: LandmarkShape[]) =>
         preserveAspectRatio="xMaxYMax meet"
         overflow="visible"
       >
+        <g filter={`url(#${id}-glow)`}>
+          {paths(skiJump).map((shape) => (
+            <path {...shape} />
+          ))}
+        </g>
         <path
           d={river}
           fill={`url(#${id}-water)`}
           stroke="#9ff8ff"
           stroke-width="1.5"
         />
-        <g filter={`url(#${id}-glow)`}>
-          {paths(monastery).map((shape) => (
-            <path {...shape} />
-          ))}
-        </g>
+        {place.abbeys.map((abbey) => (
+          <g class={abbey.class} filter={`url(#${id}-glow)`}>
+            {paths(abbey.shapes).map((shape) => (
+              <path {...shape} />
+            ))}
+          </g>
+        ))}
       </svg>
     </g>
   ))}
