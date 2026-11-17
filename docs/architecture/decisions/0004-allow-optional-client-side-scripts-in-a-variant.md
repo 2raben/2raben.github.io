@@ -4,6 +4,7 @@ status: accepted
 date: 2026-11-15
 amended-by:
   - 0005-enhance-november-games-with-local-interactions.md
+  - 0006-make-waldstatt-games-a-browser-game.md
 amends:
   - 0001-build-a-static-site-with-astro-and-daisyui.md
 sources:
@@ -19,6 +20,11 @@ sources:
 > Amended by [ADR 0005](0005-enhance-november-games-with-local-interactions.md):
 > November Games stores an optional session-scoped effects preference and adds
 > the Alt+K navigation shortcut. The original rationale below is preserved.
+>
+> Amended by [ADR 0006](0006-make-waldstatt-games-a-browser-game.md): Waldstatt
+> Games' content depends on its scripts, and it uses localStorage, a service
+> worker and PixiJS from npm. The rules below still hold for every other
+> variant.
 
 ## Context
 

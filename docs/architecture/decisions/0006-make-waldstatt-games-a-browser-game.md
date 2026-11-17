@@ -1,11 +1,18 @@
 ---
 tags: [adr]
-status: proposed
+status: accepted
 date: 2026-11-17
 amends:
   - 0001-build-a-static-site-with-astro-and-daisyui.md
   - 0004-allow-optional-client-side-scripts-in-a-variant.md
 sources:
+  - src/variants/waldstatt-games/Game.astro
+  - src/variants/waldstatt-games/game/main.ts
+  - src/variants/waldstatt-games/game/render.ts
+  - src/variants/waldstatt-games/game/state.ts
+  - src/pages/waldstatt-games/sw.js.ts
+  - src/pages/waldstatt-games/manifest.webmanifest.ts
+  - package.json
   - ../../pitches/waldstatt-games/pitch--aufbauspiel-im-wald.md
 ---
 
@@ -77,8 +84,6 @@ site's own files, keys handled only inside focused widgets or the focused map,
 and `prefers-reduced-motion` honoured. Every other variant and the overview stay
 under ADRs 0001 and 0004 unchanged.
 
-Once implemented, this record becomes accepted, and ADRs 0001 and 0004 note that
-it amends them.
 
 ## Consequences
 

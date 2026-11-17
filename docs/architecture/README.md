@@ -7,7 +7,10 @@ JavaScript; a variant may add small scripts for optional effects
 ([ADR 0004](decisions/0004-allow-optional-client-side-scripts-in-a-variant.md)). November Games adds
 keyboard navigation and an interactive canvas background
 ([ADR 0005](decisions/0005-enhance-november-games-with-local-interactions.md)), and
-2raben games a small canvas scene within the rules of ADR 0004. Until
+2raben games a small canvas scene within the rules of ADR 0004. Waldstatt Games
+is the exception to script-free content: its home page is a building game drawn
+with PixiJS, and its content is reached only through play
+([ADR 0006](decisions/0006-make-waldstatt-games-a-browser-game.md)). Until
 the studio's name is chosen, the site holds one complete version per name
 candidate ([ADR 0002](decisions/0002-compare-name-candidates-as-variant-routes.md)),
 each with its own pages, layout and theme.
@@ -22,10 +25,10 @@ two folders named after its slug:
 
 | Path | Contents |
 | --- | --- |
-| `src/pages/<slug>/` | Its pages: `index.astro`, `ueber-uns.astro`, `spiele/[game].astro`, and any pages only this variant has |
+| `src/pages/<slug>/` | Its pages: `index.astro`, usually `ueber-uns.astro` and `spiele/[game].astro`, and any pages only this variant has |
 | `src/variants/<slug>/meta.ts` | Slug, name, and tagline |
 | `src/variants/<slug>/Layout.astro` | HTML shell with `data-theme="<slug>"`, navigation, footer; loads `styles.css` |
-| `src/variants/<slug>/GameCard.astro` | A game card linking to the game and to its page |
+| `src/variants/<slug>/GameCard.astro` | A game card linking to the game and to its page (not in Waldstatt Games) |
 | `src/variants/<slug>/styles.css` | Tailwind, typography plugin, and daisyUI without built-in themes |
 | `src/variants/<slug>/theme.css` | The variant's custom daisyUI theme, named after the slug |
 
@@ -292,6 +295,106 @@ motion, without script or without a 2D canvas, the still picture stays (one for
 wide and one for tall screens) and the controls stay hidden; the header crest
 stops flapping with reduced motion. Nothing is stored or sent.
 
+### Waldstatt Games
+
+A building game in an endless forest, shaped in the
+[pitch](../pitches/waldstatt-games/pitch--aufbauspiel-im-wald.md): «Waldstatt» is
+the historical name for Einsiedeln, and its people were the «Waldleute». The home
+page is the whole variant. Visitors fell trees, build, and earn the site's
+content building by building; there are no about or game pages, and without
+JavaScript or WebGL only a still picture of the forest, the name and a note show
+([ADR 0006](decisions/0006-make-waldstatt-games-a-browser-game.md)). The map is
+drawn with PixiJS 8 (WebGL); the toolbox, menus, building info and dialogs are
+HTML. Its folder `src/variants/waldstatt-games/` holds:
+
+| Path | Contents |
+| --- | --- |
+| `Game.astro` | The page: map host, toolbox, menus, dialogs, the theatre's preview sections, and inert `<template>`s with the Ortstafel, the Chronik and each game's rendered Markdown |
+| `Forest.astro` | The still picture: the start of the generated forest as SVG, shown until the game is ready and instead of it |
+| `Icon.astro`, `icons.ts` | Pixel icons as colour grids: supplies, tools, the Waldmensch's portrait and the app icon |
+| `png.ts` | A small PNG encoder for the app icons at build time |
+| `game/config.ts` | The balance table: costs, footprints, build times, speeds, stock limits |
+| `game/world.ts` | The generated world from a fixed seed: trees, the Alp and the Sihl, the dam site and the Sihlsee basin |
+| `game/state.ts` | The save in `localStorage`: versioned JSON, validated on load, reset by key prefix |
+| `game/sim.ts` | The rules: marking and felling, Waldleute and their tasks, building sites, sheep and the printing press, the flood, the Waldmensch's hints |
+| `game/texts.ts` | Reads the templates and splits each text into sections at its `<h2>` headings |
+| `game/art.ts` | The pixel art, drawn with canvas rectangles: trees, Waldleute, buildings, scrolls, ground |
+| `game/render.ts` | PixiJS: chunks of 32 × 32 tiles, buildings and scrolls, marks, Waldleute, and the placing, sawing, cursor and flood overlays |
+| `game/input.ts` | Pointer, touch, wheel and keyboard input on the map |
+| `game/ui.ts` | The HTML interface and its announcements |
+| `game/preview.ts`, `previewMoto.ts`, `previewCar.ts` | The theatre's previews, copied from November Games and repainted as a stage set |
+| `game/main.ts` | Start-up, saving and the service worker registration |
+
+`src/pages/waldstatt-games/` holds the home page and three endpoints: the web
+manifest, the service worker `sw.js` and the app icons `icon-<size>.png`.
+
+**The world.** North is up. The forest is generated per tile from a fixed seed,
+so every visitor starts in the same forest and only changes are saved. The Alp
+and the Sihl are curves that flow together north of the first clearing;
+downstream only the Sihl goes on. Upstream on the Sihl, south-east of the start,
+lie the narrow spot for the dam and the basin of the Sihlsee. Chunks are
+generated as they come into view, a few per frame, and destroyed when far off
+screen. Trees are sprites from one generated atlas; the ground is a small canvas
+per chunk, repainted where a tree falls. Buildings stay inside their footprint
+and lie under the trees, so trees south of a building overlap it like trees in
+front. How far one can zoom out is limited so that about 24,000 tiles are on
+screen at most.
+
+**Play.** The axe marks single trees; the saw marks every tree in a dragged area
+(two fingers or another mouse button pan meanwhile). Waldleute walk in straight
+lines, wade through rivers, fell the nearest marked tree (trees for building
+sites first), and build sites whose footprint is free. Felled wood counts at
+once. Each finished hut adds a Waldmensch, up to 16. Sheep pastures grow
+parchment and the printing press turns parchment into prints while the page is
+open; nothing happens while it is closed or hidden. Buildings show their costs
+in the build menu, and those that cannot be built yet stay listed with the
+reason. Content buildings are one of a kind (per game for a game's buildings);
+tearing a building down returns half its wood.
+
+**Content.** The Ortstafel explains the name. The Chronik (the about texts) and
+each game's Spielidee (its Markdown without the controls) are scrolls: one strip
+per `##` section, as long as its text. Laying a scroll needs only its head
+cleared; the rest of its footprint is marked and unrolls into the forest as the
+trees fall, and a section becomes readable once its strip is free. On the map a
+strip shows its heading and ruled lines; the reading view shows the uncovered
+sections as HTML cloned from the templates. Each game's Anleitung is a printed
+notice with the controls table. Each game's Spielhaus offers its play and source
+links. The theatre, once a Spielhaus stands, shows the previews of the games
+whose Spielhaus stands: the rule sets of November Games' previews, copied into
+this variant and redrawn as a painted stage. The monastery is pure prestige,
+drawn without religious symbols. The dam can only stand at the narrow spot of
+the Sihl; choosing it shows the future lake, and a confirmation names the
+buildings that will drown. When it is finished, the basin floods for good:
+trees in it disappear, and drowned buildings stay as ruins under the water,
+their content locked again.
+
+**State and offline.** The save is one versioned JSON document under
+`waldstatt-games/save`: supplies, felled trees as a bitset per chunk, marks,
+buildings, the flood, the camera and the dismissed hint. Which sections are
+uncovered is derived from the cleared tiles, and a scroll's length from its
+current text, so changed texts need no migration. The game saves two seconds
+after a change and when the page is hidden. The organization's Pages sites share
+one origin and its `localStorage` (the games save under `moto-devil/` and
+`car-drive/`), so the save is validated on load, a broken save starts a new
+forest with a notice, and «Neu beginnen» removes only keys starting with
+`waldstatt-games/`. The manifest's start URL and scope and the service worker's
+scope are the variant's path under the base path. The worker's cache is named
+after the build; it fetches the page network-first and serves files under the
+variant's path and Astro's `_astro/` assets cache-first, ignoring `Vary`
+because those URLs carry content hashes. On the first visit the page hands the
+worker the files it already loaded, so the next start works offline. The worker
+is not registered in development.
+
+**Access.** The map is a focusable `role="application"`: arrow keys move a
+cursor tile, Shift and arrows pan, + and − zoom, Enter or Space applies the tool
+or opens a building, Escape cancels. Every tool, menu item and dialog is a real
+button or link with a German name; status, finished buildings, uncovered
+sections and the Waldmensch's hints are announced politely. With reduced motion
+Waldleute do not walk or swing their tools, and the previews play no
+demonstration. Screen-reader users and search engines can hardly reach the
+content: accepted for this name experiment in ADR 0006. The page weighs about
+10 kB of HTML and 195 kB of scripts and styles, gzipped, most of it PixiJS.
+
 ### Adding a variant
 
 1. Copy `src/pages/<existing>/` and `src/variants/<existing>/` to the new slug.
@@ -308,6 +411,9 @@ stops flapping with reduced motion. Nothing is stored or sent.
 | `/<slug>/` | Home: name, tagline, game cards | `src/pages/<slug>/index.astro` |
 | `/<slug>/ueber-uns/` | About the studio | `src/pages/<slug>/ueber-uns.astro` |
 | `/<slug>/spiele/<game>/` | Game idea, what to expect, controls, play link | `src/pages/<slug>/spiele/[game].astro` |
+
+Waldstatt Games has only its home page, plus `manifest.webmanifest`, `sw.js`
+and `icon-<size>.png` beside it ([ADR 0006](decisions/0006-make-waldstatt-games-a-browser-game.md)).
 
 `/moto-devil/` and `/carrrgh/` on the same domain belong to the games' own Pages
 sites and take precedence; no route of this site may use them.

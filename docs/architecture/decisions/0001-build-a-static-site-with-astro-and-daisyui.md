@@ -6,6 +6,7 @@ amended-by:
   - 0003-give-each-variant-its-own-pages-and-styles.md
   - 0004-allow-optional-client-side-scripts-in-a-variant.md
   - 0005-enhance-november-games-with-local-interactions.md
+  - 0006-make-waldstatt-games-a-browser-game.md
 sources:
   - package.json
   - astro.config.mjs
@@ -27,6 +28,11 @@ sources:
 > Amended by [ADR 0005](0005-enhance-november-games-with-local-interactions.md):
 > November Games adds optional local JavaScript for its requested synthwave
 > canvas and keyboard navigation. Static hosting and script-free core links remain.
+>
+> Amended by [ADR 0006](0006-make-waldstatt-games-a-browser-game.md):
+> Waldstatt Games is a browser game whose content needs JavaScript and WebGL,
+> drawn with PixiJS. The site stays static; every other variant keeps
+> script-free content.
 
 ## Context
 
