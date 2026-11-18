@@ -46,3 +46,5 @@ What this pitch explicitly does not include.
 | [November Games: Zukunftstag im Cyberpunk-Stil](november-games/pitch--zukunftstag-cyberpunk.md) | implemented |
 | [Egg Settlers: a strategy-game variant where settlers build a giant egg](egg-settlers/pitch--egg-settlers.md) | implemented |
 | [2raben games: Pixel-Raben aus Einsiedeln](2raben-games/pitch--pixel-raben.md) | Implemented |
+| [Waldstatt Games: ein Aufbauspiel im Wald](waldstatt-games/pitch--aufbauspiel-im-wald.md) | implemented |
+| [Waldstatt Games: Leben in der Waldstatt – food, people, faith and a forest that grows back](waldstatt-games/pitch--leben-in-der-waldstatt.md) | implemented |

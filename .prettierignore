@@ -2,3 +2,5 @@
 /*.md
 /docs/
 package-lock.json
+# Generated water data for Waldstatt Games, one long line by design.
+/src/variants/waldstatt-games/data/

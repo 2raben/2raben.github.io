@@ -2,7 +2,7 @@
  * The name candidates, in the order the overview at / lists them. Each variant
  * is a complete, independent version of the site:
  *
- * - src/pages/<slug>/: its pages (home, ueber-uns, spiele/[game]);
+ * - src/pages/<slug>/: its pages (home, and usually ueber-uns and spiele/[game]);
  * - src/variants/<slug>/: its meta, layout, components, stylesheet and theme.
  *
  * Only the game texts (src/content/games/) and src/lib/ are shared.
