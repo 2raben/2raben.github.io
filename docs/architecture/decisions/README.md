@@ -39,4 +39,5 @@ does not prove correctness.
 | [0004 — Allow optional client-side scripts in a variant](0004-allow-optional-client-side-scripts-in-a-variant.md) | accepted; amends 0001; amended by 0005, 0006 |
 | [0005 — Enhance November Games with local interactions](0005-enhance-november-games-with-local-interactions.md) | accepted; amends 0001, 0004 |
 | [0006 — Make Waldstatt Games a browser game that gates its content](0006-make-waldstatt-games-a-browser-game.md) | accepted; amends 0001, 0004; amended by 0007 |
-| [0007 — Save Waldstatt Games in IndexedDB](0007-save-waldstatt-games-in-indexeddb.md) | accepted; amends 0006 |
+| [0007 — Save Waldstatt Games in IndexedDB](0007-save-waldstatt-games-in-indexeddb.md) | accepted; amends 0006; amended by 0008 |
+| [0008 — Keep named Waldstatt saves in a database of their own, and as files](0008-keep-named-waldstatt-saves-and-files.md) | accepted; amends 0007 |
