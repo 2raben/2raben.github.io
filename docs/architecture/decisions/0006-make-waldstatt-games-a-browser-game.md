@@ -5,6 +5,8 @@ date: 2026-11-17
 amends:
   - 0001-build-a-static-site-with-astro-and-daisyui.md
   - 0004-allow-optional-client-side-scripts-in-a-variant.md
+amended-by:
+  - 0007-save-waldstatt-games-in-indexeddb.md
 sources:
   - src/variants/waldstatt-games/Game.astro
   - src/variants/waldstatt-games/game/main.ts
@@ -18,6 +20,11 @@ sources:
 ---
 
 # 0006 — Make Waldstatt Games a browser game that gates its content
+
+**Amended by [ADR 0007](0007-save-waldstatt-games-in-indexeddb.md):** the
+game state moved from `localStorage` to an IndexedDB database of its own,
+`waldstatt-games`. The rules below for storage (untrusted input, a reset that
+touches only this variant's data) apply to it unchanged.
 
 ## Context
 
@@ -108,9 +115,10 @@ under ADRs 0001 and 0004 unchanged.
 
 ## The tell
 
-- `rg -n "localStorage|sessionStorage|serviceWorker" src` finds matches only in
-  `src/variants/waldstatt-games/` and `src/variants/november-games/`, and every
-  Waldstatt key starts with `waldstatt-games/`.
+- `rg -n "localStorage|sessionStorage|indexedDB|serviceWorker" src` finds
+  matches only in `src/variants/waldstatt-games/` and
+  `src/variants/november-games/`; every Waldstatt key starts with
+  `waldstatt-games/`, and its only database is `waldstatt-games`.
 - `rg -n "from \"pixi.js\"" src` finds imports only in
   `src/variants/waldstatt-games/`.
 - `ls src/pages/waldstatt-games/` shows `index.astro` and the manifest and
