@@ -7,6 +7,7 @@ amended-by:
   - 0004-allow-optional-client-side-scripts-in-a-variant.md
   - 0005-enhance-november-games-with-local-interactions.md
   - 0006-make-waldstatt-games-a-browser-game.md
+  - 0010-move-waldstatt-games-into-its-own-repository.md
 sources:
   - package.json
   - astro.config.mjs
@@ -33,6 +34,10 @@ sources:
 > Waldstatt Games is a browser game whose content needs JavaScript and WebGL,
 > drawn with PixiJS. The site stays static; every other variant keeps
 > script-free content.
+>
+> Amended by [ADR 0010](0010-move-waldstatt-games-into-its-own-repository.md):
+> Waldstatt Games moved to its own repository, so the exception of ADR 0006
+> no longer applies here; every variant keeps script-free content.
 
 ## Context
 

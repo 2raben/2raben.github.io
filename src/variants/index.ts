@@ -12,13 +12,11 @@ import eggSettlers from "./egg-settlers/meta";
 import novemberGames from "./november-games/meta";
 import schafbockStudio from "./schafbock-studio/meta";
 import type { VariantMeta } from "./types";
-import waldstattGames from "./waldstatt-games/meta";
 
 export const variants: VariantMeta[] = [
   schafbockStudio,
   eggSettlers,
   novemberGames,
-  waldstattGames,
   zweiRabenGames,
 ];
 

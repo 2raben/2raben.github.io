@@ -4,7 +4,6 @@
 @import "../variants/schafbock-studio/theme.css";
 @import "../variants/egg-settlers/theme.css";
 @import "../variants/november-games/theme.css";
-@import "../variants/waldstatt-games/theme.css";
 @import "../variants/2raben-games/theme.css";
 @plugin "daisyui" {
   themes: lofi --default;
