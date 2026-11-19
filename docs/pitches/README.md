@@ -40,12 +40,13 @@ What this pitch explicitly does not include.
 
 ## Index
 
+The pitches for Waldstatt Games moved with it to
+[2raben/waldstatt](https://github.com/2raben/waldstatt/tree/main/docs/pitches)
+([ADR 0010](../architecture/decisions/0010-move-waldstatt-games-into-its-own-repository.md)).
+
 | Pitch | Status |
 | --- | --- |
 | [Schafbock Studio: pop-art superhero](schafbock-studio/pitch--pop-art-superhero.md) | Implemented |
 | [November Games: Zukunftstag im Cyberpunk-Stil](november-games/pitch--zukunftstag-cyberpunk.md) | implemented |
 | [Egg Settlers: a strategy-game variant where settlers build a giant egg](egg-settlers/pitch--egg-settlers.md) | implemented |
 | [2raben games: Pixel-Raben aus Einsiedeln](2raben-games/pitch--pixel-raben.md) | Implemented |
-| [Waldstatt Games: ein Aufbauspiel im Wald](waldstatt-games/pitch--aufbauspiel-im-wald.md) | implemented |
-| [Waldstatt Games: Leben in der Waldstatt – food, people, faith and a forest that grows back](waldstatt-games/pitch--leben-in-der-waldstatt.md) | implemented |
-| [Waldstatt Games: Wälder speichern, laden und als Datei mitnehmen](waldstatt-games/pitch--waelder-speichern.md) | implemented |

@@ -5,6 +5,7 @@ date: 2026-11-15
 amended-by:
   - 0005-enhance-november-games-with-local-interactions.md
   - 0006-make-waldstatt-games-a-browser-game.md
+  - 0010-move-waldstatt-games-into-its-own-repository.md
 amends:
   - 0001-build-a-static-site-with-astro-and-daisyui.md
 sources:
@@ -25,6 +26,10 @@ sources:
 > Games' content depends on its scripts, and it uses localStorage, a service
 > worker and PixiJS from npm. The rules below still hold for every other
 > variant.
+>
+> Amended by [ADR 0010](0010-move-waldstatt-games-into-its-own-repository.md):
+> Waldstatt Games moved to its own repository; the rules below hold for every
+> variant here again.
 
 ## Context
 

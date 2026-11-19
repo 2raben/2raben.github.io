@@ -11,8 +11,8 @@ Nationaler Zukunftstag:
 The games are built and deployed from their own repositories; this site only
 links to them. The studio's name is not chosen yet ("2raben" is temporary), so the
 site holds one complete version per name candidate: `/schafbock-studio/`,
-`/egg-settlers/`, `/november-games/`, `/waldstatt-games/` and `/2raben-games/`, each
-with a home page, an about page and a page per game. The page at `/` lists them all.
+`/egg-settlers/`, `/november-games/` and `/2raben-games/`, each with a home page,
+an about page and a page per game. The page at `/` lists them all.
 
 It is a static site built with [Astro](https://astro.build) and
 [daisyUI](https://daisyui.com), in German, and published on GitHub Pages at
