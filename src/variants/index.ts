@@ -25,7 +25,7 @@ export const variants: VariantMeta[] = [
  * project site takes precedence over the organization site, so a variant with
  * one of these slugs would be unreachable.
  */
-const reservedSlugs = new Set(["moto-devil", "carrrgh"]);
+const reservedSlugs = new Set(["moto-devil", "carrrgh", "waldstatt"]);
 
 /** Every folder in src/pages/ is a variant and must be listed above, and vice versa. */
 const pageFolders = new Set(
