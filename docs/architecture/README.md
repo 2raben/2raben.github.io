@@ -40,6 +40,7 @@ Waldstatt Games was a variant too, until it grew into a building game and moved
 to its own repository, [2raben/waldstatt](https://github.com/2raben/waldstatt),
 published at <https://2raben.github.io/waldstatt/>
 ([ADR 0010](decisions/0010-move-waldstatt-games-into-its-own-repository.md)).
+The overview links to the game with a card after the variants.
 
 ### Schafbock Studio
 
@@ -309,7 +310,7 @@ stops flapping with reduced motion. Nothing is stored or sent.
 
 | Route | Page | Source |
 | --- | --- | --- |
-| `/` | Overview of the variants, each card in the variant's theme | [src/pages/index.astro](../../src/pages/index.astro) |
+| `/` | Overview of the variants, each card in the variant's theme, and a card linking to the Waldstatt game | [src/pages/index.astro](../../src/pages/index.astro) |
 | `/<slug>/` | Home: name, tagline, game cards | `src/pages/<slug>/index.astro` |
 | `/<slug>/ueber-uns/` | About the studio | `src/pages/<slug>/ueber-uns.astro` |
 | `/<slug>/spiele/<game>/` | Game idea, what to expect, controls, play link | `src/pages/<slug>/spiele/[game].astro` |
@@ -319,8 +320,8 @@ configured in [astro.config.mjs](../../astro.config.mjs), for links and installe
 apps from the time Waldstatt Games was a variant
 ([ADR 0010](decisions/0010-move-waldstatt-games-into-its-own-repository.md)).
 
-`/moto-devil/` and `/carrrgh/` on the same domain belong to the games' own Pages
-sites and take precedence; no route of this site may use them.
+`/moto-devil/`, `/carrrgh/` and `/waldstatt/` on the same domain belong to the
+games' own Pages sites and take precedence; no route of this site may use them.
 
 ## Shared modules
 

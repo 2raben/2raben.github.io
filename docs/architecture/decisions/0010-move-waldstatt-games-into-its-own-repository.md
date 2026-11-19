@@ -69,7 +69,9 @@ Alternatives considered:
 
 ## The tell
 
-- `rg -n -i "waldstatt" src` finds nothing.
+- `rg -n -i "waldstatt" src` finds only the overview's link to the game in
+  `src/pages/index.astro` and its reserved slug in `src/variants/index.ts`
+  (added after this decision, so the overview leads to the game).
 - `ls src/pages src/variants` shows no `waldstatt-games`.
 - After `mise run build`, `dist/waldstatt-games/index.html` redirects to
   `https://2raben.github.io/waldstatt/`, and `dist/` holds no other file under
